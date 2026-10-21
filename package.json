@@ -1,0 +1,18 @@
+{
+  "name": "techzone-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TechZone Agentic Multi-Tenant E-Commerce Platform",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

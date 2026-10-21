@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: techzone-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-techzone}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-techzone_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-techzone_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../packages/database/sql/enable_rls.sql:/docker-entrypoint-initdb.d/01_enable_rls.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U techzone -d techzone_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: techzone-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    container_name: techzone-meilisearch
+    restart: always
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-masterKeyTechZone123}
+      MEILI_NO_ANALYTICS: "true"
+    ports:
+      - "7700:7700"
+    volumes:
+      - meili_data:/meili_data
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.10.2
+    container_name: techzone-mlflow
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      BACKEND_STORE_URI: sqlite:///mlflow.db
+      DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
+    volumes:
+      - mlflow_data:/mlflow
+
+volumes:
+  postgres_data:
+  redis_data:
+  meili_data:
+  mlflow_data:

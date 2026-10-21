@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TechZone — Detailed Full-Stack & AI Team Task Matrix</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Cairo', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            arabic: ['Cairo', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Clean Light Theme Default */
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .surface-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+    }
+
+    .task-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+    }
+
+    /* High-contrast Light Mode Layer Badges */
+    .tech-badge-fe { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .tech-badge-be { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+    .tech-badge-db { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .tech-badge-ai { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+    .tech-badge-ml { background: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
+
+    /* Code inline pill in light mode */
+    code.inline-code {
+      background: #f1f5f9;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+      padding: 0.1rem 0.35rem;
+      border-radius: 0.3rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* STRICT PDF & PRINT ALIGNMENT RULES */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-size: 9.5pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .surface-card, .task-card {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .member-page-break {
+        break-before: page;
+        page-break-before: always;
+      }
+      .member-page-break:first-of-type {
+        break-before: auto;
+        page-break-before: auto;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-indigo-600 selection:text-white">
+
+  <!-- Perfectly Aligned Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[4.25rem] py-2.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand Identity (Left Aligned) -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-sm shrink-0">
+          <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="flex flex-col justify-center">
+          <div class="flex items-center gap-2.5">
+            <span class="font-extrabold text-lg leading-none tracking-tight text-slate-900">TechZone</span>
+            <span class="inline-flex items-center text-[11px] font-mono font-semibold uppercase px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 leading-none">
+              React 18 • Full-Stack Spec
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1 leading-none">
+            6-Member Cross-Functional Full-Stack + AI Implementation Blueprint
+          </p>
+        </div>
+      </div>
+
+      <!-- Progress & Action Controls (Right Aligned, Uniform 38px Height) -->
+      <div class="flex items-center gap-2 sm:gap-2.5 ml-auto">
+        <!-- Global Progress Pill -->
+        <div class="hidden lg:flex items-center gap-3 h-[38px] bg-slate-50 border border-slate-200 px-3.5 rounded-xl">
+          <div class="flex items-center gap-1.5 text-xs whitespace-nowrap">
+            <span class="text-slate-500 font-medium">Progress:</span>
+            <span id="global-progress-text" class="font-mono font-bold text-indigo-600">0 / 30 (0%)</span>
+          </div>
+          <div class="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div id="global-progress-bar" class="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 w-0 transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <!-- Collapse / Expand Sub-Steps Button -->
+        <button onclick="toggleCompactSteps()" id="toggle-steps-btn" class="h-[38px] text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3.5 rounded-xl border border-slate-200 transition inline-flex items-center justify-center gap-1.5 whitespace-nowrap" title="Expand or Collapse Detailed Sub-Steps">
+          <i data-lucide="list-tree" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i>
+          <span class="hidden sm:inline">Collapse Sub-Steps</span>
+        </button>
+
+        <!-- Reset Button -->
+        <button onclick="resetCheckboxes()" class="h-[38px] text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 px-3.5 rounded-xl border border-slate-200 transition inline-flex items-center justify-center gap-1.5 whitespace-nowrap" title="Reset Task Checkboxes">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 shrink-0"></i>
+          <span class="hidden sm:inline">Reset</span>
+        </button>
+
+        <!-- Print / Save PDF Button -->
+        <button onclick="window.print()" class="h-[38px] bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 rounded-xl shadow-sm inline-flex items-center justify-center gap-2 transition whitespace-nowrap">
+          <i data-lucide="printer" class="w-4 h-4 shrink-0"></i>
+          <span>Print / Save PDF</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Executive Overview & Vertical Slice Philosophy (Aligned 12-Col Grid Header) -->
+    <section class="surface-card rounded-2xl p-6 sm:p-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch border-b border-slate-200 pb-6">
+        
+        <!-- Left 8 Columns: English Title & Description -->
+        <div class="lg:col-span-8 flex flex-col justify-center space-y-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 text-xs font-mono font-semibold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-md">
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              Detailed Engineering & AI Specification
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md">
+              6 Members × 5 Layers = 30 Deliverable Tasks
+            </span>
+          </div>
+
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
+            TechZone: Agentic E-Commerce Detailed Task Matrix
+          </h1>
+
+          <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+            Every team member (<strong class="text-slate-900">Moustafa, Adel, Abdallah, Retaj, Renad, and Roaa</strong>) owns a complete <strong class="text-indigo-700">Vertical Slice</strong> of the platform. Each member writes production code across all 5 layers—<span class="font-semibold text-slate-800">React.js GenUI, NestJS/FastAPI Backend, PostgreSQL/RLS Database, LangGraph AI Agent Tools, and Python Machine Learning</span>—with clear file paths, input/output schemas, and acceptance criteria.
+          </p>
+        </div>
+
+        <!-- Right 4 Columns: Arabic Summary Card (Matched Height & Alignment) -->
+        <div dir="rtl" class="lg:col-span-4 font-arabic bg-indigo-50/70 border border-indigo-200 rounded-xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-indigo-900 font-extrabold text-sm mb-2 pb-2 border-b border-indigo-200/70">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-indigo-600 shrink-0"></i>
+              <span>خطة عمل تفصيلية متكاملة (React + AI)</span>
+            </div>
+            <p class="text-xs text-slate-700 leading-relaxed">
+              تم تفصيل مهام كل عضو من الـ 6 أعضاء (<span class="font-bold text-slate-900">مصطفى، عادل، عبدالله، ريتاج، ريناد، رؤى</span>) بحيث تحتوي كل مهمة على:
+            </p>
+            <ul class="text-xs text-slate-800 font-medium space-y-1 mt-2 pr-1">
+              <li>• خطوات التنفيذ التقنية (Implementation Steps)</li>
+              <li>• المسارات والأدوات البرمجية (Files, Endpoints & Schemas)</li>
+              <li>• المخرج النهائي ومعيار القبول (Deliverable & Acceptance)</li>
+            </ul>
+          </div>
+          <div class="mt-3 pt-2 border-t border-indigo-200/60 flex items-center justify-between text-[11px] text-indigo-700 font-semibold">
+            <span>الواجهة الأمامية: React 18 + Vite</span>
+            <span class="font-mono">5 Layers / Member</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 5 Technology Pillars Legend (Equal Height Aligned Cards) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 pt-6">
+        <div class="p-3.5 rounded-xl bg-sky-50/60 border border-sky-200 flex items-center gap-3 h-full">
+          <div class="w-9 h-9 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+            <i data-lucide="layout" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-slate-900 truncate">1. Frontend & GenUI</div>
+            <div class="text-[11px] text-slate-600 font-mono truncate">React 18, Vite, Tailwind, Recharts</div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 flex items-center gap-3 h-full">
+          <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+            <i data-lucide="server" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-slate-900 truncate">2. Backend & Jobs</div>
+            <div class="text-[11px] text-slate-600 font-mono truncate">NestJS, FastAPI, Redis, BullMQ</div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200 flex items-center gap-3 h-full">
+          <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+            <i data-lucide="database" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-slate-900 truncate">3. Data & Security</div>
+            <div class="text-[11px] text-slate-600 font-mono truncate">PostgreSQL, Prisma, RLS, Meili</div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-purple-50/60 border border-purple-200 flex items-center gap-3 h-full">
+          <div class="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+            <i data-lucide="cpu" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-slate-900 truncate">4. AI Agent & LLM</div>
+            <div class="text-[11px] text-slate-600 font-mono truncate">LangGraph, Claude/GPT, sqlglot</div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-rose-50/60 border border-rose-200 flex items-center gap-3 h-full sm:col-span-2 lg:col-span-1">
+          <div class="w-9 h-9 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+            <i data-lucide="line-chart" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-slate-900 truncate">5. ML & Data Science</div>
+            <div class="text-[11px] text-slate-600 font-mono truncate">Prophet, LightGBM, RFM, SHAP</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Filter Bar (Aligned & Hidden on Print) -->
+    <section class="no-print">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+        <!-- Member Filter Pills -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500 mr-2 inline-flex items-center gap-1.5">
+            <i data-lucide="users" class="w-3.5 h-3.5 text-indigo-600"></i> Member:
+          </span>
+          <button onclick="filterByMember('ALL')" data-member-btn="ALL" class="member-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm transition">All Team (6)</button>
+          <button onclick="filterByMember('moustafa')" data-member-btn="moustafa" class="member-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">01. Moustafa</button>
+          <button onclick="filterByMember('adel')" data-member-btn="adel" class="member-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">02. Adel</button>
+          <button onclick="filterByMember('abdallah')" data-member-btn="abdallah" class="member-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">03. Abdallah</button>
+          <button onclick="filterByMember('retaj')" data-member-btn="retaj" class="member-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">04. Retaj</button>
+          <button onclick="filterByMember('renad')" data-member-btn="renad" class="member-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">05. Renad</button>
+          <button onclick="filterByMember('roaa')" data-member-btn="roaa" class="member-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">06. Roaa</button>
+        </div>
+
+        <!-- Technology Layer Filter Pills -->
+        <div class="flex items-center gap-1.5 flex-wrap lg:border-l lg:border-slate-200 lg:pl-4">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500 mr-2 inline-flex items-center gap-1.5">
+            <i data-lucide="code-2" class="w-3.5 h-3.5 text-indigo-600"></i> Layer:
+          </span>
+          <button onclick="filterByTech('ALL')" data-tech-btn="ALL" class="tech-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white transition">All Layers (5)</button>
+          <button onclick="filterByTech('FE')" data-tech-btn="FE" class="tech-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold tech-badge-fe hover:opacity-90 transition">React Frontend</button>
+          <button onclick="filterByTech('BE')" data-tech-btn="BE" class="tech-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold tech-badge-be hover:opacity-90 transition">Backend</button>
+          <button onclick="filterByTech('DB')" data-tech-btn="DB" class="tech-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold tech-badge-db hover:opacity-90 transition">Database</button>
+          <button onclick="filterByTech('AI')" data-tech-btn="AI" class="tech-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold tech-badge-ai hover:opacity-90 transition">AI Agent</button>
+          <button onclick="filterByTech('ML')" data-tech-btn="ML" class="tech-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold tech-badge-ml hover:opacity-90 transition">ML & Data</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cross-Functional Master Matrix Table -->
+    <section class="surface-card rounded-2xl p-6 overflow-hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+        <div>
+          <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+            <i data-lucide="table-2" class="w-5 h-5 text-indigo-600"></i>
+            Master Full-Stack Responsibility Matrix (Quick Reference)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Overview of how all 30 tasks map across the 6 members and 5 architectural layers.</p>
+        </div>
+        <span class="text-xs font-mono font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-lg self-start sm:self-center">
+          React 18 + NestJS + FastAPI + Postgres + LangGraph
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b-2 border-slate-200 bg-slate-50 text-slate-700 uppercase tracking-wider font-mono text-[11px]">
+              <th class="py-3 px-3">Member & Vertical Slice</th>
+              <th class="py-3 px-3 text-sky-700">1. React.js + GenUI</th>
+              <th class="py-3 px-3 text-emerald-700">2. NestJS + FastAPI</th>
+              <th class="py-3 px-3 text-amber-700">3. PostgreSQL + Data</th>
+              <th class="py-3 px-3 text-purple-700">4. LangGraph + Tools</th>
+              <th class="py-3 px-3 text-rose-700">5. Python ML & Eval</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-slate-700">
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-3 px-3 font-bold text-slate-900">01. Moustafa<br/><span class="text-[11px] font-medium text-indigo-600">Store Builder & Multi-Tenancy</span></td>
+              <td class="py-3 px-3">Live Storefront Preview & RTL Theme UI</td>
+              <td class="py-3 px-3">Tenant Provisioning API & Clerk/JWT Guards</td>
+              <td class="py-3 px-3"><code class="inline-code">tenants</code>, <code class="inline-code">users</code> + Postgres RLS</td>
+              <td class="py-3 px-3">Slot-Filling Graph + <code class="inline-code">create_store_tenant</code></td>
+              <td class="py-3 px-3">Cold-Start Excel Cleaner & SKU Classifier</td>
+            </tr>
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-3 px-3 font-bold text-slate-900">02. Adel<br/><span class="text-[11px] font-medium text-sky-600">Catalog, Inventory & HITL Edits</span></td>
+              <td class="py-3 px-3">Diff Preview Cards (Confirm / Cancel UI)</td>
+              <td class="py-3 px-3">Transactional Bulk API, Idempotency & S3</td>
+              <td class="py-3 px-3"><code class="inline-code">products</code>, <code class="inline-code">inventory</code> + Meilisearch</td>
+              <td class="py-3 px-3">LangGraph HITL Interrupt + <code class="inline-code">bulk_update_prices</code></td>
+              <td class="py-3 px-3">Dynamic Reorder Point & Stockout Predictor</td>
+            </tr>
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-3 px-3 font-bold text-slate-900">03. Abdallah<br/><span class="text-[11px] font-medium text-emerald-600">BI Analytics & Secure Text-to-SQL</span></td>
+              <td class="py-3 px-3">Dynamic Recharts & Exportable SQL Tables</td>
+              <td class="py-3 px-3">Sandboxed Query Runner, Timeouts & Redis</td>
+              <td class="py-3 px-3">Read-Only Replica, Profit Views & Indexes</td>
+              <td class="py-3 px-3"><code class="inline-code">query_sales_data</code> + <code class="inline-code">sqlglot</code> AST Guard</td>
+              <td class="py-3 px-3">Z-Score/IQR Revenue Anomaly Detector</td>
+            </tr>
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-3 px-3 font-bold text-slate-900">04. Retaj<br/><span class="text-[11px] font-medium text-purple-600">Sales Forecasting & Explainable AI</span></td>
+              <td class="py-3 px-3">Forecast Horizon Band & SHAP Waterfall UI</td>
+              <td class="py-3 px-3">FastAPI Inference Server & Celery Retraining</td>
+              <td class="py-3 px-3">Daily Time-Series SQL & MLflow Registry</td>
+              <td class="py-3 px-3"><code class="inline-code">run_sales_forecast</code> + Reorder Advisor</td>
+              <td class="py-3 px-3">Prophet vs LightGBM vs SARIMA + SHAP</td>
+            </tr>
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-3 px-3 font-bold text-slate-900">05. Renad<br/><span class="text-[11px] font-medium text-rose-600">Customer RFM & Smart Promotions</span></td>
+              <td class="py-3 px-3">RFM Cluster Scatter & Coupon Approval UI</td>
+              <td class="py-3 px-3">Promotions Engine + Paymob & Bosta APIs</td>
+              <td class="py-3 px-3"><code class="inline-code">customers</code>, <code class="inline-code">orders</code>, <code class="inline-code">promotions</code></td>
+              <td class="py-3 px-3"><code class="inline-code">get_customer_segments</code> & Promo Tool</td>
+              <td class="py-3 px-3">Scikit-Learn Log-RFM K-Means Clustering</td>
+            </tr>
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-3 px-3 font-bold text-slate-900">06. Roaa<br/><span class="text-[11px] font-medium text-amber-600">Memory, Guardrails, RAG & Eval</span></td>
+              <td class="py-3 px-3">Command Center Chat Shell & Audit Log UI</td>
+              <td class="py-3 px-3">Prompt Firewall Middleware & Audit Logger</td>
+              <td class="py-3 px-3"><code class="inline-code">agent_actions</code>, Memory + <code class="inline-code">pgvector</code></td>
+              <td class="py-3 px-3">Store Policy RAG + Langfuse Observability</td>
+              <td class="py-3 px-3">100-Prompt Benchmark & Accuracy Suite</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Detailed Member Cards Container -->
+    <section id="members-container" class="space-y-8">
+      <!-- Populated dynamically by JS -->
+    </section>
+
+    <!-- 12-Week Synchronized Execution Roadmap -->
+    <section class="surface-card rounded-2xl p-6 sm:p-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 border-b border-slate-200 pb-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <i data-lucide="calendar-clock" class="w-5 h-5 text-indigo-600"></i>
+            12-Week Synchronized Execution Roadmap (Section 10 Alignment)
+          </h2>
+          <p class="text-xs text-slate-500">Step-by-step bi-weekly integration milestones across all 6 team members.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-indigo-700 uppercase">Phase 1 • Weeks 1–2</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">Foundation</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">Database Schema, RLS & Core Backend</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Set up Docker Compose (Postgres 16 + pgvector, Redis, Meilisearch, MLflow). Each member writes Prisma migrations for their owned tables, configures Row-Level Security, loads AdventureWorks/Olist datasets, and builds core NestJS CRUD APIs.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-sky-700 uppercase">Phase 2 • Weeks 3–4</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-sky-100 text-sky-800">Core Read Agent</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">LangGraph State Machine & Read Tools</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Initialize LangGraph orchestrator. Implement safe Read-Only tools first: <code class="inline-code">search_products</code> (Adel), <code class="inline-code">query_sales_data</code> with <code class="inline-code">sqlglot</code> AST validation (Abdallah), and Store Policy RAG (Roaa).
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-rose-700 uppercase">Phase 3 • Weeks 5–6</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-rose-100 text-rose-800">Machine Learning</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">Forecasting, RFM, Stockout & FastAPI</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Train and benchmark Prophet/LightGBM/SARIMA with SHAP (Retaj), K-Means RFM clustering (Renad), Stockout velocity predictor (Adel), and Revenue Anomaly detection (Abdallah). Expose all via FastAPI + MLflow.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-amber-700 uppercase">Phase 4 • Weeks 7–8</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800">Write Tools & HITL</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">Human-in-the-Loop & Audit Logging</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Implement state-modifying tools using LangGraph <code class="inline-code">interrupt_before</code>: <code class="inline-code">create_store_tenant</code> (Moustafa), <code class="inline-code">bulk_update_prices</code> (Adel), <code class="inline-code">create_promotion_for_segment</code> (Renad), and immutable <code class="inline-code">agent_actions</code> logging + Langfuse (Roaa).
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-purple-700 uppercase">Phase 5 • Weeks 9–10</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-purple-100 text-purple-800">Generative UI</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">React.js Storefront & Streaming GenUI</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Connect our React 18 + Vite client and streaming Generative UI registry so every member's tool streams interactive React components directly inside the chat window: Recharts, Diff Preview Cards, Live Storefront Preview, and Arabic/English RTL switcher.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-emerald-700 uppercase">Phase 6 • Weeks 11–12</span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Evaluation & Defense</span>
+          </div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">Benchmarking, Stress Testing & Thesis</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Execute the 100-prompt Evaluation Benchmark (Tool Selection F1, Text-to-SQL Execution Accuracy, Forecast WAPE/MAE, Prompt Injection Block Rate), finalize graduation book, and rehearse live demo.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-slate-500 border-t border-slate-200 no-print">
+    TechZone Agentic E-Commerce System Design • Detailed Light-Mode Task Specification for Moustafa, Adel, Abdallah, Retaj, Renad, and Roaa.
+  </footer>
+
+  <script>
+    const teamData = [
+      {
+        id: 'moustafa',
+        number: '01',
+        name: 'Moustafa',
+        nameAr: 'مصطفى',
+        roleTitle: 'Conversational Store Builder & Multi-Tenant Architecture Lead',
+        roleAr: 'بناء المتجر بالمحادثة وعزل بيانات التجار (Multi-Tenancy & Onboarding)',
+        pdfSection: 'Sections 3.1, 4.1, 4.8 & 6',
+        summary: 'Owns the end-to-end conversational store creation pipeline where a merchant writes "I want to create a store selling mobile accessories called TechZone in dark mode with EGP currency" and receives a fully isolated, live multi-tenant storefront.',
+        tasks: [
+          {
+            id: 'moustafa-fe',
+            layer: 'FE',
+            layerName: '1. Frontend & Generative UI (React 18 + Vite + Tailwind + React Router + i18next)',
+            title: 'Multi-Tenant Storefront Engine, RTL Theme System & Live Onboarding Preview Card',
+            summary: 'Build the customer-facing dynamic React storefront and the split-screen Generative UI preview that updates live as the merchant chats with the Agent.',
+            steps: [
+              'Create dynamic React Router v6 storefront routes (`apps/web/src/pages/storefront/StorePage.tsx` and `StoreLayout.tsx`) that resolve tenant branding (`name`, `theme`, `currency`, `logo_url`) via TanStack Query.',
+              'Build the Generative UI `<StoreCreationPreviewCard />` component rendered inside the chat stream when the Agent collects onboarding slots: shows live color palette, currency badge (`EGP`/`USD`/`SAR`), selected payment gateways, and a **"Launch Store Now"** confirmation button.',
+              'Configure `react-i18next` with complete Arabic (`ar-EG` RTL) and English (`en-US` LTR) dictionaries and dynamic CSS variable injection for instant Dark/Light theme switching.'
+            ],
+            techSpecs: [
+              'Files: `apps/web/src/components/gen-ui/StoreCreationPreviewCard.tsx`, `apps/web/src/pages/storefront/StoreLayout.tsx`',
+              'Libraries: `react@18`, `vite`, `react-router-dom`, `tailwindcss`, `shadcn/ui`, `react-i18next`'
+            ],
+            deliverable: 'Interactive split-screen onboarding UI where typing store preferences in Arabic or English updates the live React storefront preview in <200ms.'
+          },
+          {
+            id: 'moustafa-be',
+            layer: 'BE',
+            layerName: '2. Backend & API Layer (NestJS + Clerk/JWT Auth + Redis)',
+            title: 'Tenant Provisioning Service, JWT Session Context & Role-Based Access Control (RBAC)',
+            summary: 'Build the core NestJS Tenant & Auth module that provisions new stores and enforces strict tenant isolation across every API and Agent request.',
+            steps: [
+              'Implement `TenantsController` and `TenantsService` (`POST /api/v1/tenants/provision`, `GET /api/v1/tenants/:slug`, `PATCH /api/v1/tenants/settings`) with Redis caching (`tenant:config:{id}`, TTL 15 mins) for zero-latency storefront loading.',
+              'Build `TenantContextGuard` and `RolesGuard` (`merchant`, `customer`, `admin`) in NestJS that verify the Clerk/Passport JWT signature, extract `tenant_id` and `user_id`, and attach them to the request object (`req.tenantContext`).',
+              'Ensure `tenant_id` is never accepted from raw client request bodies or LLM prompt arguments—always injected server-side from the verified JWT session.'
+            ],
+            techSpecs: [
+              'Endpoints: `POST /api/v1/tenants/provision`, `PATCH /api/v1/tenants/settings`',
+              'Files: `apps/api/src/tenants/tenants.service.ts`, `apps/api/src/common/guards/tenant-context.guard.ts`'
+            ],
+            deliverable: 'Secured NestJS API layer with automated unit tests verifying that cross-tenant requests return `403 Forbidden`.'
+          },
+          {
+            id: 'moustafa-db',
+            layer: 'DB',
+            layerName: '3. Database & Security Layer (PostgreSQL 16 + Prisma ORM + Row-Level Security)',
+            title: 'Multi-Tenant Core Schema (`tenants`, `users`) & PostgreSQL RLS Isolation Policies',
+            summary: 'Design the foundational multi-tenant tables and implement database-level Row-Level Security (RLS) so tenant data leaks are mathematically impossible.',
+            steps: [
+              'Define Prisma schema and SQL migrations for `tenants (id UUID PK, slug UNIQUE, name, currency, theme JSONB, payment_methods TEXT[], shipping_policy TEXT, created_at)` and `users (id UUID PK, tenant_id UUID FK, email, password_hash, role, created_at)`.',
+              'Write PostgreSQL Row-Level Security policies (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY;` and `CREATE POLICY tenant_isolation_policy ON ... USING (tenant_id = current_setting(\'app.current_tenant_id\')::uuid);`) across all tenant-scoped tables.',
+              'Build a Prisma Client Extension (`$allOperations`) that wraps queries in a transaction executing `SET LOCAL app.current_tenant_id = \'...\'` automatically.'
+            ],
+            techSpecs: [
+              'Tables: `tenants`, `users` + RLS Policies across all 10 tables in Section 6',
+              'Files: `packages/database/prisma/schema.prisma`, `packages/database/sql/enable_rls.sql`'
+            ],
+            deliverable: 'PostgreSQL database with active RLS policies and a test script proving User A cannot query User B’s rows even with raw SQL.'
+          },
+          {
+            id: 'moustafa-ai',
+            layer: 'AI',
+            layerName: '4. AI Agent & LLM Layer (LangGraph + Claude 3.5 / GPT-4o + Tool Use)',
+            title: 'Conversational Slot-Filling State Graph & `create_store_tenant` Tool Execution',
+            summary: 'Build the LangGraph onboarding sub-graph that extracts store entities from natural language, asks follow-up questions for missing slots, and provisions the store.',
+            steps: [
+              'Build a LangGraph `OnboardingState` node using Pydantic/Zod structured output to extract: `store_name`, `product_category`, `theme_mode` (`dark`/`light`), `currency` (`EGP`/`USD`/`SAR`), `payment_methods`, and `shipping_policy`.',
+              'Implement the **Slot-Filling Router**: if required fields (such as payment methods or shipping policy) are missing from the merchant’s initial prompt, the Agent politely asks targeted follow-up questions in the merchant’s language before calling the tool.',
+              'Register the `create_store_tenant(name, currency, theme, payment_methods, shipping_policy)` tool with Human-in-the-Loop confirmation so the store is created in Postgres only after the merchant clicks Confirm on the preview card.'
+            ],
+            techSpecs: [
+              'Tool Name: `create_store_tenant` (Write Operation • Requires Confirmation: Yes)',
+              'Files: `apps/agent/graphs/onboarding_graph.py`, `apps/agent/tools/store_builder_tools.py`'
+            ],
+            deliverable: 'End-to-end conversational flow turning a 2-turn Arabic/English chat into a live, database-backed store tenant.'
+          },
+          {
+            id: 'moustafa-ml',
+            layer: 'ML',
+            layerName: '5. Machine Learning & Data Science Layer (Python FastAPI + Pandas + Scikit-Learn)',
+            title: 'Intelligent Excel/CSV Catalog Onboarding Cleaner & Zero-Shot Category Classifier',
+            summary: 'Build the Python data pipeline that processes the initial Excel product file uploaded during store creation, cleans dirty data, and assigns product categories automatically.',
+            steps: [
+              'Create a FastAPI endpoint (`POST /ml/v1/catalog/ingest-file`) using `pandas` and `openpyxl` to parse merchant Excel/CSV uploads, automatically mapping varied column headers (e.g., `السعر`/`Price`/`Unit Price`, `الاسم`/`Title`) to the standard `products` schema.',
+              'Implement automated data cleaning: impute missing cost values using category margin medians, strip currency symbols, detect duplicate SKUs, and flag statistical price outliers (IQR method).',
+              'Train a lightweight TF-IDF + Logistic Regression / Multilingual MiniLM classifier on the Olist/AdventureWorks product titles to auto-assign `category_id` for uncategorized merchant items and establish cold-start demand priors.'
+            ],
+            techSpecs: [
+              'Endpoint: `POST /ml/v1/catalog/ingest-file`',
+              'Libraries: `pandas`, `scikit-learn`, `openpyxl`, `fastapi`'
+            ],
+            deliverable: 'Automated catalog ingestion pipeline that cleans messy Excel sheets and categorizes Arabic/English product names with >88% accuracy.'
+          }
+        ]
+      },
+      {
+        id: 'adel',
+        number: '02',
+        name: 'Adel',
+        nameAr: 'عادل',
+        roleTitle: 'Autonomous Catalog, Inventory & Human-in-the-Loop (HITL) Operations',
+        roleAr: 'الإدارة الذاتية للمنتجات والمخزون ونظام المعاينة والتأكيد (HITL)',
+        pdfSection: 'Sections 3.2, 4.3, 7.2 & 7.7',
+        summary: 'Owns autonomous day-to-day catalog and inventory management (e.g., "Add a 15% discount to all products in the speakers category with >50 units in stock") with strict Human-in-the-Loop preview cards and stockout prediction.',
+        tasks: [
+          {
+            id: 'adel-fe',
+            layer: 'FE',
+            layerName: '1. Frontend & Generative UI (React 18 + Vite + shadcn/ui + TanStack Query)',
+            title: 'Human-in-the-Loop Diff Preview Cards (`<BulkPricePreviewCard />`) & Inventory Alerts UI',
+            summary: 'Build the interactive React confirmation cards rendered in chat whenever the Agent proposes modifying product prices, details, or inventory levels.',
+            steps: [
+              'Build `<BulkPricePreviewCard />` and `<ProductUpdatePreviewCard />`: display a clean diff table showing Product SKU, Name, Current Price, Proposed Discounted Price, New Net Profit Margin, and total number of affected products.',
+              'Wire the **"Approve & Execute Changes"** and **"Cancel / Modify"** buttons to send the LangGraph `Command(resume={ approved: true, actionId })` payload back to the Agent stream.',
+              'Build the `<InventoryAlertsList />` Generative UI widget and Merchant Products Dashboard page in React with instant filtering, stock badges, and image upload dropzone.'
+            ],
+            techSpecs: [
+              'Files: `apps/web/src/components/gen-ui/BulkPricePreviewCard.tsx`, `apps/web/src/components/gen-ui/InventoryAlertsList.tsx`',
+              'UX Rule: Confirm button disables immediately on click (optimistic lock) to prevent double submission.'
+            ],
+            deliverable: 'Interactive React Generative UI diff cards that visually protect the merchant from accidental bulk edits.'
+          },
+          {
+            id: 'adel-be',
+            layer: 'BE',
+            layerName: '2. Backend & API Layer (NestJS + Prisma Transactions + S3 / Cloudinary)',
+            title: 'Transactional Catalog CRUD, Dry-Run Preview Engine, Idempotency & Media Upload',
+            summary: 'Build the NestJS product and inventory services supporting dry-run impact calculation, atomic bulk updates, and idempotent execution.',
+            steps: [
+              'Build `ProductsService` and `InventoryService` with a two-phase execution pattern: `POST /api/v1/products/bulk-discount/dry-run` (computes affected rows and before/after prices without committing) and `POST /api/v1/products/bulk-discount/commit`.',
+              'Enforce **Idempotency** using Redis (`idempotency:action:{action_id}`): if the Agent or network retries an approved write tool call twice, the second call returns the cached result without discounting prices a second time.',
+              'Integrate AWS S3 / Cloudinary signed URL uploads for product images and synchronize product changes to Meilisearch via NestJS domain events.'
+            ],
+            techSpecs: [
+              'Endpoints: `POST /api/v1/products/bulk-discount/dry-run`, `POST /api/v1/products/bulk-discount/commit`, `PATCH /api/v1/products/:id`',
+              'Files: `apps/api/src/products/products.service.ts`, `apps/api/src/inventory/inventory.service.ts`'
+            ],
+            deliverable: 'Atomic, idempotent NestJS catalog service capable of updating 1,000+ SKUs in a single Prisma `$transaction`.'
+          },
+          {
+            id: 'adel-db',
+            layer: 'DB',
+            layerName: '3. Database & Search Layer (PostgreSQL 16 + Meilisearch)',
+            title: '`categories`, `products`, `inventory` Schema, Profit Constraints & Arabic Search Index',
+            summary: 'Design the product catalog and inventory tables in PostgreSQL and configure Meilisearch for sub-50ms Arabic/English semantic and typo-tolerant search.',
+            steps: [
+              'Create Prisma models and SQL migrations for `categories (id, tenant_id, name, parent_id)`, `products (id, tenant_id, category_id, sku, name, price, cost, is_active)`, and `inventory (id, product_id, quantity, reorder_level, updated_at)`.',
+              'Add PostgreSQL `CHECK` constraints (`price >= 0`, `cost >= 0`, `quantity >= 0`) and composite B-Tree indexes on `(tenant_id, category_id, is_active)` and `(tenant_id, sku)`.',
+              'Configure Meilisearch index settings with Arabic stop-words, prefix search, synonyms (e.g., `سماعات` ↔ `speakers` ↔ `headphones`), and filterable attributes (`tenant_id`, `category_id`, `price`, `quantity`).'
+            ],
+            techSpecs: [
+              'Tables: `categories`, `products`, `inventory` + Meilisearch Index `products_index`',
+              'Key Design Point: Separating `cost` from `price` enables exact Net Profit calculation and margin floor warnings.'
+            ],
+            deliverable: 'Indexed PostgreSQL catalog schema synced with Meilisearch supporting instant bilingual search.'
+          },
+          {
+            id: 'adel-ai',
+            layer: 'AI',
+            layerName: '4. AI Agent & LLM Layer (LangGraph Checkpointer + HITL Interrupts)',
+            title: '`search_products`, `update_product`, `bulk_update_prices` & LangGraph HITL Workflow',
+            summary: 'Implement the Agent’s catalog tools and configure LangGraph state interrupts so Write tools never execute without merchant confirmation.',
+            steps: [
+              'Define strict Pydantic/JSON schemas and detailed LLM descriptions for `search_products(query, category, min_stock, max_price)`, `update_product(product_id, fields)`, `bulk_update_prices(filter_criteria, discount_pct)`, and `get_inventory_alerts()`.',
+              'Configure LangGraph `MemorySaver` / `PostgresSaver` checkpointer with `interrupt_before=["execute_write_tool"]`. When the LLM calls `bulk_update_prices`, the graph runs the backend dry-run, streams the preview payload to the React UI, and suspends execution.',
+              'Add a **Margin Safety Guardrail**: if a requested discount pushes `new_price < cost` (negative net profit), the Agent explicitly warns the merchant in the preview card.'
+            ],
+            techSpecs: [
+              'Tools: `search_products` (Read), `get_inventory_alerts` (Read), `update_product` (Write/HITL), `bulk_update_prices` (Write/HITL)',
+              'Files: `apps/agent/tools/catalog_tools.py`, `apps/agent/nodes/hitl_gate_node.py`'
+            ],
+            deliverable: 'LangGraph HITL pipeline that pauses before any database mutation and resumes cleanly upon merchant approval.'
+          },
+          {
+            id: 'adel-ml',
+            layer: 'ML',
+            layerName: '5. Machine Learning & Data Science Layer (Python FastAPI + SciPy + NumPy)',
+            title: 'Dynamic Safety Stock Optimization & Probabilistic Days-Until-Stockout Predictor',
+            summary: 'Upgrade inventory alerts from dumb static thresholds into an intelligent ML-driven stockout and reorder-point calculator.',
+            steps: [
+              'Build `POST /ml/v1/inventory/analyze-risk` in FastAPI that calculates rolling 7-day and 30-day demand velocity ($\mu_d$) and demand standard deviation ($\sigma_d$) per SKU from `order_items`.',
+              'Compute dynamic **Safety Stock** and **Reorder Point (ROP)** using supplier lead-time ($L$) and service-level Z-score ($Z_{0.95} = 1.645$): $\text{ROP} = (\mu_d \times L) + Z \cdot \sigma_d \sqrt{L}$.',
+              'Predict expected **Days Until Stockout** (`current_quantity / ewma_daily_velocity`) and rank urgent SKUs by projected lost net profit per day so `get_inventory_alerts()` prioritizes high-margin items first.'
+            ],
+            techSpecs: [
+              'Endpoint: `POST /ml/v1/inventory/analyze-risk`',
+              'Libraries: `numpy`, `scipy.stats`, `pandas`, `fastapi`'
+            ],
+            deliverable: 'Smart inventory microservice that predicts exact stockout dates and updates `reorder_level` recommendations dynamically.'
+          }
+        ]
+      },
+      {
+        id: 'abdallah',
+        number: '03',
+        name: 'Abdallah',
+        nameAr: 'عبدالله',
+        roleTitle: 'Conversational BI Analytics & Secure Text-to-SQL Engine',
+        roleAr: 'تحليلات الأعمال الذكية وتحويل الأسئلة إلى SQL آمن (Text-to-SQL)',
+        pdfSection: 'Sections 3.2, 4.4, 5.1 & 7.4',
+        summary: 'Owns the conversational Business Intelligence & Text-to-SQL pipeline where merchants ask natural language analytical questions (e.g., "What are the top 5 products that generated the highest net profit last week in Cairo?") and receive validated SQL results as interactive charts and tables.',
+        tasks: [
+          {
+            id: 'abdallah-fe',
+            layer: 'FE',
+            layerName: '1. Frontend & Generative UI (React 18 + Vite + Recharts + TanStack Table)',
+            title: 'Adaptive BI Chart Visualizer (`<AnalyticsResultCard />`) & SQL Inspector UI',
+            summary: 'Build the React Generative UI component that automatically turns structured SQL results into interactive charts, KPI cards, and sortable tables.',
+            steps: [
+              'Build `<AnalyticsResultCard />` using Recharts (`ResponsiveContainer`, `BarChart`, `LineChart`, `AreaChart`, `PieChart`) and TanStack Table: automatically select chart type based on returned column types (e.g., Date + Metric → Line Chart; Category/City + Metric → Bar Chart).',
+              'Add interactive controls inside the chat card: switch between Chart View and Table View, export query results to CSV/Excel, and a collapsible **"Verified SQL Query"** badge showing execution time and row count.',
+              'Support RTL Arabic axis labels and formatted EGP currency tooltips (`14,500 ج.م`).'
+            ],
+            techSpecs: [
+              'Files: `apps/web/src/components/gen-ui/AnalyticsResultCard.tsx`, `apps/web/src/components/gen-ui/SqlQueryDrawer.tsx`',
+              'Libraries: `react@18`, `recharts`, `@tanstack/react-table`, `lucide-react`'
+            ],
+            deliverable: 'Generative React BI component rendering publication-quality charts and sortable tables directly inside the conversation.'
+          },
+          {
+            id: 'abdallah-be',
+            layer: 'BE',
+            layerName: '2. Backend & API Layer (NestJS / FastAPI + PostgreSQL Read Pool + Redis)',
+            title: 'Sandboxed SQL Execution Runner, Statement Timeouts, Row Limits & Query Caching',
+            summary: 'Build the isolated backend query runner that executes validated analytical queries against a Read-Only connection pool with strict resource limits.',
+            steps: [
+              'Create a dedicated PostgreSQL connection pool in the backend configured exclusively with the `techzone_readonly_analyst` database role (zero write permissions at the database engine level).',
+              'Enforce hard execution guardrails on every query: wrap execution in `SET LOCAL statement_timeout = \'3000ms\';`, enforce `LIMIT 500` maximum rows, and block multi-statement queries (`;`).',
+              'Cache normalized SQL AST hashes in Redis (`bi:query:{tenant_id}:{sql_hash}`, TTL 5 mins) for instant dashboard and repeat-question responses.'
+            ],
+            techSpecs: [
+              'Endpoint: `POST /api/v1/analytics/execute-safe-sql`',
+              'Security: Dedicated Read-Only DB Pool + 3-second timeout + 500-row cap'
+            ],
+            deliverable: 'Bulletproof sandboxed SQL execution service immune to resource exhaustion and unauthorized writes.'
+          },
+          {
+            id: 'abdallah-db',
+            layer: 'DB',
+            layerName: '3. Database & Analytical Layer (PostgreSQL Read-Only Role + Views + Dataset Seeding)',
+            title: 'Read-Only DB Role, Semantic Analytical Views (`v_sales_net_profit`) & Olist Seeding',
+            summary: 'Create simplified analytical SQL views that make LLM Text-to-SQL generation highly accurate, and seed realistic multi-city Egyptian e-commerce data.',
+            steps: [
+              'Create the PostgreSQL read-only role (`CREATE ROLE techzone_readonly_analyst; GRANT SELECT ON ALL TABLES IN SCHEMA public TO techzone_readonly_analyst;`).',
+              'Build denormalized analytical views specifically designed for LLM comprehension: `v_order_profit_analytics` pre-calculating `gross_revenue`, `total_cost`, and `net_profit = ((oi.unit_price * (1 - oi.discount)) - p.cost) * oi.quantity` joined with product name, category, customer city, and order timestamp.',
+              'Write the master ETL seeding script importing **Olist Brazilian E-Commerce** and **AdventureWorks** data mapped to Egyptian cities (`Cairo`, `Alexandria`, `Giza`, `Mansoura`, `Tanta`) and realistic electronics products.'
+            ],
+            techSpecs: [
+              'Views: `v_order_profit_analytics`, `v_daily_category_kpis`',
+              'Files: `packages/database/sql/analytical_views.sql`, `packages/database/seed/seed_olist_egypt.py`'
+            ],
+            deliverable: 'Pre-joined analytical SQL views and 50,000+ realistic seeded order rows for rich analytical demos.'
+          },
+          {
+            id: 'abdallah-ai',
+            layer: 'AI',
+            layerName: '4. AI Agent & LLM Layer (LangGraph + `sqlglot` AST Guard + Self-Correction Loop)',
+            title: '`query_sales_data(natural_language)` Tool, `sqlglot` AST Validator & 3-Retry Self-Correction',
+            summary: 'Build the 5-layer secured Text-to-SQL pipeline (Section 7.4) with AST parsing, automatic `tenant_id` injection, and self-correcting error recovery.',
+            steps: [
+              'Build the **Schema Scoping Prompt** providing the LLM only with permitted analytical tables/views, column descriptions, and few-shot Arabic/English SQL examples.',
+              'Implement the **`sqlglot` AST Security Validator**: parse the LLM-generated SQL into an Abstract Syntax Tree; immediately reject any AST containing `Drop`, `Delete`, `Update`, `Insert`, `Alter`, `Grant`, `Copy`, or system catalog access (`pg_catalog`), and programmatically verify/inject `WHERE tenant_id = :current_tenant_id`.',
+              'Build the **Self-Correction Graph Loop**: if PostgreSQL returns a syntax or column error (e.g., wrong group-by or date cast), feed the exact database error message back to the LLM to rewrite the SQL (up to 3 automatic retries).'
+            ],
+            techSpecs: [
+              'Tool Name: `query_sales_data(question: str, preferred_chart: str)` (Read Operation)',
+              'Libraries: `sqlglot`, `langgraph`, `langchain-core`'
+            ],
+            deliverable: '5-layer secured Text-to-SQL agent achieving >92% execution accuracy on complex multi-join analytical questions.'
+          },
+          {
+            id: 'abdallah-ml',
+            layer: 'ML',
+            layerName: '5. Machine Learning & Data Science Layer (Python FastAPI + Statsmodels + Pandas)',
+            title: 'Automated Revenue & Net Profit Anomaly Detection & Root-Cause Explainer',
+            summary: 'Complement descriptive SQL queries with an automated statistical anomaly detector that spots unusual profit drops or city-level spikes and explains why.',
+            steps: [
+              'Build `POST /ml/v1/analytics/detect-anomalies` using `statsmodels` seasonal decomposition (STL) and rolling Z-Score / Interquartile Range (IQR) over daily revenue, net profit, and cancellation rates.',
+              'When a significant anomaly is detected (e.g., $|Z| > 2.5$ drop in Cairo speaker sales), automatically perform drill-down attribution across categories, cities, and stockouts to identify the primary driver.',
+              'Return structured anomaly insights to the Agent so when a merchant asks "How is my store performing this week?", the Agent proactively highlights statistically significant trends and root causes.'
+            ],
+            techSpecs: [
+              'Endpoint: `POST /ml/v1/analytics/detect-anomalies`',
+              'Libraries: `statsmodels`, `pandas`, `numpy`, `scipy`'
+            ],
+            deliverable: 'Statistical anomaly detection service that automatically surfaces revenue spikes/drops and their root causes.'
+          }
+        ]
+      },
+      {
+        id: 'retaj',
+        number: '04',
+        name: 'Retaj',
+        nameAr: 'ريتاج',
+        roleTitle: 'Time-Series Sales Forecasting, SHAP Explainability & MLOps Lead',
+        roleAr: 'التنبؤ بالمبيعات (Time-Series ML) وتفسير القرارات بـ SHAP و MLflow',
+        pdfSection: 'Sections 3.3, 4.5 & 8.1–8.3',
+        summary: 'Owns the end-to-end Machine Learning Forecasting pipeline where a merchant asks "How many units of Product X do I expect to sell next month? Do I need to order stock now?" and receives a real model prediction with confidence intervals, SHAP feature attributions, and an actionable restock recommendation.',
+        tasks: [
+          {
+            id: 'retaj-fe',
+            layer: 'FE',
+            layerName: '1. Frontend & Generative UI (React 18 + Vite + Recharts + Tailwind)',
+            title: 'Forecast Horizon Confidence Band Chart (`<SalesForecastCard />`) & SHAP Explainability UI',
+            summary: 'Build the React Generative UI forecasting card displaying historical sales, future predictions, uncertainty bands, and SHAP feature impacts.',
+            steps: [
+              'Build `<SalesForecastCard />` using Recharts `ComposedChart`: plot solid line for historical daily sales (last 30 days), dashed line for forecasted daily sales (`horizon = 7, 14, or 30` days), and a shaded `Area` for the 95% confidence interval (`[yhat_lower, yhat_upper]`).',
+              'Build the embedded **SHAP Feature Impact Bar List**: visually show positive/negative drivers for that specific prediction in plain merchant language (e.g., `+18% Weekend Effect`, `+24% Active 15% Discount`, `-9% Post-Holiday Dip`).',
+              'Include an interactive restock callout badge comparing `Predicted 30-Day Demand` vs `Current Inventory`.'
+            ],
+            techSpecs: [
+              'Files: `apps/web/src/components/gen-ui/SalesForecastCard.tsx`, `apps/web/src/components/gen-ui/ShapExplanationBars.tsx`',
+              'Libraries: `react@18`, `recharts`, `lucide-react`, `tailwindcss`'
+            ],
+            deliverable: 'Interactive React ML Forecast Generative UI component combining time-series uncertainty bands with visual SHAP explainability.'
+          },
+          {
+            id: 'retaj-be',
+            layer: 'BE',
+            layerName: '2. Backend & MLOps Layer (Python FastAPI + Celery/BullMQ + Docker)',
+            title: 'Low-Latency FastAPI Inference Service & Scheduled Model Retraining Workers',
+            summary: 'Build the production Python FastAPI microservice for real-time model inference and asynchronous background workers for periodic retraining.',
+            steps: [
+              'Build `POST /ml/v1/forecast/predict` in FastAPI (`apps/ml-service/app/routers/forecast.py`) that loads the champion production model from MLflow, computes real-time lag features for `product_id`, and returns predictions + confidence intervals + SHAP values in <350ms.',
+              'Configure Celery (or BullMQ + Python worker) with Redis broker to execute scheduled weekly model retraining jobs (`retrain_tenant_forecast_models`) without blocking live user requests.',
+              'Containerize the FastAPI + MLflow service with a multi-stage `Dockerfile` optimized for scientific Python dependencies.'
+            ],
+            techSpecs: [
+              'Endpoints: `POST /ml/v1/forecast/predict`, `POST /ml/v1/forecast/trigger-retrain`, `GET /ml/v1/models/metrics`',
+              'Files: `apps/ml-service/app/main.py`, `apps/ml-service/app/workers/retrain_tasks.py`'
+            ],
+            deliverable: 'Dockerized FastAPI ML microservice serving real-time predictions and managing background retraining queues.'
+          },
+          {
+            id: 'retaj-db',
+            layer: 'DB',
+            layerName: '3. Database & Feature Store Layer (PostgreSQL + MLflow Tracking Store)',
+            title: 'Time-Series Feature Extraction SQL Pipeline, Holiday Calendar & MLflow Registry',
+            summary: 'Build the SQL data pipeline that transforms raw transactional orders into continuous daily time-series features and stores model versions in MLflow.',
+            steps: [
+              'Write optimized PostgreSQL queries using `generate_series()` to create gapless daily time-series grids per `(tenant_id, product_id)` (filling zero-sale days explicitly with `0` rather than missing rows) joined with daily average discount and stock status.',
+              'Create a `calendar_events` table storing Egyptian national holidays, Ramadan/Eid seasons, White Friday, and Back-to-School periods for the `is_holiday` feature.',
+              'Configure PostgreSQL as the backend metadata store for **MLflow** (`mlflow_tracking` schema) and S3/MinIO for storing serialized `.pkl` / `.lgb` model artifacts.'
+            ],
+            techSpecs: [
+              'Tables/Views: `v_daily_product_timeseries`, `calendar_events`, MLflow Registry Tables',
+              'Files: `packages/database/sql/timeseries_feature_view.sql`'
+            ],
+            deliverable: 'Gapless SQL time-series feature pipeline and persistent MLflow model registry.'
+          },
+          {
+            id: 'retaj-ai',
+            layer: 'AI',
+            layerName: '4. AI Agent & LLM Layer (LangGraph Tool Use + Decision Synthesis)',
+            title: '`run_sales_forecast(product_id, horizon)` Tool & Natural Language Inventory Advisor',
+            summary: 'Connect the ML forecasting microservice to the LangGraph Agent so it translates mathematical predictions and SHAP values into clear business advice.',
+            steps: [
+              'Implement the `run_sales_forecast(product_id_or_name: str, horizon_days: int = 30)` tool in LangGraph: automatically resolves fuzzy product names to `product_id`, queries the FastAPI ML service, and fetches current stock from `inventory`.',
+              'Design the **Forecast Synthesis Prompt**: instruct the Agent to explain the expected total units, confidence range (`[lower, upper]`), top 3 SHAP drivers, and a concrete action (e.g., *"You are projected to sell 145 units [125–165] next month driven by weekend demand and your current 10% promo. Since you only have 80 units in stock, I recommend ordering 85 units this week"*).',
+              'Allow chaining: if the merchant replies "Draft a purchase order or set a reminder for those 85 units", the Agent seamlessly continues the workflow.'
+            ],
+            techSpecs: [
+              'Tool Name: `run_sales_forecast(product_id, horizon=30)` (Read/ML Operation • No Confirmation Required)',
+              'Files: `apps/agent/tools/forecast_tools.py`'
+            ],
+            deliverable: 'Seamless Agent tool that bridges classical ML time-series outputs and natural language merchant decision-making.'
+          },
+          {
+            id: 'retaj-ml',
+            layer: 'ML',
+            layerName: '5. Machine Learning & Data Science Layer (Prophet + LightGBM + SARIMA + SHAP)',
+            title: 'Feature Engineering, Strict Time-Based Split, Multi-Model Benchmarking & SHAP',
+            summary: 'Build the core scientific pipeline in Section 8.2 & 8.3 comparing classical statistical models against gradient boosting and explaining predictions with SHAP.',
+            steps: [
+              'Engineer the exact Section 8.3 feature matrix: `sales_lag_7`, `sales_lag_14`, `sales_lag_28`, `sales_rolling_mean_7`, `sales_rolling_mean_28`, `sales_rolling_std_28`, `discount_pct`, `price_change_pct`, `day_of_week`, `month`, `is_holiday`, and `stock_level`.',
+              'Enforce a **Strict Time-Based Train/Validation/Test Split** (e.g., train on first 80% chronological dates, test on final 20% future dates—never random shuffle to prevent data leakage).',
+              'Train and benchmark three distinct model families in MLflow: **SARIMA (`statsmodels`)** as statistical baseline, **Meta Prophet** for seasonality/holidays, and **LightGBM / XGBoost** with quantile regression (`alpha=0.05, 0.5, 0.95`) for confidence intervals. Evaluate using **MAE**, **RMSE**, and **WAPE / MAPE**, and compute `shap.TreeExplainer` values for every forecast.'
+            ],
+            techSpecs: [
+              'Models: `LightGBM` (Quantile + Point), `Prophet`, `SARIMA` + `shap.TreeExplainer`',
+              'Metrics Logged in MLflow: `MAE`, `RMSE`, `MAPE`, `WAPE`'
+            ],
+            deliverable: 'Reproducible training notebook & production pipeline with full academic model comparison table and SHAP explainability.'
+          }
+        ]
+      },
+      {
+        id: 'renad',
+        number: '05',
+        name: 'Renad',
+        nameAr: 'ريناد',
+        roleTitle: 'Customer RFM Segmentation, Smart Promotions & Local Egypt Integrations',
+        roleAr: 'تقسيم العملاء بـ (RFM & K-Means) والعروض الذكية وبوابات الدفع والشحن',
+        pdfSection: 'Sections 4.7, 7.2 & 8.4',
+        summary: 'Owns customer intelligence, retention marketing, and order fulfillment: clustering customers using Unsupervised Machine Learning (RFM + K-Means), enabling the Agent to launch targeted segment coupons with HITL approval, and integrating Egyptian payment/shipping gateways.',
+        tasks: [
+          {
+            id: 'renad-fe',
+            layer: 'FE',
+            layerName: '1. Frontend & Generative UI (React 18 + Vite + Recharts + Checkout Flow)',
+            title: 'RFM Customer Segment Visualizer (`<CustomerSegmentsCard />`), Promo HITL Card & Checkout UI',
+            summary: 'Build the React Generative UI cards for exploring customer segments and approving targeted promotions, plus the storefront checkout interface.',
+            steps: [
+              'Build `<CustomerSegmentsCard />`: render an interactive distribution chart and summary cards for each RFM cluster (**VIP Champions**, **Loyal Customers**, **At-Risk of Churn**, **New Customers**, **Hibernating**), showing customer count, average spend (`Monetary`), and average days since last order (`Recency`).',
+              'Build `<PromotionApprovalCard />` (Human-in-the-Loop): when the Agent proposes creating a discount coupon for a specific segment, show coupon code, target segment size, discount %, validity dates, estimated revenue impact, and **Confirm & Launch Campaign** button.',
+              'Build the customer storefront Cart & Egyptian Checkout page in React supporting governorate/city selection, promo code application, and payment method choice (Card, InstaPay, Fawry).'
+            ],
+            techSpecs: [
+              'Files: `apps/web/src/components/gen-ui/CustomerSegmentsCard.tsx`, `apps/web/src/components/gen-ui/PromotionApprovalCard.tsx`',
+              'Storefront Route: `apps/web/src/pages/storefront/CheckoutPage.tsx`'
+            ],
+            deliverable: 'Rich React RFM segmentation GenUI widgets, HITL campaign confirmation card, and working Egyptian checkout flow.'
+          },
+          {
+            id: 'renad-be',
+            layer: 'BE',
+            layerName: '2. Backend & Integrations Layer (NestJS + Paymob/Fawry + Bosta Shipping API)',
+            title: 'Orders & Promotions Engine + Egyptian Payment (Paymob) & Shipping (Bosta) Adapters',
+            summary: 'Build the NestJS Orders and Promotions microservices and integrate local Egyptian payment and shipping providers (Section 4.7).',
+            steps: [
+              'Build `OrdersService` and `PromotionsService`: validate coupon rules (active dates, `discount_pct`, segment eligibility), calculate order totals, deduct inventory atomically, and record `order_items`.',
+              'Implement the **Egyptian Payment Adapter (`Paymob / Kashier / Fawry` Sandbox)**: generate payment intention tokens for Visa/MasterCard, InstaPay, and Fawry reference codes, and verify HMAC webhook signatures to update order status to `PAID`.',
+              'Implement the **Shipping Adapter (`Bosta / Aramex` Sandbox)**: create waybill shipments automatically upon order confirmation and expose tracking status updates.'
+            ],
+            techSpecs: [
+              'Endpoints: `POST /api/v1/orders/checkout`, `POST /api/v1/promotions`, `POST /api/v1/webhooks/paymob`, `POST /api/v1/shipping/bosta`',
+              'Files: `apps/api/src/orders/orders.service.ts`, `apps/api/src/promotions/promotions.service.ts`'
+            ],
+            deliverable: 'Production-grade NestJS commerce backend localized for the Egyptian market (EGP, Paymob, Bosta).'
+          },
+          {
+            id: 'renad-db',
+            layer: 'DB',
+            layerName: '3. Database & Storage Layer (PostgreSQL 16 + Prisma ORM)',
+            title: '`customers`, `orders`, `order_items` & `promotions` Schema & UCI/Olist Seeding',
+            summary: 'Design and optimize the customer and transactional order tables in PostgreSQL to support fast RFM aggregation and promotion tracking.',
+            steps: [
+              'Define Prisma models and SQL migrations for `customers (id, tenant_id, name, email, phone, city, rfm_segment, created_at)`, `orders (id, tenant_id, customer_id, status, total, created_at)`, `order_items (id, order_id, product_id, quantity, unit_price, discount)`, and `promotions (id, tenant_id, code, name, target_segment, discount_pct, starts_at, ends_at)`.',
+              'Create composite indexes on `orders (tenant_id, customer_id, status, created_at)` so RFM queries across 100,000+ orders execute in <50ms.',
+              'Seed realistic multi-order customer histories combining the **UCI Online Retail Dataset** and **Olist** mapped to Egyptian customer profiles.'
+            ],
+            techSpecs: [
+              'Tables: `customers`, `orders`, `order_items`, `promotions`',
+              'Files: `packages/database/prisma/schema.prisma`, `packages/database/seed/seed_customers_rfm.py`'
+            ],
+            deliverable: 'Normalized transactional order schema seeded with realistic repeat-purchase histories for RFM clustering.'
+          },
+          {
+            id: 'renad-ai',
+            layer: 'AI',
+            layerName: '4. AI Agent & LLM Layer (LangGraph Tools + HITL Campaign Confirmation)',
+            title: '`get_customer_segments()` & `create_promotion_for_segment(segment, discount)` Tools',
+            summary: 'Equip the Agent with customer intelligence tools so merchants can analyze customer loyalty and launch targeted retention campaigns through chat.',
+            steps: [
+              'Implement `get_customer_segments()` (Read/ML tool): calls the FastAPI RFM service, returns cluster statistics, and proactively suggests retention strategies (e.g., *"You have 142 high-spending customers in the At-Risk segment who haven’t ordered in 45+ days. Would you like to create a 15% win-back coupon for them?"*).',
+              'Implement `create_promotion_for_segment(segment, discount_pct, duration_days)` (Write tool with mandatory HITL Confirmation): pauses the LangGraph workflow, renders `<PromotionApprovalCard />` in the React UI, and creates the promotion in PostgreSQL only after merchant approval.'
+            ],
+            techSpecs: [
+              'Tools: `get_customer_segments()` (Read/ML), `create_promotion_for_segment(segment, discount)` (Write/HITL)',
+              'Files: `apps/agent/tools/customer_promo_tools.py`'
+            ],
+            deliverable: 'Proactive AI retention workflow connecting unsupervised ML segmentation directly to automated coupon creation.'
+          },
+          {
+            id: 'renad-ml',
+            layer: 'ML',
+            layerName: '5. Machine Learning & Data Science Layer (Python FastAPI + Scikit-Learn K-Means)',
+            title: 'RFM Feature Engineering, Log-Transformation & Unsupervised K-Means Clustering Pipeline',
+            summary: 'Build the unsupervised Machine Learning pipeline (Section 8.4) that segments customers based on purchasing behavior.',
+            steps: [
+              'Build `POST /ml/v1/customers/rfm-segmentation` in FastAPI using `pandas` and `scikit-learn`: compute per-customer **Recency** ($\text{days since max(order.created\_at)}$), **Frequency** ($\text{count(distinct order\_id)}$), and **Monetary** ($\sum \text{order.total}$).',
+              'Apply `np.log1p()` transformation to correct right-skewed Monetary and Frequency distributions, followed by `StandardScaler` normalization.',
+              'Train **K-Means Clustering (`KMeans(n_clusters=k, n_init=10)`)**, evaluate optimal $K$ using **Silhouette Score** and Davies-Bouldin Index, and programmatically rank cluster centroids to assign human-readable labels (`VIP Champions`, `Loyal`, `At-Risk`, `New`, `Lost`). Log clustering metrics in MLflow.'
+            ],
+            techSpecs: [
+              'Endpoint: `POST /ml/v1/customers/rfm-segmentation`',
+              'Libraries: `scikit-learn` (`KMeans`, `StandardScaler`, `silhouette_score`), `pandas`, `numpy`'
+            ],
+            deliverable: 'Unsupervised K-Means RFM clustering microservice with automated cluster naming and Silhouette evaluation.'
+          }
+        ]
+      },
+      {
+        id: 'roaa',
+        number: '06',
+        name: 'Roaa',
+        nameAr: 'رؤى',
+        roleTitle: 'Agent Memory, Prompt Security, Policy RAG, Observability & Academic Evaluation',
+        roleAr: 'ذاكرة الوكيل الذكي، الحماية والأمان، RAG، المراقبة وتقييم الأداء الأكاديمي',
+        pdfSection: 'Sections 4.4, 6, 7.5, 7.6, 9 & Phase 6',
+        summary: 'Owns the central Merchant Command Center Chat UI in React, short/long-term Agent Memory, RAG over store policies, Prompt Injection security guardrails, the immutable Audit Log (`agent_actions`), Langfuse observability, and the quantitative graduation benchmark suite.',
+        tasks: [
+          {
+            id: 'roaa-fe',
+            layer: 'FE',
+            layerName: '1. Frontend & Generative UI (React 18 + Vite + SSE Streaming Command Center)',
+            title: 'Merchant Command Center Chat Shell, Voice Input, Tool Reasoning Pill & Audit Log UI',
+            summary: 'Build the unified React Chat & Command Center interface where streaming text and all 6 team members’ Generative UI components render seamlessly.',
+            steps: [
+              'Build the primary split-screen `<CommandCenterChat />` interface (`apps/web/src/pages/dashboard/ChatCommandCenter.tsx`) in React 18 using Server-Sent Events (SSE) / WebSockets: supports streaming markdown, real-time "Agent Thinking / Calling Tool..." step indicators, Web Speech API voice input (Arabic & English), and quick-action prompt chips.',
+              'Build the unified **React Generative UI Component Registry** (`GenUiRegistry.tsx`) that maps structured tool outputs from Moustafa, Adel, Abdallah, Retaj, and Renad into their respective interactive React cards.',
+              'Build the `<AgentAuditLogTable />` dashboard page (`/dashboard/audit-log`) allowing merchants to inspect every tool executed by the Agent, its parameters, timestamp, status, and user confirmation trail.'
+            ],
+            techSpecs: [
+              'Files: `apps/web/src/pages/dashboard/ChatCommandCenter.tsx`, `apps/web/src/components/chat/GenUiRegistry.tsx`, `apps/web/src/pages/dashboard/AuditLogPage.tsx`',
+              'Libraries: `react@18`, `vite`, `@tanstack/react-query`, `lucide-react`, `shadcn/ui`'
+            ],
+            deliverable: 'Polished, production-ready React Merchant Command Center UI uniting all team Generative UI components and audit logs.'
+          },
+          {
+            id: 'roaa-be',
+            layer: 'BE',
+            layerName: '2. Backend & Security Layer (NestJS + Guardrail Firewall + Docker Compose + CI/CD)',
+            title: 'Prompt Injection Firewall Middleware, Tool Permission Validator & Immutable Audit Logger',
+            summary: 'Implement the multi-layered security guardrails (Section 7.5) and immutable audit logging service, plus Docker Compose orchestration.',
+            steps: [
+              'Build the **Prompt Injection & Input Sanitization Middleware**: enforce strict separation between System Instructions and untrusted user/external data (wrapping untrusted supplier descriptions or user inputs in `<untrusted_data>` delimiters and scanning for jailbreak/override patterns).',
+              'Build the `AuditLogService` (`POST /api/v1/audit/log-action`, `GET /api/v1/audit/actions`) that records every single Agent tool invocation (`tenant_id`, `user_id`, `tool_name`, `params`, `status`: `PENDING_CONFIRMATION` | `EXECUTED` | `REJECTED` | `FAILED`) into `agent_actions`.',
+              'Maintain the master `docker-compose.yml` (React + Vite SPA, NestJS, FastAPI Agent/ML, Postgres+pgvector, Redis, Meilisearch, MLflow, Langfuse) and GitHub Actions CI pipeline.'
+            ],
+            techSpecs: [
+              'Endpoints: `POST /api/v1/agent/chat`, `GET /api/v1/audit/actions`',
+              'Files: `apps/api/src/security/prompt-guard.middleware.ts`, `docker-compose.yml`'
+            ],
+            deliverable: 'Hardened backend gateway with full auditability and one-command `docker compose up` local orchestration.'
+          },
+          {
+            id: 'roaa-db',
+            layer: 'DB',
+            layerName: '3. Database & Vector Layer (PostgreSQL 16 + `pgvector` + Memory & Audit Schema)',
+            title: '`agent_actions` Audit Table, Short/Long-Term Memory Tables & `pgvector` Policy Store',
+            summary: 'Design the database tables for audit logging, conversational session memory, persistent merchant preferences, and vector embeddings.',
+            steps: [
+              'Create the Section 6 `agent_actions (id, tenant_id, user_id, tool_name, params JSONB, status, error_message, created_at)` table and conversation history tables (`chat_sessions`, `chat_messages`).',
+              'Create the **Long-Term Memory** table `merchant_memories (id, tenant_id, memory_key, memory_value, updated_at)` to persist merchant preferences across sessions (e.g., *"Always display profit margins net of VAT"*, *"Default forecast horizon is 14 days"*).',
+              'Enable `CREATE EXTENSION IF NOT EXISTS vector;` in PostgreSQL and create `store_policy_chunks (id, tenant_id, doc_title, content, embedding vector(1536))` with an HNSW index for fast semantic retrieval.'
+            ],
+            techSpecs: [
+              'Tables: `agent_actions`, `chat_sessions`, `chat_messages`, `merchant_memories`, `store_policy_chunks` (`pgvector`)',
+              'Files: `packages/database/prisma/schema.prisma`, `packages/database/sql/init_pgvector.sql`'
+            ],
+            deliverable: 'Complete PostgreSQL schema supporting audit compliance, dual-layer agent memory, and `pgvector` similarity search.'
+          },
+          {
+            id: 'roaa-ai',
+            layer: 'AI',
+            layerName: '4. AI Agent & Observability Layer (LangGraph Memory + LlamaIndex RAG + Langfuse)',
+            title: 'Store Context Injector, Long-Term Preference Memory, Policy RAG & Langfuse Tracing',
+            summary: 'Build the Agent’s memory manager, RAG over store documents (shipping/return policies, FAQs), and full observability tracing in Langfuse.',
+            steps: [
+              'Build the **Context & Memory Node** in LangGraph (Section 7.6) that automatically injects 3 memory layers into every turn: (1) Fixed **Store Context** (`tenant_id`, name, currency), (2) **Long-Term Merchant Preferences**, and (3) **Short-Term Session Window**.',
+              'Build the `search_store_policies(query)` RAG tool using `pgvector` / LlamaIndex to answer merchant and customer questions about shipping policies, return rules, and platform documentation with grounded citations.',
+              'Integrate **Langfuse (Open-Source AI Observability)** callbacks across the entire LangGraph workflow to trace every step, tool latency, token cost, and prompt version.'
+            ],
+            techSpecs: [
+              'Tools: `search_store_policies(query)` (RAG Read), `save_merchant_preference(key, value)`',
+              'Observability: Self-hosted or cloud **Langfuse** integration (`CallbackHandler`)'
+            ],
+            deliverable: 'Context-aware Agent with persistent memory, grounded RAG, and 100% step-by-step trace visibility in Langfuse.'
+          },
+          {
+            id: 'roaa-ml',
+            layer: 'ML',
+            layerName: '5. Machine Learning & Academic Evaluation Layer (Python Benchmark & Evaluation Suite)',
+            title: '100-Prompt Golden Evaluation Dataset & Automated Agent Quality Benchmark (Section 9)',
+            summary: 'Build the quantitative academic evaluation framework required for Section 9 & Phase 6 of the graduation thesis.',
+            steps: [
+              'Curate the **TechZone Golden Evaluation Dataset (`eval_dataset_100.json`)** containing 100 diverse Arabic and English test cases across 5 categories: Store Creation (15), Catalog/HITL Edits (20), Complex Text-to-SQL Queries (30), ML Forecasting & RFM (20), and Adversarial Prompt Injections / Cross-Tenant Attacks (15).',
+              'Write the automated Python evaluation harness (`apps/ml-service/eval/run_agent_benchmark.py`) that runs the Agent against all 100 prompts and computes thesis-ready metrics: **Tool Selection Precision/Recall/F1**, **Parameter Extraction Accuracy**, **Text-to-SQL Execution Match Rate**, **End-to-End Latency (p50/p95)**, and **Security Guardrail Block Rate (100% target)**.',
+              'Export automated comparison tables and confusion matrices (e.g., comparing Claude 3.5 Sonnet vs GPT-4o vs Open-Source Qwen/Llama) for the graduation report and presentation.'
+            ],
+            techSpecs: [
+              'Files: `apps/ml-service/eval/eval_dataset_100.json`, `apps/ml-service/eval/run_agent_benchmark.py`',
+              'Academic Output: Quantitative benchmark tables & charts for Chapter 5 (Experiments & Results) of the thesis.'
+            ],
+            deliverable: 'Automated 100-prompt evaluation suite producing rigorous scientific metrics for the graduation defense.'
+          }
+        ]
+      }
+    ];
+
+    const badgeClasses = {
+      FE: 'tech-badge-fe',
+      BE: 'tech-badge-be',
+      DB: 'tech-badge-db',
+      AI: 'tech-badge-ai',
+      ML: 'tech-badge-ml'
+    };
+
+    const layerIcons = {
+      FE: 'layout',
+      BE: 'server',
+      DB: 'database',
+      AI: 'cpu',
+      ML: 'line-chart'
+    };
+
+    const accentBorderColors = {
+      moustafa: 'border-l-4 border-l-indigo-600',
+      adel: 'border-l-4 border-l-sky-600',
+      abdallah: 'border-l-4 border-l-emerald-600',
+      retaj: 'border-l-4 border-l-purple-600',
+      renad: 'border-l-4 border-l-rose-600',
+      roaa: 'border-l-4 border-l-amber-600'
+    };
+
+    let currentMemberFilter = 'ALL';
+    let currentTechFilter = 'ALL';
+    let showDetailedSteps = true;
+    let completedTasks = JSON.parse(localStorage.getItem('techzone_tasks_v2_light') || '{}');
+
+    function formatInlineCode(text) {
+      return text.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+    }
+
+    function renderMembers() {
+      const container = document.getElementById('members-container');
+      container.innerHTML = '';
+
+      teamData.forEach(member => {
+        if (currentMemberFilter !== 'ALL' && currentMemberFilter !== member.id) return;
+
+        const filteredTasks = member.tasks.filter(t => currentTechFilter === 'ALL' || t.layer === currentTechFilter);
+        if (filteredTasks.length === 0) return;
+
+        const doneCount = member.tasks.filter(t => completedTasks[t.id]).length;
+
+        const card = document.createElement('article');
+        card.className = `surface-card rounded-2xl p-6 sm:p-8 member-page-break ${accentBorderColors[member.id] || ''}`;
+        card.innerHTML = `
+          <!-- Cleanly Aligned Member Header -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center border-b border-slate-200 pb-5 mb-6">
+            <div class="lg:col-span-9 flex items-start sm:items-center gap-4">
+              <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-col items-center justify-center shrink-0 font-mono shadow-sm">
+                <span class="text-[10px] font-bold text-indigo-600 tracking-wider leading-none">SLICE</span>
+                <span class="text-lg font-extrabold text-indigo-950 leading-tight mt-0.5">${member.number}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2.5">
+                  <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-none">${member.name}</h2>
+                  <span class="font-arabic text-sm font-bold px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200">${member.nameAr}</span>
+                  <span class="text-xs font-mono font-medium text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200">${member.pdfSection}</span>
+                </div>
+                <p class="text-sm font-bold text-indigo-700 mt-1.5">${member.roleTitle}</p>
+                <p dir="rtl" class="font-arabic text-xs font-semibold text-slate-600 mt-0.5 text-left">${member.roleAr}</p>
+              </div>
+            </div>
+
+            <!-- Right-Aligned Member Slice Progress Box -->
+            <div class="lg:col-span-3 flex items-center justify-between lg:justify-end gap-3 no-print bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl">
+              <div class="text-left lg:text-right">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-500">Slice Progress</div>
+                <div class="text-sm font-extrabold text-slate-900 font-mono">${doneCount} / 5 Layers</div>
+              </div>
+              <div class="w-20 h-2.5 bg-slate-200 rounded-full overflow-hidden shrink-0">
+                <div class="h-full bg-indigo-600 transition-all duration-300" style="width: ${(doneCount / 5) * 100}%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Module Context Description -->
+          <div class="text-xs sm:text-sm text-slate-700 mb-6 bg-slate-50 border border-slate-200 rounded-xl p-4 leading-relaxed">
+            <strong class="text-slate-900 font-bold">End-to-End Slice Ownership:</strong> ${member.summary}
+          </div>
+
+          <!-- 5 Detailed Technology Tasks Grid -->
+          <div class="grid grid-cols-1 gap-5">
+            ${filteredTasks.map(task => {
+              const isChecked = !!completedTasks[task.id];
+              return `
+                <div class="task-card p-5 rounded-xl ${isChecked ? 'bg-emerald-50/40 border-emerald-300' : 'bg-white border-slate-200'}">
+                  <div class="flex items-start gap-3.5">
+                    <input
+                      type="checkbox"
+                      id="chk-${task.id}"
+                      ${isChecked ? 'checked' : ''}
+                      onchange="toggleTask('${task.id}')"
+                      class="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <!-- Layer Badge & Task Title -->
+                      <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span class="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-1 rounded-md ${badgeClasses[task.layer]}">
+                          <i data-lucide="${layerIcons[task.layer]}" class="w-3.5 h-3.5"></i>
+                          ${task.layerName}
+                        </span>
+                        <span class="text-[11px] font-mono text-slate-400">Task ID: ${task.id.toUpperCase()}</span>
+                      </div>
+
+                      <label for="chk-${task.id}" class="block font-extrabold text-base sm:text-lg ${isChecked ? 'line-through text-slate-400' : 'text-slate-900'} cursor-pointer">
+                        ${formatInlineCode(task.title)}
+                      </label>
+
+                      <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium leading-relaxed">
+                        ${formatInlineCode(task.summary)}
+                      </p>
+
+                      <!-- Detailed Implementation Sub-Steps & Specs -->
+                      <div class="${showDetailedSteps ? 'block' : 'hidden'} mt-4 pt-3.5 border-t border-slate-100 space-y-3">
+                        <div>
+                          <div class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2 flex items-center gap-1.5">
+                            <i data-lucide="check-square" class="w-3.5 h-3.5 text-indigo-600"></i>
+                            Detailed Implementation Steps:
+                          </div>
+                          <ul class="space-y-2 text-xs sm:text-[13px] text-slate-700 list-disc pl-5 leading-relaxed">
+                            ${task.steps.map(step => `<li>${formatInlineCode(step)}</li>`).join('')}
+                          </ul>
+                        </div>
+
+                        <!-- Technical Specifications & Deliverable Box -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                          <div class="bg-slate-50 border border-slate-200/80 rounded-lg p-3">
+                            <div class="text-[11px] font-mono font-bold uppercase text-slate-500 mb-1 flex items-center gap-1">
+                              <i data-lucide="terminal" class="w-3 h-3 text-slate-700"></i>
+                              Key Files, Endpoints & Libraries
+                            </div>
+                            <ul class="space-y-1 text-xs text-slate-700">
+                              ${task.techSpecs.map(spec => `<li>• ${formatInlineCode(spec)}</li>`).join('')}
+                            </ul>
+                          </div>
+
+                          <div class="bg-indigo-50/50 border border-indigo-100 rounded-lg p-3">
+                            <div class="text-[11px] font-mono font-bold uppercase text-indigo-700 mb-1 flex items-center gap-1">
+                              <i data-lucide="award" class="w-3 h-3 text-indigo-600"></i>
+                              Primary Deliverable & Acceptance Criteria
+                            </div>
+                            <p class="text-xs text-slate-800 leading-relaxed font-medium">
+                              ${formatInlineCode(task.deliverable)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+      updateGlobalProgress();
+    }
+
+    function toggleCompactSteps() {
+      showDetailedSteps = !showDetailedSteps;
+      const btn = document.getElementById('toggle-steps-btn');
+      if (btn) {
+        btn.innerHTML = showDetailedSteps
+          ? '<i data-lucide="list-tree" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i><span class="hidden sm:inline">Collapse Sub-Steps</span>'
+          : '<i data-lucide="list-tree" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i><span class="hidden sm:inline">Expand Sub-Steps</span>';
+      }
+      renderMembers();
+    }
+
+    function toggleTask(taskId) {
+      completedTasks[taskId] = !completedTasks[taskId];
+      if (!completedTasks[taskId]) delete completedTasks[taskId];
+      localStorage.setItem('techzone_tasks_v2_light', JSON.stringify(completedTasks));
+      renderMembers();
+    }
+
+    function resetCheckboxes() {
+      completedTasks = {};
+      localStorage.removeItem('techzone_tasks_v2_light');
+      renderMembers();
+    }
+
+    function updateGlobalProgress() {
+      const total = 30;
+      const done = Object.keys(completedTasks).length;
+      const pct = Math.round((done / total) * 100);
+      const textEl = document.getElementById('global-progress-text');
+      const barEl = document.getElementById('global-progress-bar');
+      if (textEl) textEl.textContent = `${done} / ${total} (${pct}%)`;
+      if (barEl) barEl.style.width = `${pct}%`;
+    }
+
+    function filterByMember(memberId) {
+      currentMemberFilter = memberId;
+      document.querySelectorAll('.member-filter-btn').forEach(btn => {
+        if (btn.dataset.memberBtn === memberId) {
+          btn.className = 'member-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm transition';
+        } else {
+          btn.className = 'member-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        }
+      });
+      renderMembers();
+    }
+
+    function filterByTech(techId) {
+      currentTechFilter = techId;
+      document.querySelectorAll('.tech-filter-btn').forEach(btn => {
+        if (btn.dataset.techBtn === techId) {
+          btn.classList.add('ring-2', 'ring-indigo-600', 'ring-offset-1');
+        } else {
+          btn.classList.remove('ring-2', 'ring-indigo-600', 'ring-offset-1');
+        }
+      });
+      renderMembers();
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMembers();
+    });
+  </script>
+</body>
+</html>
