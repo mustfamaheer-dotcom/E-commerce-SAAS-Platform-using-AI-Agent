@@ -12,11 +12,11 @@
 
 | # | Layer | Task Title | Status |
 |---|-------|-----------|--------|
-| 1 | 🖥️ Frontend & GenUI | Adaptive BI Chart Visualizer & SQL Inspector UI | ⬜ |
-| 2 | ⚙️ Backend & API | Sandboxed SQL Execution Runner, Timeouts & Redis Cache | ⬜ |
-| 3 | 🗄️ Database & Analytical | Read-Only DB Role, Analytical Views & Olist Seeding | ⬜ |
-| 4 | 🤖 AI Agent & LLM | `query_sales_data` Tool + `sqlglot` AST Guard & Self-Correction | ⬜ |
-| 5 | 📊 ML & Data Science | Revenue & Net Profit Anomaly Detection & Root-Cause Explainer | ⬜ |
+| 1 | 🖥️ Frontend & GenUI | Adaptive BI Chart Visualizer & SQL Inspector UI | ✅ Completed |
+| 2 | ⚙️ Backend & API | Sandboxed SQL Execution Runner, Timeouts & Redis Cache | ✅ Completed |
+| 3 | 🗄️ Database & Analytical | Read-Only DB Role, Analytical Views & Olist Seeding | ✅ Completed |
+| 4 | 🤖 AI Agent & LLM | `query_sales_data` Tool + `sqlglot` AST Guard & Self-Correction | ✅ Completed |
+| 5 | 📊 ML & Data Science | Revenue & Net Profit Anomaly Detection & Root-Cause Explainer | ✅ Completed |
 
 ---
 
