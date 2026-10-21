@@ -1,5 +1,6 @@
 # apps/ml/src/main.py
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from apps.ml.src.catalog.ingest import router as catalog_router
 from apps.ml.src.routers.inventory_risk import router as inventory_risk_router
@@ -22,6 +23,12 @@ app.add_middleware(
 app.include_router(catalog_router)
 app.include_router(inventory_risk_router)
 app.include_router(anomaly_router)
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    """Redirect root to Swagger documentation"""
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
