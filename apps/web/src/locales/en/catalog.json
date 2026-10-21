@@ -1,0 +1,18 @@
+{
+  "title": "Catalog & Inventory Management",
+  "bulkPreviewTitle": "Bulk Price Discount Preview (HITL)",
+  "approveAndExecute": "Approve & Execute Changes",
+  "cancelModify": "Cancel / Modify",
+  "marginWarningTitle": "Profit Margin Floor Warning",
+  "affectedSkus": "Affected SKUs",
+  "avgMarginBefore": "Avg Margin Before",
+  "avgMarginAfter": "Avg Margin After",
+  "negativeMarginCount": "Negative Margin SKUs",
+  "inventoryAlertsTitle": "Inventory Stockout Risk Alerts",
+  "dailyProfitAtRisk": "Daily Profit at Risk",
+  "daysUntilStockout": "Days Until Stockout",
+  "recommendedOrderQty": "Recommended Reorder",
+  "inStock": "In Stock",
+  "lowStock": "Low Stock",
+  "criticalRisk": "Critical Stockout Risk"
+}

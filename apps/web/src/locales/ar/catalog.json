@@ -1,0 +1,18 @@
+{
+  "title": "إدارة المنتجات والمخزون",
+  "bulkPreviewTitle": "معاينة تطبيق الخصم الجماعي (HITL)",
+  "approveAndExecute": "اعتماد وتطبيق التغييرات",
+  "cancelModify": "إلغاء / تعديل",
+  "marginWarningTitle": "تحذير أمان هامش الربح",
+  "affectedSkus": "المنتجات المتأثرة",
+  "avgMarginBefore": "متوسط الهامش قبل",
+  "avgMarginAfter": "متوسط الهامش بعد",
+  "negativeMarginCount": "منتجات بهامش سالب",
+  "inventoryAlertsTitle": "تنبيهات مخاطر نفاد المخزون (Dynamic ROP)",
+  "dailyProfitAtRisk": "صافي ربح يومي معرض للضياع",
+  "daysUntilStockout": "أيام حتى نفاد الكمية",
+  "recommendedOrderQty": "الكمية الموصى بإعادة طلبها",
+  "inStock": "متوفر",
+  "lowStock": "مخزون منخفض",
+  "criticalRisk": "خطر نفاد حرج جداً"
+}

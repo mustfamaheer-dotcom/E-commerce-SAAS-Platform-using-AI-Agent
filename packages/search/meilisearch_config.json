@@ -1,0 +1,81 @@
+{
+  "indexName": "products_index",
+  "primaryKey": "id",
+  "searchableAttributes": [
+    "name",
+    "sku",
+    "category_name",
+    "description"
+  ],
+  "filterableAttributes": [
+    "tenant_id",
+    "category_id",
+    "price",
+    "quantity",
+    "is_active"
+  ],
+  "sortableAttributes": [
+    "price",
+    "quantity",
+    "updated_at"
+  ],
+  "rankingRules": [
+    "words",
+    "typo",
+    "proximity",
+    "attribute",
+    "sort",
+    "exactness"
+  ],
+  "typoTolerance": {
+    "enabled": true,
+    "minWordSizeForTypos": {
+      "oneTypo": 4,
+      "twoTypos": 8
+    },
+    "disableOnWords": [],
+    "disableOnAttributes": ["sku"]
+  },
+  "pagination": {
+    "maxTotalHits": 5000
+  },
+  "synonyms": {
+    "سماعات": ["speakers", "headphones", "earbuds", "سماعة"],
+    "سماعة": ["speaker", "headphone", "earbud", "سماعات"],
+    "speakers": ["سماعات", "headphones", "سماعة"],
+    "headphones": ["سماعات", "headphone", "سماعة"],
+    "شاحن": ["charger", "power bank", "شواحن"],
+    "شواحن": ["chargers", "شاحن"],
+    "charger": ["شاحن", "شواحن", "adapter"],
+    "جراب": ["case", "cover", "كفر", "جرابات"],
+    "جرابات": ["cases", "covers", "جراب"],
+    "case": ["جراب", "كفر", "cover"],
+    "سلك": ["cable", "كابل", "wire"],
+    "كابل": ["cable", "سلك"],
+    "cable": ["كابل", "سلك"]
+  },
+  "stopWords": [
+    "في",
+    "من",
+    "على",
+    "إلى",
+    "عن",
+    "مع",
+    "هذا",
+    "هذه",
+    "تم",
+    "كان",
+    "و",
+    "او",
+    "أو",
+    "the",
+    "a",
+    "an",
+    "in",
+    "on",
+    "at",
+    "for",
+    "with",
+    "by"
+  ]
+}
