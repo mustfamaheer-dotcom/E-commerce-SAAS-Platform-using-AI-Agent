@@ -31,6 +31,8 @@ model Tenant {
   promotions      Promotion[]
   policies        Policy[]
   agentActions    AgentAction[]
+  merchantMemories MerchantMemory[]
+  chatSessions    ChatSession[]
 
   @@map("tenants")
 }
@@ -111,40 +113,47 @@ model Inventory {
   @@map("inventory")
 }
 
+// Renad Slice 05: Customer demographic & RFM segmentation data
 model Customer {
-  id        String   @id @default(uuid()) @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  name      String   @db.VarChar(255)
-  email     String   @db.VarChar(255)
-  phone     String?  @db.VarChar(50)
-  segment   String?  @db.VarChar(50)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  name       String   @db.VarChar(255)
+  email      String   @db.VarChar(255)
+  phone      String?  @db.VarChar(50)
+  city       String   @default("Cairo") @db.VarChar(100)
+  rfmSegment String?  @map("rfm_segment") @db.VarChar(50) // VIP Champions, Loyal, New, At-Risk of Churn, Hibernating / Lost
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  orders    Order[]
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders     Order[]
 
-  @@index([tenantId, email])
+  @@unique([tenantId, email])
+  @@index([tenantId, rfmSegment])
   @@map("customers")
 }
 
+// Renad Slice 05: Multi-order RFM tracking with payment and shipping references
 model Order {
-  id         String      @id @default(uuid()) @db.Uuid
-  tenantId   String      @map("tenant_id") @db.Uuid
-  userId     String?     @map("user_id") @db.Uuid
-  customerId String?     @map("customer_id") @db.Uuid
-  status     String      @default("pending") @db.VarChar(50)
-  total      Decimal     @db.Decimal(12, 2)
-  currency   String      @default("EGP") @db.VarChar(3)
-  createdAt  DateTime    @default(now()) @map("created_at")
-  updatedAt  DateTime    @updatedAt @map("updated_at")
+  id          String      @id @default(uuid()) @db.Uuid
+  tenantId    String      @map("tenant_id") @db.Uuid
+  userId      String?     @map("user_id") @db.Uuid
+  customerId  String?     @map("customer_id") @db.Uuid
+  status      String      @default("pending") @db.VarChar(50) // PENDING, PAID, SHIPPED, DELIVERED, CANCELLED
+  total       Decimal     @db.Decimal(12, 2)
+  currency    String      @default("EGP") @db.VarChar(3)
+  paymentRef  String?     @map("payment_ref") @db.VarChar(255)
+  shippingAwB String?     @map("shipping_awb") @db.VarChar(255)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
-  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user       User?       @relation(fields: [userId], references: [id])
-  customer   Customer?   @relation(fields: [customerId], references: [id])
-  items      OrderItem[]
-  payments   Payment[]
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user        User?       @relation(fields: [userId], references: [id])
+  customer    Customer?   @relation(fields: [customerId], references: [id])
+  items       OrderItem[]
+  payments    Payment[]
 
+  @@index([tenantId, customerId, status, createdAt(sort: Desc)], name: "idx_orders_rfm_lookup")
   @@index([tenantId, status])
   @@map("orders")
 }
@@ -155,17 +164,19 @@ model OrderItem {
   productId String   @map("product_id") @db.Uuid
   quantity  Int      @default(1)
   unitPrice Decimal  @map("unit_price") @db.Decimal(12, 2)
+  discount  Decimal  @default(0.0) @db.Decimal(5, 4)
 
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id])
 
+  @@index([orderId])
   @@map("order_items")
 }
 
 model Payment {
   id        String   @id @default(uuid()) @db.Uuid
   orderId   String   @map("order_id") @db.Uuid
-  provider  String   @db.VarChar(50)
+  provider  String   @db.VarChar(50) // paymob | fawry | instapay
   status    String   @default("pending") @db.VarChar(50)
   amount    Decimal  @db.Decimal(12, 2)
   createdAt DateTime @default(now()) @map("created_at")
@@ -176,18 +187,21 @@ model Payment {
 }
 
 model Promotion {
-  id             String    @id @default(uuid()) @db.Uuid
-  tenantId       String    @map("tenant_id") @db.Uuid
-  code           String    @db.VarChar(50)
-  discountPct    Decimal   @map("discount_pct") @db.Decimal(5, 2)
-  targetSegment  String?   @map("target_segment") @db.VarChar(50)
-  startsAt       DateTime  @map("starts_at")
-  endsAt         DateTime  @map("ends_at")
-  isActive       Boolean   @default(true) @map("is_active")
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  code          String    @db.VarChar(50)
+  name          String    @default("Promo") @db.VarChar(255)
+  discountPct   Decimal   @map("discount_pct") @db.Decimal(5, 2)
+  targetSegment String?   @map("target_segment") @db.VarChar(50)
+  startsAt      DateTime  @map("starts_at")
+  endsAt        DateTime  @map("ends_at")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
 
-  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, code])
+  @@index([tenantId, targetSegment])
   @@map("promotions")
 }
 
@@ -204,22 +218,65 @@ model Policy {
   @@map("policies")
 }
 
+// Roaa Slice 06: Immutable audit logger for all agent tool executions
 model AgentAction {
-  id        String   @id @default(uuid()) @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  action    String   @db.VarChar(100)
-  payload   Json
-  status    String   @default("executed") @db.VarChar(50)
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  userId       String?  @map("user_id") @db.Uuid
+  toolName     String   @map("tool_name") @db.VarChar(100)
+  params       Json     @default("{}")
+  status       String   @default("PENDING_CONFIRMATION") @db.VarChar(50) // PENDING_CONFIRMATION | EXECUTED | REJECTED | FAILED
+  errorMessage String?  @map("error_message") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@index([tenantId, action])
+  @@index([tenantId, toolName, status])
   @@map("agent_actions")
 }
 
-// Retaj slice 04: country-scoped holiday/season calendar used by the
-// time-series feature pipeline (is_holiday / holiday_weight).
+// Roaa Slice 06: Persistent 3-Tier long-term merchant preferences
+model MerchantMemory {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  memoryKey   String   @map("memory_key") @db.VarChar(100)
+  memoryValue String   @map("memory_value") @db.Text
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, memoryKey])
+  @@index([tenantId])
+  @@map("merchant_memories")
+}
+
+// Roaa Slice 06: Short-term chat session window & message history
+model ChatSession {
+  id        String        @id @default(uuid()) @db.Uuid
+  tenantId  String        @map("tenant_id") @db.Uuid
+  title     String?       @db.VarChar(255)
+  createdAt DateTime      @default(now()) @map("created_at")
+  messages  ChatMessage[]
+  tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id           String      @id @default(uuid()) @db.Uuid
+  sessionId    String      @map("session_id") @db.Uuid
+  role         String      @db.VarChar(20) // user | assistant | system
+  content      String      @db.Text
+  genUiPayload Json?       @map("gen_ui_payload")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  session      ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("chat_messages")
+}
+
+// Retaj Slice 04: Holiday/season calendar used by time-series forecasting
 model CalendarEvent {
   id        String   @id @default(uuid()) @db.Uuid
   eventName String   @map("event_name") @db.VarChar(100)

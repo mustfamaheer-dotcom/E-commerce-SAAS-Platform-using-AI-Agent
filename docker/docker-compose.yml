@@ -14,6 +14,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ../packages/database/sql/enable_rls.sql:/docker-entrypoint-initdb.d/01_enable_rls.sql
+      - ../packages/database/sql/init_pgvector.sql:/docker-entrypoint-initdb.d/02_init_pgvector.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U techzone -d techzone_db"]
       interval: 5s
@@ -95,6 +96,20 @@ services:
       mc mb --ignore-existing local/techzone-mlflow-artifacts;
       exit 0;
       "
+
+  langfuse:
+    image: langfuse/langfuse:2
+    container_name: techzone-langfuse
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-techzone}:${POSTGRES_PASSWORD:-techzone_secret}@postgres:5432/${POSTGRES_DB:-techzone_db}
+      NEXTAUTH_SECRET: ${LANGFUSE_SECRET:-super_secret_langfuse_techzone_token}
+      SALT: ${LANGFUSE_SALT:-techzone_salt_12345}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   ml-api:
     build:

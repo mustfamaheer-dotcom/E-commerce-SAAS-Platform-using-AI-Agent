@@ -1,0 +1,14 @@
+{
+  "customer_segments": "تحليل شرائح العملاء",
+  "total_customers": "إجمالي العملاء",
+  "cluster_quality": "جودة التجميع (Silhouette)",
+  "vip_champions": "أبطال الـ VIP",
+  "loyal_customers": "العملاء المخلصين",
+  "new_customers": "العملاء الجدد",
+  "at_risk_churn": "معرضين للمغادرة",
+  "hibernating_lost": "العملاء الخاملين",
+  "create_promo": "إنشاء كوبون خصم",
+  "confirm_launch": "تأكيد وإطلاق الحملة",
+  "estimated_reach": "الوصول التقديري",
+  "projected_revenue": "العائد المتوقع من الحملة"
+}

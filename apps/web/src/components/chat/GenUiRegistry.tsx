@@ -6,6 +6,8 @@ import { InventoryAlertsList, InventoryAlertData } from '../gen-ui/InventoryAler
 import { ProductUpdatePreviewCard, ProductUpdateDiff } from '../gen-ui/ProductUpdatePreviewCard';
 import { SalesForecastCard, SalesForecastPayload } from '../gen-ui/SalesForecastCard';
 import { StoreCreationPreviewCard, StorePreviewData } from '../gen-ui/StoreCreationPreviewCard';
+import { CustomerSegmentsCard, CustomerSegmentsPayload } from '../gen-ui/CustomerSegmentsCard';
+import { PromotionApprovalCard, PromotionApprovalPayload } from '../gen-ui/PromotionApprovalCard';
 
 export type GenUiCardType =
   | 'analytics_result'
@@ -13,7 +15,9 @@ export type GenUiCardType =
   | 'bulk_price_preview'
   | 'product_update_preview'
   | 'inventory_alerts'
-  | 'store_creation_preview';
+  | 'store_creation_preview'
+  | 'customer_segments'
+  | 'promotion_approval';
 
 export interface GenUiRegistryProps {
   cardType: GenUiCardType | string;
@@ -23,6 +27,7 @@ export interface GenUiRegistryProps {
   onReorder?: (sku: string, quantity: number) => void;
   onHorizonChange?: (horizon: 7 | 14 | 30) => void;
   onRequestPurchase?: (quantity: number) => void;
+  onCreatePromo?: (segment: string) => void;
   isSubmitting?: boolean;
 }
 
@@ -34,26 +39,28 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
   onReorder,
   onHorizonChange,
   onRequestPurchase,
+  onCreatePromo,
   isSubmitting = false,
 }) => {
+  const safePayload = (payload?.payload || payload) as any;
+
   switch (cardType) {
     case 'sales_forecast':
       return (
         <SalesForecastCard
-          data={payload as SalesForecastPayload}
+          data={safePayload as SalesForecastPayload}
           onHorizonChange={onHorizonChange}
           onRequestPurchase={onRequestPurchase}
         />
       );
 
     case 'analytics_result':
-      return <AnalyticsResultCard data={payload as AnalyticsResultPayload} />;
+      return <AnalyticsResultCard data={safePayload as AnalyticsResultPayload} />;
 
     case 'bulk_price_preview': {
-      const card = payload as BulkPricePreviewPayload;
       return (
         <BulkPricePreviewCard
-          payload={card}
+          payload={safePayload as BulkPricePreviewPayload}
           onApprove={(actionId) => onApprove?.(actionId)}
           onCancel={(actionId) => onCancel?.(actionId)}
           isSubmitting={isSubmitting}
@@ -62,10 +69,9 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
     }
 
     case 'product_update_preview': {
-      const card = payload as ProductUpdateDiff;
       return (
         <ProductUpdatePreviewCard
-          diff={card}
+          diff={safePayload as ProductUpdateDiff}
           onApprove={(actionId) => onApprove?.(actionId)}
           onCancel={(actionId) => onCancel?.(actionId)}
         />
@@ -75,7 +81,7 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
     case 'inventory_alerts':
       return (
         <InventoryAlertsList
-          alerts={(payload.alerts || payload) as InventoryAlertData[]}
+          alerts={(safePayload.alerts || safePayload) as InventoryAlertData[]}
           onReorderClick={onReorder}
         />
       );
@@ -83,10 +89,27 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
     case 'store_creation_preview':
       return (
         <StoreCreationPreviewCard
-          data={payload as StorePreviewData}
+          data={safePayload as StorePreviewData}
           onConfirm={() => onApprove?.('store_creation')}
           onCancel={() => onCancel?.('store_creation')}
           isLoading={isSubmitting}
+        />
+      );
+
+    case 'customer_segments':
+      return (
+        <CustomerSegmentsCard
+          data={safePayload as CustomerSegmentsPayload}
+          onCreatePromo={onCreatePromo}
+        />
+      );
+
+    case 'promotion_approval':
+      return (
+        <PromotionApprovalCard
+          data={safePayload as PromotionApprovalPayload}
+          onConfirm={(actionId) => onApprove?.(actionId)}
+          onCancel={(actionId) => onCancel?.(actionId)}
         />
       );
 
@@ -102,4 +125,6 @@ export const GEN_UI_COMPONENTS: Record<string, string> = {
   product_update_preview: 'ProductUpdatePreviewCard',
   inventory_alerts: 'InventoryAlertsList',
   store_creation_preview: 'StoreCreationPreviewCard',
+  customer_segments: 'CustomerSegmentsCard',
+  promotion_approval: 'PromotionApprovalCard',
 };

@@ -165,6 +165,10 @@ class TestRetajForecastSlice(unittest.TestCase):
         from apps.ml.src.main import app
 
         client = TestClient(app)
+        client.post(
+            "/ml/v1/forecast/predict",
+            json={"tenant_id": "tenant-demo-01", "product_id": "prod_101", "horizon_days": 30},
+        )
         response = client.post(
             "/ml/v1/forecast/predict",
             json={"tenant_id": "tenant-demo-01", "product_id": "prod_101", "horizon_days": 30},

@@ -8,6 +8,8 @@ from apps.ml.src.catalog.ingest import router as catalog_router
 from apps.ml.src.routers.inventory_risk import router as inventory_risk_router
 from apps.ml.src.routers.anomaly_detection import router as anomaly_router
 from apps.ml.src.routers.forecast import router as forecast_router
+from apps.ml.src.routers.rfm_segmentation import router as rfm_router
+from apps.ml.src.routers.agent_chat import router as agent_chat_router
 
 
 @asynccontextmanager
@@ -27,7 +29,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="TechZone ML & Intelligence Microservice",
-    description="Product Catalog Cleaning, Zero-Shot Category Classification, Probabilistic Inventory Risk, BI Financial Anomaly Detection, and Sales Forecasting with SHAP explainability",
+    description="Product Catalog Cleaning, Zero-Shot Category Classification, Probabilistic Inventory Risk, BI Financial Anomaly Detection, Sales Forecasting with SHAP explainability, and Customer RFM Segmentation",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -44,6 +46,8 @@ app.include_router(catalog_router)
 app.include_router(inventory_risk_router)
 app.include_router(anomaly_router)
 app.include_router(forecast_router)
+app.include_router(rfm_router)
+app.include_router(agent_chat_router)
 
 
 @app.get("/", include_in_schema=False)
@@ -64,5 +68,6 @@ def health():
             "bi_anomaly_detector",
             "sales_forecaster",
             "forecast_retrain_worker",
+            "customer_rfm_segmentation",
         ],
     }

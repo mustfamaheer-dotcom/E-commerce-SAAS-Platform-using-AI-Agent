@@ -6,14 +6,20 @@ import { AlertCircle, Clock, DollarSign, PackagePlus, ArrowUpRight } from 'lucid
 export interface InventoryAlertData {
   productId?: string;
   sku: string;
-  productName: string;
+  productName?: string;
+  product_name?: string;
   categoryName?: string;
-  currentStock: number;
+  category?: string;
+  currentStock?: number;
+  current_stock?: number;
   reorderLevel?: number;
-  daysUntilStockout: number;
-  urgency: 'CRITICAL' | 'WARNING' | 'HEALTHY';
-  dailyProfitAtRisk: number;
-  recommendedReorderQty: number;
+  daysUntilStockout?: number;
+  days_until_stockout?: number;
+  urgency: 'CRITICAL' | 'WARNING' | 'HEALTHY' | string;
+  dailyProfitAtRisk?: number;
+  daily_profit_at_risk?: number;
+  recommendedReorderQty?: number;
+  recommended_reorder_qty?: number;
 }
 
 interface InventoryAlertsListProps {
@@ -28,7 +34,9 @@ export const InventoryAlertsList: React.FC<InventoryAlertsListProps> = ({
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language.startsWith('ar');
 
-  if (!alerts || alerts.length === 0) {
+  const safeAlerts: InventoryAlertData[] = Array.isArray(alerts) ? alerts : (alerts as any)?.alerts || [];
+
+  if (!safeAlerts || safeAlerts.length === 0) {
     return (
       <div
         dir={isRtl ? 'rtl' : 'ltr'}
@@ -59,64 +67,74 @@ export const InventoryAlertsList: React.FC<InventoryAlertsListProps> = ({
           </div>
         </div>
         <span className="text-xs px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-medium">
-          {alerts.length} {isRtl ? 'نواقص عاجلة' : 'Urgent Alerts'}
+          {safeAlerts.length} {isRtl ? 'نواقص عاجلة' : 'Urgent Alerts'}
         </span>
       </div>
 
       <div className="divide-y divide-slate-800 max-h-96 overflow-y-auto">
-        {alerts.map((item) => (
-          <div key={item.sku} className="p-4 hover:bg-slate-800/40 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="font-mono font-medium text-indigo-400">{item.sku}</span>
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                    item.urgency === 'CRITICAL'
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                      : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  }`}
-                >
-                  {item.urgency === 'CRITICAL'
-                    ? isRtl ? 'حرج جداً' : 'CRITICAL'
-                    : isRtl ? 'تحذير' : 'WARNING'}
-                </span>
-              </div>
-              <div className="text-slate-200 font-medium">{item.productName}</div>
-              <div className="text-slate-400 text-[11px] flex items-center gap-3">
-                <span>{isRtl ? 'المتبقي:' : 'Stock:'} <b className="text-white">{item.currentStock}</b></span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-slate-400" />
-                  {isRtl ? 'ينفد خلال:' : 'Stockout in:'}{' '}
-                  <b className="text-amber-400">{item.daysUntilStockout} {isRtl ? 'أيام' : 'days'}</b>
-                </span>
-              </div>
-            </div>
+        {safeAlerts.map((item, idx) => {
+          const sku = item.sku || `SKU-${idx}`;
+          const prodName = item.productName || item.product_name || sku;
+          const currentStock = item.currentStock ?? item.current_stock ?? 0;
+          const daysUntilStockout = item.daysUntilStockout ?? item.days_until_stockout ?? 0;
+          const dailyProfitAtRisk = Number(item.dailyProfitAtRisk ?? item.daily_profit_at_risk ?? 0);
+          const recommendedReorderQty = item.recommendedReorderQty ?? item.recommended_reorder_qty ?? 30;
+          const urgency = item.urgency || 'WARNING';
 
-            <div className="flex items-center gap-4">
-              <div className="text-right sm:text-left">
-                <div className="text-[10px] text-slate-400">{isRtl ? 'ربح يومي معرض للفقد' : 'Daily Profit at Risk'}</div>
-                <div className="text-xs font-bold text-rose-400 mt-0.5">
-                  {item.dailyProfitAtRisk.toFixed(2)} EGP
+          return (
+            <div key={sku} className="p-4 hover:bg-slate-800/40 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-medium text-indigo-400">{sku}</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                      urgency === 'CRITICAL'
+                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    }`}
+                  >
+                    {urgency === 'CRITICAL'
+                      ? isRtl ? 'حرج جداً' : 'CRITICAL'
+                      : isRtl ? 'تحذير' : 'WARNING'}
+                  </span>
                 </div>
-                <div className="text-[10px] text-slate-500">
-                  {isRtl ? `طلب موصى: ${item.recommendedReorderQty} وحدة` : `Reorder: ${item.recommendedReorderQty} units`}
+                <div className="text-slate-200 font-medium">{prodName}</div>
+                <div className="text-slate-400 text-[11px] flex items-center gap-3">
+                  <span>{isRtl ? 'المتبقي:' : 'Stock:'} <b className="text-white">{currentStock}</b></span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-slate-400" />
+                    {isRtl ? 'ينفد خلال:' : 'Stockout in:'}{' '}
+                    <b className="text-amber-400">{daysUntilStockout} {isRtl ? 'أيام' : 'days'}</b>
+                  </span>
                 </div>
               </div>
 
-              {onReorderClick && (
-                <button
-                  type="button"
-                  onClick={() => onReorderClick(item.sku, item.recommendedReorderQty)}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 transition-all flex items-center gap-1 shrink-0"
-                >
-                  <PackagePlus className="w-3.5 h-3.5" />
-                  <span>{isRtl ? 'إعادة طلب' : 'Reorder'}</span>
-                </button>
-              )}
+              <div className="flex items-center gap-4">
+                <div className="text-right sm:text-left">
+                  <div className="text-[10px] text-slate-400">{isRtl ? 'ربح يومي معرض للفقد' : 'Daily Profit at Risk'}</div>
+                  <div className="text-xs font-bold text-rose-400 mt-0.5">
+                    {dailyProfitAtRisk.toFixed(2)} EGP
+                  </div>
+                  <div className="text-[10px] text-slate-500">
+                    {isRtl ? `طلب موصى: ${recommendedReorderQty} وحدة` : `Reorder: ${recommendedReorderQty} units`}
+                  </div>
+                </div>
+
+                {onReorderClick && (
+                  <button
+                    type="button"
+                    onClick={() => onReorderClick(sku, recommendedReorderQty)}
+                    className="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 transition-all flex items-center gap-1 shrink-0"
+                  >
+                    <PackagePlus className="w-3.5 h-3.5" />
+                    <span>{isRtl ? 'إعادة طلب' : 'Reorder'}</span>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

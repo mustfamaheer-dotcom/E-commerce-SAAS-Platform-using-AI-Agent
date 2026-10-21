@@ -1,0 +1,191 @@
+{
+  "benchmark_date": "2026-10-22 00:11:49",
+  "total_queries": 20,
+  "p50_latency_ms": 100.9,
+  "p95_latency_ms": 119.79,
+  "max_latency_ms": 131.05,
+  "target_max_latency_ms": 3000.0,
+  "is_within_budget": true,
+  "queries": [
+    {
+      "query_id": 1,
+      "query": "اجمالي مبيعات شهر سبتمبر بالجنيه المصري",
+      "ast_validation_ms": 31.37,
+      "llm_inference_ms": 71.08,
+      "sql_execution_ms": 28.6,
+      "total_round_trip_ms": 131.05,
+      "status": "PASS"
+    },
+    {
+      "query_id": 2,
+      "query": "اعلى 5 منتجات مبيعا في فرع القاهرة",
+      "ast_validation_ms": 8.73,
+      "llm_inference_ms": 85.95,
+      "sql_execution_ms": 22.59,
+      "total_round_trip_ms": 117.33,
+      "status": "PASS"
+    },
+    {
+      "query_id": 3,
+      "query": "ارباح مبيعات سماعات JBL Flip 6",
+      "ast_validation_ms": 6.23,
+      "llm_inference_ms": 88.39,
+      "sql_execution_ms": 16.08,
+      "total_round_trip_ms": 110.71,
+      "status": "PASS"
+    },
+    {
+      "query_id": 4,
+      "query": "توزيع مبيعات المنتجات حسب التصنيف",
+      "ast_validation_ms": 10.8,
+      "llm_inference_ms": 42.12,
+      "sql_execution_ms": 14.18,
+      "total_round_trip_ms": 67.11,
+      "status": "PASS"
+    },
+    {
+      "query_id": 5,
+      "query": "متوسط قيمة الطلب AOV في محافظة الجيزة",
+      "ast_validation_ms": 10.27,
+      "llm_inference_ms": 72.73,
+      "sql_execution_ms": 20.89,
+      "total_round_trip_ms": 103.89,
+      "status": "PASS"
+    },
+    {
+      "query_id": 6,
+      "query": "عدد الطلبات المكتملة عبر بوابات Paymob",
+      "ast_validation_ms": 6.5,
+      "llm_inference_ms": 79.7,
+      "sql_execution_ms": 16.47,
+      "total_round_trip_ms": 102.69,
+      "status": "PASS"
+    },
+    {
+      "query_id": 7,
+      "query": "مقارنة مبيعات الربع الثالث مع الربع الثاني",
+      "ast_validation_ms": 9.72,
+      "llm_inference_ms": 60.12,
+      "sql_execution_ms": 12.39,
+      "total_round_trip_ms": 82.24,
+      "status": "PASS"
+    },
+    {
+      "query_id": 8,
+      "query": "تحليل هامش الربح الصافي لكابلات الشحن",
+      "ast_validation_ms": 7.31,
+      "llm_inference_ms": 59.28,
+      "sql_execution_ms": 24.1,
+      "total_round_trip_ms": 90.71,
+      "status": "PASS"
+    },
+    {
+      "query_id": 9,
+      "query": "كمية المخزون المتاحة لشواحن أنكر 65 وات",
+      "ast_validation_ms": 15.28,
+      "llm_inference_ms": 87.34,
+      "sql_execution_ms": 16.56,
+      "total_round_trip_ms": 119.2,
+      "status": "PASS"
+    },
+    {
+      "query_id": 10,
+      "query": "العملاء الاكثر انفاقا في الاسكندرية",
+      "ast_validation_ms": 15.13,
+      "llm_inference_ms": 65.37,
+      "sql_execution_ms": 19.98,
+      "total_round_trip_ms": 100.49,
+      "status": "PASS"
+    },
+    {
+      "query_id": 11,
+      "query": "نسبة مرتجعات المنتجات خلال اخر 30 يوم",
+      "ast_validation_ms": 15.58,
+      "llm_inference_ms": 57.85,
+      "sql_execution_ms": 29.44,
+      "total_round_trip_ms": 102.89,
+      "status": "PASS"
+    },
+    {
+      "query_id": 12,
+      "query": "تطور المبيعات اليومية خلال الاسبوع الماضي",
+      "ast_validation_ms": 9.73,
+      "llm_inference_ms": 59.05,
+      "sql_execution_ms": 18.73,
+      "total_round_trip_ms": 87.53,
+      "status": "PASS"
+    },
+    {
+      "query_id": 13,
+      "query": "اجمالي المبيعات المدفوعة عبر انستاباي",
+      "ast_validation_ms": 8.19,
+      "llm_inference_ms": 46.59,
+      "sql_execution_ms": 21.59,
+      "total_round_trip_ms": 76.38,
+      "status": "PASS"
+    },
+    {
+      "query_id": 14,
+      "query": "الطلبات المشحونة عبر بوسطة في الدلتا",
+      "ast_validation_ms": 7.99,
+      "llm_inference_ms": 48.47,
+      "sql_execution_ms": 14.85,
+      "total_round_trip_ms": 71.32,
+      "status": "PASS"
+    },
+    {
+      "query_id": 15,
+      "query": "هامش ربح سماعات ابل ايربودز برو",
+      "ast_validation_ms": 9.89,
+      "llm_inference_ms": 77.61,
+      "sql_execution_ms": 26.77,
+      "total_round_trip_ms": 114.28,
+      "status": "PASS"
+    },
+    {
+      "query_id": 16,
+      "query": "قائمة المنتجات التي وصل مخزونها للحد الحرج",
+      "ast_validation_ms": 15.37,
+      "llm_inference_ms": 88.3,
+      "sql_execution_ms": 14.8,
+      "total_round_trip_ms": 118.48,
+      "status": "PASS"
+    },
+    {
+      "query_id": 17,
+      "query": "عدد العملاء الجدد المسجلين في اكتوبر",
+      "ast_validation_ms": 6.64,
+      "llm_inference_ms": 59.38,
+      "sql_execution_ms": 14.99,
+      "total_round_trip_ms": 81.02,
+      "status": "PASS"
+    },
+    {
+      "query_id": 18,
+      "query": "مبيعات موسم الجمعة البيضاء التقديرية",
+      "ast_validation_ms": 9.79,
+      "llm_inference_ms": 65.18,
+      "sql_execution_ms": 16.58,
+      "total_round_trip_ms": 91.57,
+      "status": "PASS"
+    },
+    {
+      "query_id": 19,
+      "query": "متوسط ايام استلام الشحنات في الصعيد",
+      "ast_validation_ms": 14.07,
+      "llm_inference_ms": 59.88,
+      "sql_execution_ms": 27.35,
+      "total_round_trip_ms": 101.31,
+      "status": "PASS"
+    },
+    {
+      "query_id": 20,
+      "query": "اجمالي الخصومات الممنوحة عبر الكوبونات",
+      "ast_validation_ms": 8.58,
+      "llm_inference_ms": 56.67,
+      "sql_execution_ms": 18.51,
+      "total_round_trip_ms": 83.77,
+      "status": "PASS"
+    }
+  ]
+}

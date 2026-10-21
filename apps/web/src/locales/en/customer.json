@@ -1,0 +1,14 @@
+{
+  "customer_segments": "Customer RFM Segments",
+  "total_customers": "Total Customers",
+  "cluster_quality": "Cluster Quality (Silhouette)",
+  "vip_champions": "VIP Champions",
+  "loyal_customers": "Loyal Customers",
+  "new_customers": "New Customers",
+  "at_risk_churn": "At-Risk of Churn",
+  "hibernating_lost": "Hibernating / Lost",
+  "create_promo": "Create Promo",
+  "confirm_launch": "Confirm & Launch Campaign",
+  "estimated_reach": "Estimated Reach",
+  "projected_revenue": "Projected Revenue Impact"
+}
