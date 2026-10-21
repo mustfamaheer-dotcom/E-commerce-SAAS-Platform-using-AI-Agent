@@ -50,16 +50,93 @@ services:
     image: ghcr.io/mlflow/mlflow:v2.10.2
     container_name: techzone-mlflow
     restart: always
+    command: >
+      mlflow server
+      --backend-store-uri ${MLFLOW_BACKEND_STORE_URI:-postgresql://techzone:techzone_secret@postgres:5432/techzone_db}
+      --default-artifact-root ${MLFLOW_ARTIFACT_ROOT:-s3://techzone-mlflow-artifacts/}
+      --host 0.0.0.0
+      --port 5000
     ports:
       - "5000:5000"
     environment:
-      BACKEND_STORE_URI: sqlite:///mlflow.db
-      DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
     volumes:
       - mlflow_data:/mlflow
+
+  minio:
+    image: minio/minio:latest
+    container_name: techzone-minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: techzone-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin}; do sleep 1; done;
+      mc mb --ignore-existing local/techzone-mlflow-artifacts;
+      exit 0;
+      "
+
+  ml-api:
+    build:
+      context: ..
+      dockerfile: apps/ml/Dockerfile
+    container_name: techzone-ml-api
+    restart: always
+    command: uvicorn apps.ml.src.main:app --host 0.0.0.0 --port 8100 --workers 4
+    environment:
+      MLFLOW_URI: http://mlflow:5000
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-techzone}:${POSTGRES_PASSWORD:-techzone_secret}@postgres:5432/${POSTGRES_DB:-techzone_db}
+    ports:
+      - "8100:8100"
+    depends_on:
+      - postgres
+      - redis
+      - mlflow
+
+  ml-worker:
+    build:
+      context: ..
+      dockerfile: apps/ml/Dockerfile
+    container_name: techzone-ml-worker
+    restart: always
+    command: >
+      sh -c "celery -A apps.ml.src.forecast.workers.celery_app worker -l info &
+             celery -A apps.ml.src.forecast.workers.celery_app beat -l info"
+    environment:
+      MLFLOW_URI: http://mlflow:5000
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-techzone}:${POSTGRES_PASSWORD:-techzone_secret}@postgres:5432/${POSTGRES_DB:-techzone_db}
+    depends_on:
+      - redis
+      - postgres
+      - mlflow
 
 volumes:
   postgres_data:
   redis_data:
   meili_data:
   mlflow_data:
+  minio_data:

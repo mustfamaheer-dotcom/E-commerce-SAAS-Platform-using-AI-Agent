@@ -93,8 +93,8 @@ export const ProductUpdatePreviewCard: React.FC<ProductUpdatePreviewCardProps> =
             <div className="text-[11px] text-slate-400 mt-1">
               {isRtl ? 'الهامش:' : 'Margin:'}{' '}
               {(
-                ((((diff.after.price ?? diff.before.price) - diff.before.cost) /
-                  (diff.after.price ?? diff.before.price)) *
+                (((diff.after.price ?? diff.before.price) - diff.before.cost) /
+                  Math.max(diff.after.price ?? diff.before.price, 1)) *
                 100
               ).toFixed(1)}%
             </div>

@@ -1,0 +1,31 @@
+{
+  "title": "توقّع المبيعات والطلب",
+  "horizon": "الأفق",
+  "expectedDemand": "الطلب المتوقع",
+  "currentStock": "المخزون الحالي",
+  "restockTitle": "توصية المخزون",
+  "orderNow": "اطلب {{qty}} وحدة هذا الأسبوع",
+  "sufficient": "المخزون يكفي للأفق الحالي",
+  "stockoutEta": "تاريخ النفاد المتوقع: {{date}}",
+  "historySeries": "المبيعات الفعلية",
+  "forecastSeries": "التوقع",
+  "confidence": "ثقة 95%",
+  "driversTitle": "العوامل المؤثرة في التوقع (SHAP)",
+  "model": "النموذج",
+  "requestPurchase": "جهّز أمر شراء",
+  "features": {
+    "sales_lag_7": "زخم المبيعات الأسبوعي",
+    "sales_lag_14": "زخم المبيعات نصف الشهري",
+    "sales_lag_28": "زخم المبيعات الشهري",
+    "sales_rolling_mean_7": "متوسط المبيعات الأسبوعي",
+    "sales_rolling_mean_28": "متوسط المبيعات الشهري",
+    "sales_rolling_std_28": "تقلّب الطلب",
+    "discount_pct": "الخصومات الفعالة",
+    "price_change_pct": "تغيّر السعر",
+    "day_of_week": "تأثير الويكند",
+    "month": "الموسمية",
+    "is_holiday": "الموسم / العيد",
+    "holiday_weight": "قوة الموسم",
+    "stock_level": "توفر المخزون"
+  }
+}

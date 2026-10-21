@@ -1,0 +1,31 @@
+{
+  "title": "Sales Demand Forecast",
+  "horizon": "Horizon",
+  "expectedDemand": "Expected demand",
+  "currentStock": "Current stock",
+  "restockTitle": "Restock recommendation",
+  "orderNow": "Order {{qty}} units this week",
+  "sufficient": "Stock covers this horizon",
+  "stockoutEta": "Projected stockout: {{date}}",
+  "historySeries": "Actual sales",
+  "forecastSeries": "Forecast",
+  "confidence": "95% confidence",
+  "driversTitle": "What drives this forecast (SHAP)",
+  "model": "Model",
+  "requestPurchase": "Draft purchase order",
+  "features": {
+    "sales_lag_7": "Weekly Momentum",
+    "sales_lag_14": "Biweekly Momentum",
+    "sales_lag_28": "Monthly Momentum",
+    "sales_rolling_mean_7": "Weekly Average",
+    "sales_rolling_mean_28": "Monthly Average",
+    "sales_rolling_std_28": "Demand Volatility",
+    "discount_pct": "Active Discounts",
+    "price_change_pct": "Price Changes",
+    "day_of_week": "Weekend Effect",
+    "month": "Seasonality",
+    "is_holiday": "Holiday Season",
+    "holiday_weight": "Holiday Strength",
+    "stock_level": "Stock Availability"
+  }
+}
