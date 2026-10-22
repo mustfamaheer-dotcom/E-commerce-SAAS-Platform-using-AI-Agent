@@ -1,9 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --brand-primary: #0ea5e9;
+  --brand-secondary: #6366f1;
+  --brand-accent: #10b981;
+}
 
 html, body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+  scroll-behavior: smooth;
+}
+
+/* Glassmorphism utility classes */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 41, 59, 0.8);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* Micro-animations */
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Brand Button Glow */
+.btn-brand {
+  background-color: var(--brand-primary);
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btn-brand:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 14px 0 rgba(14, 165, 233, 0.39);
 }

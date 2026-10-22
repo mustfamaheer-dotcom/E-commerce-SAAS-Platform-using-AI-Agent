@@ -1,0 +1,1892 @@
+[
+  {
+    "id": "eg_aw_00369",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "أكتر 3 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 3 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 3 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00442",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "مجموع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00713",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "متوسط متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00759",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "احسب متوسط متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00592",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "أفضل 5 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 5 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 5 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00251",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "الأفريج بتاع أيام تصنيع المنتجات المتعلقة بـ خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00032",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "كم مرة الأوردرات الموجودة في اتعملت آخر شهر",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 1 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في آخر شهر."
+  },
+  {
+    "id": "eg_aw_00510",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "وريني عدد طلبات الشراء المتأخرة آخر سنة",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2012;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في آخر سنة."
+  },
+  {
+    "id": "eg_aw_00366",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "الأفريج بتاع أيام تصنيع المنتجات اللي في خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00941",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كم مرة العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00676",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "متوسط متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00970",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "احسب عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00421",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "التوتال بتاع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00152",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "مجموع مبيعات مندوبين المبيعات بتاع حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00923",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أعلى 3 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 3 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 3 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00656",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "هاتلي أول 20 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 20 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 20 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00746",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "أكتر 3 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 3 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 3 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_01000",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أفضل 3 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 3 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 3 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00703",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "كام عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00277",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "كل فلوس كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00116",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderDetail (SalesOrderID, SalesOrderDetailID, OrderQty, ProductID, UnitPrice)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate)",
+    "input_prompt": "هاتلي أول 5 منتجات مبيعا من حيث الكمية آخر سنة",
+    "output_sql": "SELECT TOP 5 sod.ProductID, SUM(sod.OrderQty) AS TotalQuantity FROM Sales.SalesOrderDetail sod JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID WHERE YEAR(soh.OrderDate) = 2014 GROUP BY sod.ProductID ORDER BY TotalQuantity DESC;",
+    "explanation_ar": "استخراج أكثر 5 منتجات مبيعاً من حيث كمية الوحدات المطلوبة في آخر سنة."
+  },
+  {
+    "id": "eg_aw_00496",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "أفضل 3 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 3 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 3 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00955",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "وريني عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00877",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "هاتلي أول 15 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 15 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 15 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00890",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أفضل 3 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 3 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 3 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00531",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "أعلى 5 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 5 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 5 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_01022",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كم مرة العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00728",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "احسب عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_01026",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أفضل 15 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 15 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 15 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00362",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "أفضل 10 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 10 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 10 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00848",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "عدلي العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_01034",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "التوب 20 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 20 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 20 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00470",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "إجمالي تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00374",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "إجمالي كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00260",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "إجمالي كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00499",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "أعلى 5 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 5 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 5 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00680",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "عدلي الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00264",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "معدل أيام تصنيع المنتجات الموجودة في خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00559",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "إجمالي تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00360",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "احسب متوسط أيام تصنيع المنتجات اللي في خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00753",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "أفضل 5 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 5 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 5 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00503",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "احسب عدد طلبات الشراء المتأخرة سنة 2013",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2013;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في سنة 2013."
+  },
+  {
+    "id": "eg_aw_00464",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "احسب عدد طلبات الشراء المتأخرة سنة 2014",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في سنة 2014."
+  },
+  {
+    "id": "eg_aw_00344",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "احسب مجموع كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00754",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "وريني عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00824",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "وريني عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00312",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, SafetyStockLevel, ReorderPoint)\nTable: Production.ProductInventory (ProductID, LocationID, Shelf, Bin, Quantity)",
+    "input_prompt": "وريني عدد المنتجات الموجودة في مخزونها أقل من الحد الحرج",
+    "output_sql": "SELECT COUNT(p.ProductID) AS LowStockCount FROM Production.Product p JOIN Production.ProductInventory pi ON p.ProductID = pi.ProductID WHERE pi.Quantity < p.SafetyStockLevel;",
+    "explanation_ar": "حساب عدد المنتجات التي هبط رصيدها عن الحد الأدنى للأمان."
+  },
+  {
+    "id": "eg_aw_00103",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.Customer (CustomerID, PersonID, TerritoryID)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue)",
+    "input_prompt": "أفضل 10 زباين دفعوا فلوس سنة 2014",
+    "output_sql": "SELECT TOP 10 c.CustomerID, SUM(soh.TotalDue) AS TotalSpent FROM Sales.Customer c JOIN Sales.SalesOrderHeader soh ON c.CustomerID = soh.CustomerID WHERE YEAR(soh.OrderDate) = 2013 GROUP BY c.CustomerID ORDER BY TotalSpent DESC;",
+    "explanation_ar": "استخراج أعلى 10 عملاء إنفاقاً خلال سنة 2014."
+  },
+  {
+    "id": "eg_aw_01012",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كم مرة العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00794",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "أفضل 10 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 10 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 10 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00151",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "إجمالي مبيعات مندوبين المبيعات بتاع حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00774",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "التوب 5 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 5 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 5 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00172",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "احسب عدد الأوردرات بتاع اتعملت الشهر ده",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 12 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في الشهر ده."
+  },
+  {
+    "id": "eg_aw_00949",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أفضل 10 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 10 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 10 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00538",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "كل فلوس تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00234",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, SafetyStockLevel, ReorderPoint)\nTable: Production.ProductInventory (ProductID, LocationID, Shelf, Bin, Quantity)",
+    "input_prompt": "وريني عدد المنتجات اللي في مخزونها أقل من الحد الحرج",
+    "output_sql": "SELECT COUNT(p.ProductID) AS LowStockCount FROM Production.Product p JOIN Production.ProductInventory pi ON p.ProductID = pi.ProductID WHERE pi.Quantity < p.SafetyStockLevel;",
+    "explanation_ar": "حساب عدد المنتجات التي هبط رصيدها عن الحد الأدنى للأمان."
+  },
+  {
+    "id": "eg_aw_00856",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أفضل 3 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 3 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 3 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00298",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "الأفريج بتاع أيام تصنيع المنتجات الموجودة في خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00697",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "احسب متوسط متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00581",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "كل فلوس تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00018",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.Customer (CustomerID, PersonID, TerritoryID)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue)",
+    "input_prompt": "هاتلي أول 10 زباين دفعوا فلوس السنة اللي فاتت",
+    "output_sql": "SELECT TOP 10 c.CustomerID, SUM(soh.TotalDue) AS TotalSpent FROM Sales.Customer c JOIN Sales.SalesOrderHeader soh ON c.CustomerID = soh.CustomerID WHERE YEAR(soh.OrderDate) = 2012 GROUP BY c.CustomerID ORDER BY TotalSpent DESC;",
+    "explanation_ar": "استخراج أعلى 10 عملاء إنفاقاً خلال السنة اللي فاتت."
+  },
+  {
+    "id": "eg_aw_00839",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "أفضل 5 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 5 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 5 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00047",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "كم مرة الأوردرات المتعلقة بـ اتعملت الشهر ده",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 1 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في الشهر ده."
+  },
+  {
+    "id": "eg_aw_00113",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderDetail (SalesOrderID, SalesOrderDetailID, OrderQty, ProductID, UnitPrice)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate)",
+    "input_prompt": "أعلى 3 منتجات مبيعا من حيث الكمية السنة اللي فاتت",
+    "output_sql": "SELECT TOP 3 sod.ProductID, SUM(sod.OrderQty) AS TotalQuantity FROM Sales.SalesOrderDetail sod JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID WHERE YEAR(soh.OrderDate) = 2013 GROUP BY sod.ProductID ORDER BY TotalQuantity DESC;",
+    "explanation_ar": "استخراج أكثر 3 منتجات مبيعاً من حيث كمية الوحدات المطلوبة في السنة اللي فاتت."
+  },
+  {
+    "id": "eg_aw_00484",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "كم مرة طلبات الشراء المتأخرة سنة 2013",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2012;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في سنة 2013."
+  },
+  {
+    "id": "eg_aw_00254",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "أفضل 10 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 10 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 10 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00895",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كام عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00501",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "احسب مجموع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00002",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.Customer (CustomerID, PersonID, TerritoryID)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue)",
+    "input_prompt": "أعلى 3 زباين دفعوا فلوس سنة 2013",
+    "output_sql": "SELECT TOP 3 c.CustomerID, SUM(soh.TotalDue) AS TotalSpent FROM Sales.Customer c JOIN Sales.SalesOrderHeader soh ON c.CustomerID = soh.CustomerID WHERE YEAR(soh.OrderDate) = 2012 GROUP BY c.CustomerID ORDER BY TotalSpent DESC;",
+    "explanation_ar": "استخراج أعلى 3 عملاء إنفاقاً خلال سنة 2013."
+  },
+  {
+    "id": "eg_aw_00598",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "احسب مجموع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00926",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كم مرة العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00361",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "أفضل 20 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 20 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 20 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_01005",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أعلى 15 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 15 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 15 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00010",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "احسب عدد الأوردرات الموجودة في اتعملت آخر شهر",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 9 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في آخر شهر."
+  },
+  {
+    "id": "eg_aw_00942",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أعلى 20 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 20 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 20 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00779",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "أفضل 10 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 10 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 10 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00696",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "كم مرة الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00938",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "التوب 15 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 15 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 15 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00079",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.Customer (CustomerID, PersonID, TerritoryID)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue)",
+    "input_prompt": "التوب 3 زباين دفعوا فلوس السنة اللي فاتت",
+    "output_sql": "SELECT TOP 3 c.CustomerID, SUM(soh.TotalDue) AS TotalSpent FROM Sales.Customer c JOIN Sales.SalesOrderHeader soh ON c.CustomerID = soh.CustomerID WHERE YEAR(soh.OrderDate) = 2012 GROUP BY c.CustomerID ORDER BY TotalSpent DESC;",
+    "explanation_ar": "استخراج أعلى 3 عملاء إنفاقاً خلال السنة اللي فاتت."
+  },
+  {
+    "id": "eg_aw_00903",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أعلى 3 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 3 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 3 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00271",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "كل فلوس كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00182",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, TerritoryID, TotalDue)\nTable: Sales.SalesTerritory (TerritoryID, Name, CountryRegionCode)",
+    "input_prompt": "الأفريج بتاع قيمة الطلب (AOV) المتعلقة بـ منطقة القاهرة أو مصر",
+    "output_sql": "SELECT st.Name AS TerritoryName, AVG(soh.TotalDue) AS AverageOrderValue FROM Sales.SalesOrderHeader soh JOIN Sales.SalesTerritory st ON soh.TerritoryID = st.TerritoryID GROUP BY st.Name ORDER BY AverageOrderValue DESC;",
+    "explanation_ar": "حساب متوسط قيمة الطلب مقسماً حسب المنطقة البيعية."
+  },
+  {
+    "id": "eg_aw_00022",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.Customer (CustomerID, PersonID, TerritoryID)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue)",
+    "input_prompt": "هاتلي أول 5 زباين دفعوا فلوس سنة 2014",
+    "output_sql": "SELECT TOP 5 c.CustomerID, SUM(soh.TotalDue) AS TotalSpent FROM Sales.Customer c JOIN Sales.SalesOrderHeader soh ON c.CustomerID = soh.CustomerID WHERE YEAR(soh.OrderDate) = 2012 GROUP BY c.CustomerID ORDER BY TotalSpent DESC;",
+    "explanation_ar": "استخراج أعلى 5 عملاء إنفاقاً خلال سنة 2014."
+  },
+  {
+    "id": "eg_aw_00343",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "احسب متوسط أيام تصنيع المنتجات اللي في خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00439",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "وريني عدد طلبات الشراء المتأخرة آخر سنة",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في آخر سنة."
+  },
+  {
+    "id": "eg_aw_00486",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "أعلى 10 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 10 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 10 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00683",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "وريني عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00014",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderDetail (SalesOrderID, SalesOrderDetailID, OrderQty, ProductID, UnitPrice)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate)",
+    "input_prompt": "التوب 20 منتجات مبيعا من حيث الكمية سنة 2014",
+    "output_sql": "SELECT TOP 20 sod.ProductID, SUM(sod.OrderQty) AS TotalQuantity FROM Sales.SalesOrderDetail sod JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID WHERE YEAR(soh.OrderDate) = 2012 GROUP BY sod.ProductID ORDER BY TotalQuantity DESC;",
+    "explanation_ar": "استخراج أكثر 20 منتجات مبيعاً من حيث كمية الوحدات المطلوبة في سنة 2014."
+  },
+  {
+    "id": "eg_aw_00146",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "مجموع مبيعات مندوبين المبيعات الخاصة بـ حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00467",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "احسب مجموع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00922",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كام عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00341",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "معدل أيام تصنيع المنتجات بتاع خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00192",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, TerritoryID, TotalDue)\nTable: Sales.SalesTerritory (TerritoryID, Name, CountryRegionCode)",
+    "input_prompt": "معدل قيمة الطلب (AOV) اللي في منطقة القاهرة أو مصر",
+    "output_sql": "SELECT st.Name AS TerritoryName, AVG(soh.TotalDue) AS AverageOrderValue FROM Sales.SalesOrderHeader soh JOIN Sales.SalesTerritory st ON soh.TerritoryID = st.TerritoryID GROUP BY st.Name ORDER BY AverageOrderValue DESC;",
+    "explanation_ar": "حساب متوسط قيمة الطلب مقسماً حسب المنطقة البيعية."
+  },
+  {
+    "id": "eg_aw_00171",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "مجموع مبيعات مندوبين المبيعات الخاصة بـ حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00072",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderDetail (SalesOrderID, SalesOrderDetailID, OrderQty, ProductID, UnitPrice)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate)",
+    "input_prompt": "أفضل 10 منتجات مبيعا من حيث الكمية آخر سنة",
+    "output_sql": "SELECT TOP 10 sod.ProductID, SUM(sod.OrderQty) AS TotalQuantity FROM Sales.SalesOrderDetail sod JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID WHERE YEAR(soh.OrderDate) = 2014 GROUP BY sod.ProductID ORDER BY TotalQuantity DESC;",
+    "explanation_ar": "استخراج أكثر 10 منتجات مبيعاً من حيث كمية الوحدات المطلوبة في آخر سنة."
+  },
+  {
+    "id": "eg_aw_00997",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "التوب 3 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 3 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 3 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00323",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "أكتر 20 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 20 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 20 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00175",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderDetail (SalesOrderID, SalesOrderDetailID, OrderQty, ProductID, UnitPrice)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate)",
+    "input_prompt": "أكتر 3 منتجات مبيعا من حيث الكمية سنة 2013",
+    "output_sql": "SELECT TOP 3 sod.ProductID, SUM(sod.OrderQty) AS TotalQuantity FROM Sales.SalesOrderDetail sod JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID WHERE YEAR(soh.OrderDate) = 2012 GROUP BY sod.ProductID ORDER BY TotalQuantity DESC;",
+    "explanation_ar": "استخراج أكثر 3 منتجات مبيعاً من حيث كمية الوحدات المطلوبة في سنة 2013."
+  },
+  {
+    "id": "eg_aw_00984",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "التوب 20 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 20 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 20 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00705",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "احسب متوسط متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00929",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "وريني عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00874",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "هاتلي أول 3 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 3 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 3 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00313",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, SafetyStockLevel, ReorderPoint)\nTable: Production.ProductInventory (ProductID, LocationID, Shelf, Bin, Quantity)",
+    "input_prompt": "كم مرة المنتجات اللي في مخزونها أقل من الحد الحرج",
+    "output_sql": "SELECT COUNT(p.ProductID) AS LowStockCount FROM Production.Product p JOIN Production.ProductInventory pi ON p.ProductID = pi.ProductID WHERE pi.Quantity < p.SafetyStockLevel;",
+    "explanation_ar": "حساب عدد المنتجات التي هبط رصيدها عن الحد الأدنى للأمان."
+  },
+  {
+    "id": "eg_aw_00757",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "معدل متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00489",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "التوتال بتاع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00638",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "وريني عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00718",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "وريني عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00930",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "هاتلي أول 20 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 20 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 20 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00516",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "أكتر 10 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 10 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 10 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00190",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.Customer (CustomerID, PersonID, TerritoryID)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue)",
+    "input_prompt": "أفضل 5 زباين دفعوا فلوس سنة 2013",
+    "output_sql": "SELECT TOP 5 c.CustomerID, SUM(soh.TotalDue) AS TotalSpent FROM Sales.Customer c JOIN Sales.SalesOrderHeader soh ON c.CustomerID = soh.CustomerID WHERE YEAR(soh.OrderDate) = 2014 GROUP BY c.CustomerID ORDER BY TotalSpent DESC;",
+    "explanation_ar": "استخراج أعلى 5 عملاء إنفاقاً خلال سنة 2013."
+  },
+  {
+    "id": "eg_aw_00097",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "عدلي الأوردرات الموجودة في اتعملت الشهر ده",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 12 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في الشهر ده."
+  },
+  {
+    "id": "eg_aw_00004",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "التوتال بتاع مبيعات مندوبين المبيعات اللي في حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00969",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "عدلي العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00957",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "هاتلي أول 20 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 20 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 20 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00611",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "كم مرة طلبات الشراء المتأخرة السنة اللي فاتت",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2013;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في السنة اللي فاتت."
+  },
+  {
+    "id": "eg_aw_00723",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "هاتلي أول 5 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 5 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 5 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00295",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "أعلى 3 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 3 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 3 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00653",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "معدل متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00356",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "هاتلي أول 20 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 20 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 20 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00209",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "إجمالي مبيعات مندوبين المبيعات بتاع حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00805",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "أكتر 15 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 15 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 15 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00176",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, TerritoryID, TotalDue)\nTable: Sales.SalesTerritory (TerritoryID, Name, CountryRegionCode)",
+    "input_prompt": "معدل قيمة الطلب (AOV) الخاصة بـ منطقة القاهرة أو مصر",
+    "output_sql": "SELECT st.Name AS TerritoryName, AVG(soh.TotalDue) AS AverageOrderValue FROM Sales.SalesOrderHeader soh JOIN Sales.SalesTerritory st ON soh.TerritoryID = st.TerritoryID GROUP BY st.Name ORDER BY AverageOrderValue DESC;",
+    "explanation_ar": "حساب متوسط قيمة الطلب مقسماً حسب المنطقة البيعية."
+  },
+  {
+    "id": "eg_aw_00211",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, SafetyStockLevel, ReorderPoint)\nTable: Production.ProductInventory (ProductID, LocationID, Shelf, Bin, Quantity)",
+    "input_prompt": "كام عدد المنتجات اللي في مخزونها أقل من الحد الحرج",
+    "output_sql": "SELECT COUNT(p.ProductID) AS LowStockCount FROM Production.Product p JOIN Production.ProductInventory pi ON p.ProductID = pi.ProductID WHERE pi.Quantity < p.SafetyStockLevel;",
+    "explanation_ar": "حساب عدد المنتجات التي هبط رصيدها عن الحد الأدنى للأمان."
+  },
+  {
+    "id": "eg_aw_00508",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "التوتال بتاع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00275",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "الأفريج بتاع أيام تصنيع المنتجات المتعلقة بـ خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00709",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "معدل متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00901",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أعلى 5 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 5 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 5 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00844",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كم مرة العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00752",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "أفضل 15 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 15 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 15 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_01042",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أفضل 15 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 15 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 15 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00981",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كام عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00403",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "التوب 10 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 10 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 10 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00402",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "هاتلي أول 20 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 20 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 20 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00415",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, SafetyStockLevel, ReorderPoint)\nTable: Production.ProductInventory (ProductID, LocationID, Shelf, Bin, Quantity)",
+    "input_prompt": "كام عدد المنتجات بتاع مخزونها أقل من الحد الحرج",
+    "output_sql": "SELECT COUNT(p.ProductID) AS LowStockCount FROM Production.Product p JOIN Production.ProductInventory pi ON p.ProductID = pi.ProductID WHERE pi.Quantity < p.SafetyStockLevel;",
+    "explanation_ar": "حساب عدد المنتجات التي هبط رصيدها عن الحد الأدنى للأمان."
+  },
+  {
+    "id": "eg_aw_00734",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "متوسط متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00717",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "هاتلي أول 5 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 5 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 5 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00636",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "معدل متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00904",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "وريني عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00232",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "متوسط أيام تصنيع المنتجات الموجودة في خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_01004",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أعلى 10 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 10 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 10 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00104",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "احسب عدد الأوردرات اللي في اتعملت الشهر ده",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 12 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في الشهر ده."
+  },
+  {
+    "id": "eg_aw_00545",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "أفضل 10 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 10 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 10 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00068",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.Customer (CustomerID, PersonID, TerritoryID)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue)",
+    "input_prompt": "أعلى 10 زباين دفعوا فلوس سنة 2014",
+    "output_sql": "SELECT TOP 10 c.CustomerID, SUM(soh.TotalDue) AS TotalSpent FROM Sales.Customer c JOIN Sales.SalesOrderHeader soh ON c.CustomerID = soh.CustomerID WHERE YEAR(soh.OrderDate) = 2012 GROUP BY c.CustomerID ORDER BY TotalSpent DESC;",
+    "explanation_ar": "استخراج أعلى 10 عملاء إنفاقاً خلال سنة 2014."
+  },
+  {
+    "id": "eg_aw_00245",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, SafetyStockLevel, ReorderPoint)\nTable: Production.ProductInventory (ProductID, LocationID, Shelf, Bin, Quantity)",
+    "input_prompt": "كام عدد المنتجات الخاصة بـ مخزونها أقل من الحد الحرج",
+    "output_sql": "SELECT COUNT(p.ProductID) AS LowStockCount FROM Production.Product p JOIN Production.ProductInventory pi ON p.ProductID = pi.ProductID WHERE pi.Quantity < p.SafetyStockLevel;",
+    "explanation_ar": "حساب عدد المنتجات التي هبط رصيدها عن الحد الأدنى للأمان."
+  },
+  {
+    "id": "eg_aw_00273",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, SafetyStockLevel, ReorderPoint)\nTable: Production.ProductInventory (ProductID, LocationID, Shelf, Bin, Quantity)",
+    "input_prompt": "وريني عدد المنتجات الخاصة بـ مخزونها أقل من الحد الحرج",
+    "output_sql": "SELECT COUNT(p.ProductID) AS LowStockCount FROM Production.Product p JOIN Production.ProductInventory pi ON p.ProductID = pi.ProductID WHERE pi.Quantity < p.SafetyStockLevel;",
+    "explanation_ar": "حساب عدد المنتجات التي هبط رصيدها عن الحد الأدنى للأمان."
+  },
+  {
+    "id": "eg_aw_00590",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "احسب عدد طلبات الشراء المتأخرة سنة 2013",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في سنة 2013."
+  },
+  {
+    "id": "eg_aw_00037",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "كم مرة الأوردرات الخاصة بـ اتعملت الشهر ده",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 7 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في الشهر ده."
+  },
+  {
+    "id": "eg_aw_00917",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "عدلي العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_01021",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كام عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00118",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "عدلي الأوردرات الموجودة في اتعملت شهر 5",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 11 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في شهر 5."
+  },
+  {
+    "id": "eg_aw_00225",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "احسب متوسط أيام تصنيع المنتجات الموجودة في خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00114",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "عدلي الأوردرات الخاصة بـ اتعملت الشهر اللي فات",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 12 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في الشهر اللي فات."
+  },
+  {
+    "id": "eg_aw_00982",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "احسب عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00255",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "كل فلوس كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00662",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "احسب عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00052",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "مجموع مبيعات مندوبين المبيعات الخاصة بـ حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00698",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.EmployeePayHistory (BusinessEntityID, RateChangeDate, Rate, PayFrequency)\nTable: HumanResources.Department (DepartmentID, Name)",
+    "input_prompt": "معدل متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+    "output_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+    "explanation_ar": "حساب متوسط الأجر بالساعة مقسماً على إدارات المؤسسة."
+  },
+  {
+    "id": "eg_aw_00112",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderDetail (SalesOrderID, SalesOrderDetailID, OrderQty, ProductID, UnitPrice)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate)",
+    "input_prompt": "هاتلي أول 5 منتجات مبيعا من حيث الكمية سنة 2014",
+    "output_sql": "SELECT TOP 5 sod.ProductID, SUM(sod.OrderQty) AS TotalQuantity FROM Sales.SalesOrderDetail sod JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID WHERE YEAR(soh.OrderDate) = 2012 GROUP BY sod.ProductID ORDER BY TotalQuantity DESC;",
+    "explanation_ar": "استخراج أكثر 5 منتجات مبيعاً من حيث كمية الوحدات المطلوبة في سنة 2014."
+  },
+  {
+    "id": "eg_aw_00444",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "أكتر 10 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 10 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 10 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00532",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "احسب عدد طلبات الشراء المتأخرة السنة اللي فاتت",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2012;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في السنة اللي فاتت."
+  },
+  {
+    "id": "eg_aw_00506",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "احسب مجموع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00623",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "مجموع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00543",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "هاتلي أول 5 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 5 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 5 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00283",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "احسب مجموع كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00609",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "التوتال بتاع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00181",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "كم مرة الأوردرات بتاع اتعملت آخر شهر",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 7 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في آخر شهر."
+  },
+  {
+    "id": "eg_aw_00413",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "التوتال بتاع كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00194",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "كم مرة الأوردرات بتاع اتعملت الشهر ده",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 11 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في الشهر ده."
+  },
+  {
+    "id": "eg_aw_01045",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "عدلي العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00199",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "التوتال بتاع مبيعات مندوبين المبيعات بتاع حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00433",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "كل فلوس تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00951",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أكتر 5 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 5 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 5 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00750",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "هاتلي أول 15 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 15 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 15 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00392",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "التوب 10 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 10 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 10 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00665",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "وريني عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00051",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "احسب مجموع مبيعات مندوبين المبيعات بتاع حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00101",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderDetail (SalesOrderID, SalesOrderDetailID, OrderQty, ProductID, UnitPrice)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate)",
+    "input_prompt": "أفضل 3 منتجات مبيعا من حيث الكمية سنة 2013",
+    "output_sql": "SELECT TOP 3 sod.ProductID, SUM(sod.OrderQty) AS TotalQuantity FROM Sales.SalesOrderDetail sod JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID WHERE YEAR(soh.OrderDate) = 2014 GROUP BY sod.ProductID ORDER BY TotalQuantity DESC;",
+    "explanation_ar": "استخراج أكثر 3 منتجات مبيعاً من حيث كمية الوحدات المطلوبة في سنة 2013."
+  },
+  {
+    "id": "eg_aw_00379",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "أفضل 3 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 3 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 3 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00280",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, SafetyStockLevel, ReorderPoint)\nTable: Production.ProductInventory (ProductID, LocationID, Shelf, Bin, Quantity)",
+    "input_prompt": "كام عدد المنتجات المتعلقة بـ مخزونها أقل من الحد الحرج",
+    "output_sql": "SELECT COUNT(p.ProductID) AS LowStockCount FROM Production.Product p JOIN Production.ProductInventory pi ON p.ProductID = pi.ProductID WHERE pi.Quantity < p.SafetyStockLevel;",
+    "explanation_ar": "حساب عدد المنتجات التي هبط رصيدها عن الحد الأدنى للأمان."
+  },
+  {
+    "id": "eg_aw_00452",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "التوب 10 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 10 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 10 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00055",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "وريني عدد الأوردرات الخاصة بـ اتعملت الشهر ده",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 7 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في الشهر ده."
+  },
+  {
+    "id": "eg_aw_00342",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "كل فلوس كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00521",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "أكتر 20 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 20 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 20 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00883",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "وريني عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00813",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Employee (BusinessEntityID, NationalIDNumber, JobTitle, VacationHours, SickLeaveHours)",
+    "input_prompt": "التوب 20 موظفين عندهم رصيد إجازات كبير",
+    "output_sql": "SELECT TOP 20 e.BusinessEntityID, e.JobTitle, e.VacationHours FROM HumanResources.Employee e ORDER BY e.VacationHours DESC;",
+    "explanation_ar": "عرض أعلى 20 موظفين من حيث ساعات الإجازات المتراكمة."
+  },
+  {
+    "id": "eg_aw_00309",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "متوسط أيام تصنيع المنتجات الخاصة بـ خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00435",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "عدلي طلبات الشراء المتأخرة سنة 2013",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في سنة 2013."
+  },
+  {
+    "id": "eg_aw_00884",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كم مرة العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00726",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "وريني عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00173",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "مجموع مبيعات مندوبين المبيعات اللي في حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00243",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "مجموع كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00544",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, Status, OrderDate, ExpectedDate)",
+    "input_prompt": "عدلي طلبات الشراء المتأخرة سنة 2014",
+    "output_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2012;",
+    "explanation_ar": "حساب عدد أوامر الشراء المعلقة أو المتأخرة في سنة 2014."
+  },
+  {
+    "id": "eg_aw_00721",
+    "domain": "HumanResources",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: HumanResources.Department (DepartmentID, Name, GroupName)\nTable: HumanResources.EmployeeDepartmentHistory (BusinessEntityID, DepartmentID, StartDate, EndDate)",
+    "input_prompt": "كام عدد الموظفين في كل إدارة في الشركة",
+    "output_sql": "SELECT d.Name AS DepartmentName, COUNT(edh.BusinessEntityID) AS Headcount FROM HumanResources.Department d JOIN HumanResources.EmployeeDepartmentHistory edh ON d.DepartmentID = edh.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name ORDER BY Headcount DESC;",
+    "explanation_ar": "حساب عدد الموظفين النشطين في كل إدارة وتوزيع القوى العاملة."
+  },
+  {
+    "id": "eg_aw_00928",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "التوب 3 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 3 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 3 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00976",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أفضل 5 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 5 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 5 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00059",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.Customer (CustomerID, PersonID, TerritoryID)\nTable: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue)",
+    "input_prompt": "أكتر 5 زباين دفعوا فلوس آخر سنة",
+    "output_sql": "SELECT TOP 5 c.CustomerID, SUM(soh.TotalDue) AS TotalSpent FROM Sales.Customer c JOIN Sales.SalesOrderHeader soh ON c.CustomerID = soh.CustomerID WHERE YEAR(soh.OrderDate) = 2012 GROUP BY c.CustomerID ORDER BY TotalSpent DESC;",
+    "explanation_ar": "استخراج أعلى 5 عملاء إنفاقاً خلال آخر سنة."
+  },
+  {
+    "id": "eg_aw_00547",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "احسب مجموع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  },
+  {
+    "id": "eg_aw_00384",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.ProductInventory (ProductID, LocationID, Quantity)\nTable: Production.Location (LocationID, Name, CostRate)",
+    "input_prompt": "احسب مجموع كمية المخزون الإجمالية في كل المخازن",
+    "output_sql": "SELECT l.Name AS LocationName, SUM(pi.Quantity) AS TotalInventory FROM Production.ProductInventory pi JOIN Production.Location l ON pi.LocationID = l.LocationID GROUP BY l.Name ORDER BY TotalInventory DESC;",
+    "explanation_ar": "حساب إجمالي كميات المخزون الفيزيائي المتوفرة في مواقع التخزين المختلفة."
+  },
+  {
+    "id": "eg_aw_00944",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Address (AddressID, AddressLine1, City, StateProvinceID, PostalCode)",
+    "input_prompt": "أعلى 3 مدن فيها أكبر عدد من عناوين العملاء",
+    "output_sql": "SELECT TOP 3 a.City, COUNT(a.AddressID) AS ResidentCount FROM Person.Address a GROUP BY a.City ORDER BY ResidentCount DESC;",
+    "explanation_ar": "استخراج أكثر 3 مدن تضم عناوين مسجلة للعملاء والموظفين."
+  },
+  {
+    "id": "eg_aw_00034",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesPerson (BusinessEntityID, TerritoryID, SalesQuota, Bonus, SalesYTD)\nTable: Sales.SalesOrderHeader (SalesOrderID, SalesPersonID, TotalDue)",
+    "input_prompt": "كل فلوس مبيعات مندوبين المبيعات الموجودة في حققوا التارجت",
+    "output_sql": "SELECT sp.BusinessEntityID, SUM(soh.TotalDue) AS TotalSales FROM Sales.SalesPerson sp JOIN Sales.SalesOrderHeader soh ON sp.BusinessEntityID = soh.SalesPersonID WHERE soh.TotalDue >= sp.SalesQuota GROUP BY sp.BusinessEntityID;",
+    "explanation_ar": "حساب إجمالي المبيعات لمندوبي المبيعات الذين تجاوزوا الحصة المستهدفة."
+  },
+  {
+    "id": "eg_aw_00493",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "هاتلي أول 20 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 20 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 20 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00226",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "هاتلي أول 20 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 20 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 20 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00220",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, StandardCost, ListPrice)",
+    "input_prompt": "التوب 3 منتجات تكلفة تصنيعها عالية",
+    "output_sql": "SELECT TOP 3 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+    "explanation_ar": "عرض أعلى 3 منتجات من حيث تكلفة التصنيع المعيارية."
+  },
+  {
+    "id": "eg_aw_00945",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "كام عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00302",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, Name, ProductNumber, SafetyStockLevel, ReorderPoint)\nTable: Production.ProductInventory (ProductID, LocationID, Shelf, Bin, Quantity)",
+    "input_prompt": "احسب عدد المنتجات المتعلقة بـ مخزونها أقل من الحد الحرج",
+    "output_sql": "SELECT COUNT(p.ProductID) AS LowStockCount FROM Production.Product p JOIN Production.ProductInventory pi ON p.ProductID = pi.ProductID WHERE pi.Quantity < p.SafetyStockLevel;",
+    "explanation_ar": "حساب عدد المنتجات التي هبط رصيدها عن الحد الأدنى للأمان."
+  },
+  {
+    "id": "eg_aw_00210",
+    "domain": "Sales",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Sales.SalesOrderHeader (SalesOrderID, OrderDate, CustomerID, TotalDue, Status)",
+    "input_prompt": "احسب عدد الأوردرات الموجودة في اتعملت الشهر ده",
+    "output_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 7 AND YEAR(OrderDate) = 2014;",
+    "explanation_ar": "حساب إجمالي عدد الطلبات المنفذة في الشهر ده."
+  },
+  {
+    "id": "eg_aw_00630",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.Vendor (BusinessEntityID, AccountNumber, Name, CreditRating)\nTable: Purchasing.PurchaseOrderHeader (PurchaseOrderID, VendorID, TotalDue, OrderDate)",
+    "input_prompt": "هاتلي أول 3 موردين بنشتري منهم بضاعة",
+    "output_sql": "SELECT TOP 3 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+    "explanation_ar": "استخراج قائمة أكبر 3 موردين من حيث حجم المشتريات الإجمالية."
+  },
+  {
+    "id": "eg_aw_00337",
+    "domain": "Production",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Production.Product (ProductID, ProductSubcategoryID, DaysToManufacture)\nTable: Production.ProductSubcategory (ProductSubcategoryID, ProductCategoryID, Name)\nTable: Production.ProductCategory (ProductCategoryID, Name)",
+    "input_prompt": "متوسط أيام تصنيع المنتجات بتاع خط الإنتاج",
+    "output_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+    "explanation_ar": "حساب متوسط أيام التصنيع اللازمة للمنتجات بحسب التصنيف الرئيسي."
+  },
+  {
+    "id": "eg_aw_00867",
+    "domain": "Person",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Person.Person (BusinessEntityID, PersonType, FirstName, LastName)\nTable: Person.EmailAddress (BusinessEntityID, EmailAddressID, EmailAddress)\nTable: Person.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID)",
+    "input_prompt": "وريني عدد العملاء اللي مسجلين بإيميل وتليفون",
+    "output_sql": "SELECT COUNT(DISTINCT p.BusinessEntityID) AS VerifiedPersons FROM Person.Person p JOIN Person.EmailAddress ea ON p.BusinessEntityID = ea.BusinessEntityID JOIN Person.PersonPhone pp ON p.BusinessEntityID = pp.BusinessEntityID;",
+    "explanation_ar": "حساب عدد الأفراد المسجل لهم عنوان بريد إلكتروني ورقم هاتف نشط."
+  },
+  {
+    "id": "eg_aw_00570",
+    "domain": "Purchasing",
+    "instruction": "Convert the user question asked in Egyptian Arabic into an accurate Microsoft SQL Server T-SQL query using the provided schema.",
+    "schema_context": "Table: Purchasing.PurchaseOrderHeader (PurchaseOrderID, ShipMethodID, Freight)\nTable: Purchasing.ShipMethod (ShipMethodID, Name, ShipBase, ShipRate)",
+    "input_prompt": "مجموع تكاليف الشحن المدفوعة لموردي البضائع",
+    "output_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+    "explanation_ar": "حساب إجمالي نفقات الشحن والتوصيل المدفوعة لشركات النقل."
+  }
+]

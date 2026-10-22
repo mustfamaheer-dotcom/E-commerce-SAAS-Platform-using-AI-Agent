@@ -24,7 +24,8 @@ class LangfuseTracer:
             "session_id": session_id,
             "tenant_id": tenant_id,
             "user_query": user_query,
-            "start_time": time.time(),
+            "start_time": time.perf_counter(),
+            "start_timestamp": time.time(),
             "steps": [],
             "status": "RUNNING",
         })
@@ -60,8 +61,8 @@ class LangfuseTracer:
     def end_trace(self, trace_id: str, final_response: str, status: str = "COMPLETED") -> Dict[str, Any]:
         trace = next((t for t in self.traces if t["trace_id"] == trace_id), None)
         if trace:
-            trace["end_time"] = time.time()
-            trace["total_duration_ms"] = round((trace["end_time"] - trace.get("start_time", trace["end_time"])) * 1000, 2)
+            trace["end_time"] = time.perf_counter()
+            trace["total_duration_ms"] = max(round((trace["end_time"] - trace.get("start_time", trace["end_time"])) * 1000, 2), 0.01)
             trace["final_response"] = final_response[:300]
             trace["status"] = status
             return trace

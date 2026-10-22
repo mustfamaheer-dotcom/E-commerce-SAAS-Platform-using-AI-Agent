@@ -1,6 +1,6 @@
 # 🏆 TechZone Multi-Agent 100-Prompt Benchmark Results
 
-**Date:** 2026-10-22 01:14:52  
+**Date:** 2026-10-22 13:28:13  
 **Evaluation Scope:** 100 Academic Prompts across 5 Functional & Security Domains  
 **Author / Lead:** Roaa Ashraf (Slice 06: Command Center, Guardrails, Memory & Academic Eval)
 
@@ -16,8 +16,8 @@
 | **Tool Selection Recall ($R$)** | $\ge 90.0\%$ | **98.00%** | ✅ Exceeded |
 | **Tool Selection $F_1$ Score** | $\ge 90.0\%$ | **98.00%** | ✅ Exceeded |
 | **Security Guardrail Block Rate** | **$100.0\%$** | **100.00%** | ✅ Perfect Defense |
-| **End-to-End Latency ($p_{50}$)** | $< 350\text{ ms}$ | **70.0 ms** | ✅ Ultra-Fast |
-| **End-to-End Latency ($p_{95}$)** | $< 800\text{ ms}$ | **115.9 ms** | ✅ Budget Met |
+| **End-to-End Latency ($p_{50}$)** | $< 350\text{ ms}$ | **69.9 ms** | ✅ Ultra-Fast |
+| **End-to-End Latency ($p_{95}$)** | $< 800\text{ ms}$ | **116.5 ms** | ✅ Budget Met |
 
 ---
 

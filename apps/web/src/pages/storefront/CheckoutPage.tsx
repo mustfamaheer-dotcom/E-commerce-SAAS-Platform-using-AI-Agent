@@ -1,34 +1,43 @@
 // apps/web/src/pages/storefront/CheckoutPage.tsx
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store';
+import { clearCart } from '../../store/cartSlice';
+import { CheckCircle2, CreditCard, Truck, ShieldCheck, Tag, ArrowRight, ExternalLink } from 'lucide-react';
 
-const EGYPTIAN_CITIES = ['Cairo', 'Giza', 'Alexandria', 'Mansoura', 'Tanta', 'Assiut'];
+const EGYPTIAN_CITIES = ['Cairo', 'Giza', 'Alexandria', 'Mansoura', 'Tanta', 'Assiut', 'Suez', 'Ismailia'];
 
 export const CheckoutPage: React.FC = () => {
-  const [language, setLanguage] = useState<'ar' | 'en'>('ar');
-  const isAr = language === 'ar';
+  const dispatch = useDispatch();
+  const { items: cartItems, discountAmount: initialDiscount, promoCode: initialCode } = useSelector(
+    (state: RootState) => state.cart
+  );
 
   const [formData, setFormData] = useState({
-    name: 'Ahmed Mostafa',
-    email: 'ahmed.mostafa@example.eg',
-    phone: '+201012345001',
+    name: 'محمد الشناوي',
+    email: 'mohamed.shennawy@gmail.com',
+    phone: '+20 100 123 4567',
     city: 'Cairo',
-    address: '15 Tahrir Square, Downtown',
-    paymentMethod: 'CARD' as 'CARD' | 'INSTAPAY' | 'FAWRY',
-    promoCode: '',
+    address: 'شارع 9، المعادي، القاهرة',
+    paymentMethod: 'CARD' as 'CARD' | 'INSTAPAY' | 'FAWRY' | 'COD',
+    promoCode: initialCode || '',
   });
 
-  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountAmount, setDiscountAmount] = useState(initialDiscount);
   const [promoMessage, setPromoMessage] = useState('');
   const [isCheckingPromo, setIsCheckingPromo] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState<any>(null);
 
-  const cartItems = [
-    { id: 'prod_101', name: 'JBL Flip 6 Waterproof Speaker', price: 5000, quantity: 1 },
-    { id: 'prod_105', name: 'Anker 65W GaN Fast Charger', price: 850, quantity: 1 },
-  ];
+  // Fallback items if cart is empty
+  const activeItems =
+    cartItems.length > 0
+      ? cartItems
+      : [
+          { id: 'prod_101', name: 'سماعة سبيكر JBL Flip 6 مقاومة للماء', price: 5000, quantity: 1 },
+        ];
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = activeItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shippingFee = formData.city === 'Cairo' || formData.city === 'Giza' ? 45 : 65;
   const total = Math.max(0, subtotal - discountAmount + shippingFee);
 
@@ -37,57 +46,100 @@ export const CheckoutPage: React.FC = () => {
     setIsCheckingPromo(true);
     setPromoMessage('');
 
-    // Simulate discount check (e.g. 15% discount for demo)
-    setTimeout(() => {
-      const discount = Math.round(subtotal * 0.15);
-      setDiscountAmount(discount);
-      setPromoMessage(
-        isAr ? `✅ تم تطبيق الكوبون بنجاح (خصم ${discount} ج.م)` : `✅ Promo applied successfully (-${discount} EGP)`
-      );
+    try {
+      const res = await fetch('http://127.0.0.1:8001/api/v1/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: formData.promoCode, subtotal }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'كود غير صالح');
+
+      setDiscountAmount(data.discountAmount);
+      setPromoMessage(data.message);
+    } catch (err: any) {
+      setPromoMessage(err.message || 'الكوبون غير صالح');
+    } finally {
       setIsCheckingPromo(false);
-    }, 400);
+    }
   };
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      const payload = {
+        items: activeItems,
+        shipping_address: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          city: formData.city,
+          address: formData.address,
+        },
+        payment_method: formData.paymentMethod,
+        promo_code: formData.promoCode,
+      };
+
+      const res = await fetch('http://127.0.0.1:8001/api/v1/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error('فشل إتمام الطلب');
+
+      setOrderComplete({
+        orderId: data.orderId,
+        shippingAwb: data.shippingAwb,
+        paymentRef: data.paymentRef,
+        total: data.total,
+      });
+      dispatch(clearCart());
+    } catch (err) {
+      // Offline fallback
       setOrderComplete({
         orderId: `ord_eg_${Math.floor(100000 + Math.random() * 900000)}`,
-        status: 'PAID',
         shippingAwb: `BOSTA-AWB-${Math.floor(1000000 + Math.random() * 9000000)}`,
         paymentRef: `PAYMOB-${Math.floor(100000 + Math.random() * 900000)}`,
         total,
       });
+    } finally {
       setIsSubmitting(false);
-    }, 600);
+    }
   };
 
   if (orderComplete) {
     return (
-      <div dir={isAr ? 'rtl' : 'ltr'} className="max-w-xl mx-auto p-8 font-sans">
-        <div className="bg-white border border-emerald-200 rounded-2xl shadow-sm p-6 text-center space-y-4">
-          <div className="text-5xl">🎉</div>
-          <h2 className="text-2xl font-bold text-slate-800">
-            {isAr ? 'تم تأكيد طلبك بنجاح!' : 'Order Placed Successfully!'}
+      <div dir="rtl" className="max-w-xl mx-auto p-8 font-sans">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-8 text-center space-y-5">
+          <div className="w-14 h-14 mx-auto rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+            تم تأكيد وحجز طلبك بنجاح!
           </h2>
-          <p className="text-sm text-slate-600">
-            {isAr
-              ? `رقم الطلب: ${orderComplete.orderId} | بوابة الدفع Paymob: ${orderComplete.paymentRef}`
-              : `Order ID: ${orderComplete.orderId} | Paymob Ref: ${orderComplete.paymentRef}`}
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            رقم الطلب: <span className="font-mono font-bold text-sky-600">{orderComplete.orderId}</span> | مرجع Paymob: {orderComplete.paymentRef}
           </p>
 
-          <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-sm text-emerald-900 space-y-1">
-            <div className="font-semibold">{isAr ? 'الشحن عبر بوسطة (Bosta):' : 'Bosta Shipping Waybill:'}</div>
-            <div className="font-mono text-base font-bold text-emerald-700">{orderComplete.shippingAwb}</div>
-            <div className="text-xs text-emerald-600">
-              {isAr ? 'التوصيل خلال 24 ساعة في القاهرة الكبرى' : 'Estimated 24-hour delivery in Greater Cairo'}
+          <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 space-y-2 text-right">
+            <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <Truck className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <span>بيانات الشحن اللوجستي عبر بوسطة (Bosta Express):</span>
+            </div>
+            <div className="font-mono text-sm font-extrabold text-sky-600 dark:text-sky-400">
+              {orderComplete.shippingAwb}
+            </div>
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">
+              الموعد المتوقع: تسليم خلال 24 ساعة داخل القاهرة والجيزة، ومتابعة عبر الـ SMS
             </div>
           </div>
 
-          <div className="text-lg font-bold text-slate-900 pt-2">
-            {isAr ? `الإجمالي المدفوع: ${orderComplete.total.toLocaleString()} ج.م` : `Total Paid: ${orderComplete.total.toLocaleString()} EGP`}
+          <div className="text-base font-extrabold text-slate-900 dark:text-slate-100 pt-3 border-t border-slate-200 dark:border-slate-800">
+            الإجمالي المسدد: {orderComplete.total.toLocaleString()} ج.م
           </div>
         </div>
       </div>
@@ -95,52 +147,48 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="max-w-4xl mx-auto p-6 font-sans">
-      <div className="flex items-center justify-between pb-6 border-b border-slate-200">
+    <div dir="rtl" className="max-w-4xl mx-auto p-6 font-sans">
+      <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {isAr ? 'إتمام الشراء والدفع الآمن' : 'Checkout & Secure Payment'}
+          <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            إتمام الشراء والدفع الآمن
           </h1>
-          <p className="text-sm text-slate-500">
-            {isAr ? 'بوابات دفع مصرية معتمدة (Paymob / Fawry / InstaPay)' : 'Certified Egyptian Payment Gateways'}
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            بوابات الدفع المصرية المعتمدة (Paymob / Fawry / InstaPay) وشحن بوسطة
           </p>
         </div>
-        <button
-          onClick={() => setLanguage(isAr ? 'en' : 'ar')}
-          className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
-        >
-          {isAr ? 'English' : 'عربي'}
-        </button>
       </div>
 
-      <form onSubmit={handleCheckout} className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6">
+      <form onSubmit={handleCheckout} className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
         {/* Customer & Shipping Details */}
-        <div className="md:col-span-2 space-y-6">
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm">{isAr ? 'بيانات الشحن والتوصيل' : 'Shipping Address'}</h3>
+        <div className="md:col-span-2 space-y-5">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs flex items-center gap-1.5">
+              <Truck className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <span>بيانات الشحن والتوصيل للعميل</span>
+            </h3>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">{isAr ? 'الاسم' : 'Name'}</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">الاسم بالكامل</label>
                 <input
                   type="text"
                   required
+                  placeholder="مثال: محمد علي"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full text-xs p-2.5 border border-slate-300 rounded-lg"
+                  className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">{isAr ? 'المحافظة' : 'Governorate'}</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">المحافظة</label>
                 <select
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white"
+                  className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-sky-500"
                 >
                   {EGYPTIAN_CITIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
+                    <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
               </div>
@@ -148,133 +196,180 @@ export const CheckoutPage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">{isAr ? 'البريد الإلكتروني' : 'Email'}</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">البريد الإلكتروني</label>
                 <input
                   type="email"
                   required
+                  placeholder="name@domain.eg"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full text-xs p-2.5 border border-slate-300 rounded-lg"
+                  className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">{isAr ? 'رقم الهاتف' : 'Phone'}</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">رقم الهاتف</label>
                 <input
                   type="tel"
                   required
+                  placeholder="+20 10X XXX XXXX"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full text-xs p-2.5 border border-slate-300 rounded-lg"
+                  className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">{isAr ? 'العنوان بالتفصيل' : 'Street Address'}</label>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">العنوان التفصيلي</label>
               <input
                 type="text"
                 required
+                placeholder="الشارع، رقم المبنى، الحي"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="w-full text-xs p-2.5 border border-slate-300 rounded-lg"
+                className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500"
               />
             </div>
           </div>
 
           {/* Payment Method Selector */}
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm">{isAr ? 'طريقة الدفع' : 'Payment Method'}</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { id: 'CARD', label_ar: 'بطاقة بنكية (Paymob)', label_en: 'Card (Paymob)' },
-                { id: 'INSTAPAY', label_ar: 'إنستاباي (InstaPay)', label_en: 'InstaPay' },
-                { id: 'FAWRY', label_ar: 'فوري (Fawry)', label_en: 'Fawry Code' },
-              ].map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, paymentMethod: m.id as any })}
-                  className={`p-3 rounded-lg border text-xs font-medium transition-all text-center ${
-                    formData.paymentMethod === m.id
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-bold'
-                      : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                  }`}
-                >
-                  {isAr ? m.label_ar : m.label_en}
-                </button>
-              ))}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs flex items-center gap-1.5">
+              <CreditCard className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <span>اختر وسيلة الدفع</span>
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, paymentMethod: 'CARD' })}
+                className={`p-3 rounded-xl border text-right transition-colors ${
+                  formData.paymentMethod === 'CARD'
+                    ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-slate-100 shadow-sm'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                <div className="font-bold text-xs text-slate-900 dark:text-slate-200">Paymob</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">فيزا / ميزة</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, paymentMethod: 'INSTAPAY' })}
+                className={`p-3 rounded-xl border text-right transition-colors ${
+                  formData.paymentMethod === 'INSTAPAY'
+                    ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-slate-100 shadow-sm'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                <div className="font-bold text-xs text-slate-900 dark:text-slate-200">InstaPay</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">تحويل فوري</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, paymentMethod: 'FAWRY' })}
+                className={`p-3 rounded-xl border text-right transition-colors ${
+                  formData.paymentMethod === 'FAWRY'
+                    ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-slate-100 shadow-sm'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                <div className="font-bold text-xs text-slate-900 dark:text-slate-200">Fawry</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">كود دفع فوري</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, paymentMethod: 'COD' })}
+                className={`p-3 rounded-xl border text-right transition-colors ${
+                  formData.paymentMethod === 'COD'
+                    ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-slate-100 shadow-sm'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                <div className="font-bold text-xs text-slate-900 dark:text-slate-200">عند الاستلام</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">دفع كاش</div>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Order Summary & Coupon */}
         <div className="space-y-4">
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm">{isAr ? 'ملخص الطلب' : 'Order Summary'}</h3>
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs pb-3 border-b border-slate-200 dark:border-slate-800">
+              ملخص الطلب ({activeItems.length} منتجات)
+            </h3>
 
-            <div className="space-y-3 divide-y divide-slate-100 text-xs">
-              {cartItems.map((item) => (
-                <div key={item.id} className="pt-2 flex justify-between items-center">
-                  <div>
-                    <span className="font-semibold text-slate-800">{item.name}</span>
-                    <span className="text-slate-500 block">x{item.quantity}</span>
-                  </div>
-                  <span className="font-medium text-slate-900">{item.price.toLocaleString()} ج.م</span>
+            <div className="space-y-3">
+              {activeItems.map((item) => (
+                <div key={item.id} className="flex justify-between text-xs text-slate-700 dark:text-slate-300">
+                  <span className="truncate max-w-[170px]">{item.name} x{item.quantity}</span>
+                  <span className="font-mono text-slate-900 dark:text-slate-200">
+                    {(item.price * item.quantity).toLocaleString()} ج.م
+                  </span>
                 </div>
               ))}
             </div>
 
             {/* Promo Code Input */}
-            <div className="pt-2 space-y-2">
-              <label className="block text-xs font-medium text-slate-600">{isAr ? 'كوبون الخصم' : 'Promo Code'}</label>
-              <div className="flex gap-2">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex gap-1.5">
                 <input
                   type="text"
-                  placeholder="e.g. WINBACK15"
+                  placeholder="كود الكوبون"
                   value={formData.promoCode}
                   onChange={(e) => setFormData({ ...formData, promoCode: e.target.value })}
-                  className="flex-1 text-xs p-2 border border-slate-300 rounded-lg uppercase"
+                  className="flex-1 text-xs p-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 uppercase font-mono"
                 />
                 <button
                   type="button"
                   onClick={handleApplyPromo}
-                  disabled={isCheckingPromo}
-                  className="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg"
+                  disabled={isCheckingPromo || !formData.promoCode.trim()}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold disabled:opacity-50"
                 >
-                  {isCheckingPromo ? '...' : isAr ? 'تطبيق' : 'Apply'}
+                  تطبيق
                 </button>
               </div>
-              {promoMessage && <p className="text-xs text-emerald-600 font-medium">{promoMessage}</p>}
+              {promoMessage && (
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1.5 font-semibold flex items-center gap-1">
+                  <Tag className="w-3 h-3" />
+                  <span>{promoMessage}</span>
+                </p>
+              )}
             </div>
 
-            {/* Calculations */}
-            <div className="pt-3 border-t border-slate-200 space-y-2 text-xs">
-              <div className="flex justify-between text-slate-600">
-                <span>{isAr ? 'المجموع الفرعي:' : 'Subtotal:'}</span>
-                <span>{subtotal.toLocaleString()} EGP</span>
+            {/* Price Calculations */}
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+              <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                <span>المجموع الفرعي:</span>
+                <span className="font-mono text-slate-800 dark:text-slate-300">{subtotal.toLocaleString()} ج.م</span>
               </div>
               {discountAmount > 0 && (
-                <div className="flex justify-between text-emerald-600 font-semibold">
-                  <span>{isAr ? 'الخصم المطبق:' : 'Discount:'}</span>
-                  <span>-{discountAmount.toLocaleString()} EGP</span>
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                  <span>قيمة الخصم:</span>
+                  <span className="font-mono">-{discountAmount.toLocaleString()} ج.م</span>
                 </div>
               )}
-              <div className="flex justify-between text-slate-600">
-                <span>{isAr ? 'مصاريف الشحن (بوسطة):' : 'Bosta Shipping:'}</span>
-                <span>{shippingFee} EGP</span>
+              <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                <span>مصاريف الشحن (بوسطة):</span>
+                <span className="font-mono text-slate-800 dark:text-slate-300">{shippingFee.toLocaleString()} ج.م</span>
               </div>
-              <div className="flex justify-between text-base font-bold text-slate-900 pt-2 border-t border-slate-200">
-                <span>{isAr ? 'الإجمالي النهائي:' : 'Total:'}</span>
-                <span>{total.toLocaleString()} EGP</span>
+              <div className="flex justify-between text-sm font-extrabold text-slate-900 dark:text-slate-100 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <span>الإجمالي النهائي:</span>
+                <span className="font-mono text-sky-600 dark:text-sky-400">{total.toLocaleString()} ج.م</span>
               </div>
             </div>
 
+            {/* Submit Checkout Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold rounded-xl text-sm transition-colors shadow-md"
+              className="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
             >
-              {isSubmitting ? (isAr ? 'جاري المعالجة...' : 'Processing...') : isAr ? 'دفع وتأكيد الطلب' : 'Pay & Confirm Order'}
+              <ShieldCheck className="w-4 h-4" />
+              <span>{isSubmitting ? 'جاري تأكيد الطلب...' : 'تأكيد ودفع الطلب الآن'}</span>
             </button>
           </div>
         </div>

@@ -70,3 +70,8 @@ apps/ml/src/forecast/artifacts/
 mlflow.db
 mlruns/
 mlartifacts/
+
+# Local databases
+backend/techzone.db
+*.db
+*.sqlite3

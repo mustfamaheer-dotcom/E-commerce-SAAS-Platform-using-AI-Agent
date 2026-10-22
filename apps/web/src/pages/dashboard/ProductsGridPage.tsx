@@ -1,107 +1,79 @@
 // apps/web/src/pages/dashboard/ProductsGridPage.tsx
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
-  Filter,
   Plus,
-  UploadCloud,
+  Edit2,
+  Trash2,
+  Package,
   CheckSquare,
   Square,
-  AlertTriangle,
-  ArrowUpDown,
-  Tag,
-  Package,
-  Layers,
   Sparkles,
-  Download,
+  ExternalLink,
 } from 'lucide-react';
-
-interface ProductItem {
-  id: string;
-  sku: string;
-  name: string;
-  category: string;
-  price: number;
-  cost: number;
-  stock: number;
-  isActive: boolean;
-  imageUrl?: string;
-}
-
-const INITIAL_PRODUCTS: ProductItem[] = [
-  {
-    id: 'prod_101',
-    sku: 'SPK-JBL-01',
-    name: 'JBL Flip 6 Waterproof Speaker',
-    category: 'Speakers',
-    price: 5000.0,
-    cost: 3800.0,
-    stock: 72,
-    isActive: true,
-  },
-  {
-    id: 'prod_102',
-    sku: 'SPK-ANKER-02',
-    name: 'Anker Soundcore Motion+ Bluetooth Speaker',
-    category: 'Speakers',
-    price: 3200.0,
-    cost: 2100.0,
-    stock: 58,
-    isActive: true,
-  },
-  {
-    id: 'prod_109',
-    sku: 'SPK-MINI-09',
-    name: 'Mini Bluetooth Pocket Speaker',
-    category: 'Speakers',
-    price: 500.0,
-    cost: 450.0,
-    stock: 64,
-    isActive: true,
-  },
-  {
-    id: 'prod_115',
-    sku: 'CHG-65W-GAN',
-    name: '65W GaN Fast Wall Charger',
-    category: 'Chargers',
-    price: 850.0,
-    cost: 400.0,
-    stock: 12,
-    isActive: true,
-  },
-  {
-    id: 'prod_120',
-    sku: 'CAB-USBC-2M',
-    name: 'Braided USB-C to USB-C Cable 2M',
-    category: 'Cables',
-    price: 250.0,
-    cost: 90.0,
-    stock: 4,
-    isActive: true,
-  },
-];
+import { ProductFormModal } from './ProductFormModal';
 
 export const ProductsGridPage: React.FC = () => {
-  const { t, i18n } = useTranslation();
-  const isRtl = i18n.language.startsWith('ar');
-
-  const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [isDropzoneActive, setIsDropzoneActive] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any | null>(null);
 
-  // Filters
-  const categories = ['ALL', 'Speakers', 'Chargers', 'Cables'];
+  const loadData = async () => {
+    try {
+      const [prodRes, catRes] = await Promise.all([
+        fetch('http://127.0.0.1:8001/api/v1/products'),
+        fetch('http://127.0.0.1:8001/api/v1/categories'),
+      ]);
+      if (prodRes.ok) {
+        const prodData = await prodRes.json();
+        setProducts(prodData);
+      }
+      if (catRes.ok) {
+        const catData = await catRes.json();
+        setCategories(catData);
+      }
+    } catch (_) {}
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleSaveProduct = async (formData: any) => {
+    const isEdit = Boolean(editingProduct);
+    const url = isEdit
+      ? `http://127.0.0.1:8001/api/v1/products/${editingProduct.id}`
+      : 'http://127.0.0.1:8001/api/v1/products';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+
+    await loadData();
+  };
+
+  const handleDeleteProduct = async (id: string, name: string) => {
+    if (!window.confirm(`هل أنت متأكد من حذف المنتج "${name}"؟`)) return;
+    await fetch(`http://127.0.0.1:8001/api/v1/products/${id}`, {
+      method: 'DELETE',
+    });
+    await loadData();
+  };
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
       search === '' ||
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === 'ALL' || p.category === selectedCategory;
+      p.name?.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku?.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory =
+      selectedCategory === 'ALL' || p.categoryId === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -115,180 +87,170 @@ export const ProductsGridPage: React.FC = () => {
 
   const toggleSelectOne = (id: string) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDropzoneActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      setUploadStatus(
-        isRtl
-          ? `تم رفع الملف '${file.name}' بنجاح وتوليد رابط S3 آمن.`
-          : `File '${file.name}' uploaded successfully to secure S3 storage.`,
-      );
-      setTimeout(() => setUploadStatus(null), 4000);
-    }
-  };
-
   return (
-    <div
-      dir={isRtl ? 'rtl' : 'ltr'}
-      className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-6 font-sans"
-    >
+    <div dir="rtl" className="space-y-5 font-sans text-slate-800 dark:text-slate-100">
       {/* Top Bar / Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Package className="w-6 h-6 text-indigo-400" />
-            {isRtl ? 'إدارة المنتجات والمخزون' : 'Catalog & Inventory Management'}
+          <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Package className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+            <span>إدارة المنتجات والكتالوج (Products Manager)</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            {isRtl
-              ? 'تحكم متكامل بالمنتجات، التسعير، وتنبيهات نفاد المخزون المدعومة بالذكاء الاصطناعي'
-              : 'Autonomous catalog operations, dynamic pricing, and probabilistic stockout alerts'}
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            إضافة وتعديل وحذف المنتجات، وضبط الأسعار والمخزون والتنبيهات الذكية
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2"
+            onClick={() => {
+              setEditingProduct(null);
+              setIsModalOpen(true);
+            }}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white transition-colors shadow-sm flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
-            {isRtl ? 'إضافة منتج جديد' : 'New Product'}
+            <span>إضافة منتج جديد</span>
           </button>
         </div>
       </div>
 
-      {/* Media Dropzone (S3/Cloudinary Presigned Upload) */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDropzoneActive(true);
-        }}
-        onDragLeave={() => setIsDropzoneActive(false)}
-        onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-2xl p-4 transition-all text-center flex flex-col items-center justify-center gap-2 ${
-          isDropzoneActive
-            ? 'border-indigo-400 bg-indigo-950/20 text-indigo-300'
-            : 'border-slate-800 bg-slate-900/50 text-slate-400 hover:border-slate-700'
-        }`}
-      >
-        <UploadCloud className="w-6 h-6 text-indigo-400" />
-        <div className="text-xs font-medium">
-          {isRtl
-            ? 'اسحب وأفلت صور المنتجات أو ملفات Excel للرفع المباشر عبر S3 Presigned URLs'
-            : 'Drag & drop product images or Excel sheets for direct S3 presigned upload'}
-        </div>
-        {uploadStatus && (
-          <div className="text-xs text-emerald-400 font-medium">{uploadStatus}</div>
-        )}
-      </div>
-
       {/* Controls Strip: Search & Filters */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 absolute top-3 left-3 text-slate-400 pointer-events-none" />
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="relative w-full sm:w-72">
+          <Search className="w-3.5 h-3.5 absolute top-2.5 right-3 text-slate-400 dark:text-slate-500 pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={
-              isRtl ? 'بحث فوري (MeiliSearch)...' : 'Instant search (MeiliSearch)...'
-            }
-            className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+            placeholder="بحث بالاسم أو SKU..."
+            className="w-full pr-8 pl-3 py-1.5 rounded-lg text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
+          <button
+            onClick={() => setSelectedCategory('ALL')}
+            className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+              selectedCategory === 'ALL'
+                ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white shadow-2xs'
+                : 'bg-slate-100 text-slate-600 dark:bg-slate-950 dark:text-slate-400 hover:text-slate-900'
+            }`}
+          >
+            الكل ({products.length})
+          </button>
           {categories.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                selectedCategory === cat
-                  ? 'bg-indigo-600 text-white shadow'
-                  : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                selectedCategory === cat.id
+                  ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white shadow-2xs'
+                  : 'bg-slate-100 text-slate-600 dark:bg-slate-950 dark:text-slate-400 hover:text-slate-900'
               }`}
             >
-              {cat === 'ALL' ? (isRtl ? 'الكل' : 'All') : cat}
+              {cat.name}
             </button>
           ))}
         </div>
       </div>
 
       {/* Products Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-xl">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-800/80 text-slate-300 border-b border-slate-700">
+          <table className="w-full text-right text-xs border-collapse">
+            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px]">
               <tr>
                 <th className="p-3 w-10 text-center">
                   <button onClick={toggleSelectAll} className="focus:outline-none">
-                    {selectedIds.length === filteredProducts.length && filteredProducts.length > 0 ? (
-                      <CheckSquare className="w-4 h-4 text-indigo-400" />
+                    {selectedIds.length === filteredProducts.length &&
+                    filteredProducts.length > 0 ? (
+                      <CheckSquare className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                     ) : (
-                      <Square className="w-4 h-4 text-slate-500" />
+                      <Square className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600" />
                     )}
                   </button>
                 </th>
-                <th className="px-4 py-3 font-semibold">SKU</th>
-                <th className="px-4 py-3 font-semibold">{isRtl ? 'الاسم' : 'Name'}</th>
-                <th className="px-4 py-3 font-semibold">{isRtl ? 'الفئة' : 'Category'}</th>
-                <th className="px-4 py-3 font-semibold">{isRtl ? 'السعر' : 'Price'}</th>
-                <th className="px-4 py-3 font-semibold">{isRtl ? 'التكلفة' : 'Cost'}</th>
-                <th className="px-4 py-3 font-semibold">{isRtl ? 'المخزون' : 'Stock'}</th>
-                <th className="px-4 py-3 font-semibold">{isRtl ? 'الحالة' : 'Status'}</th>
+                <th className="px-4 py-2.5 font-semibold">SKU</th>
+                <th className="px-4 py-2.5 font-semibold">اسم المنتج</th>
+                <th className="px-4 py-2.5 font-semibold">السعر</th>
+                <th className="px-4 py-2.5 font-semibold">المخزون</th>
+                <th className="px-4 py-2.5 font-semibold">الحالة</th>
+                <th className="px-4 py-2.5 font-semibold text-center">إجراءات</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredProducts.map((p) => {
                 const isSelected = selectedIds.includes(p.id);
-                let stockBadge = (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    {isRtl ? 'متوفر' : 'In Stock'}
-                  </span>
-                );
-                if (p.stock <= 5) {
-                  stockBadge = (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">
-                      {isRtl ? 'حرج جداً' : 'Critical Risk'}
-                    </span>
-                  );
-                } else if (p.stock <= 20) {
-                  stockBadge = (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                      {isRtl ? 'منخفض' : 'Low Stock'}
-                    </span>
-                  );
-                }
-
+                const isLow = p.stock <= 5;
                 return (
                   <tr
                     key={p.id}
-                    className={`transition-colors hover:bg-slate-800/40 ${
-                      isSelected ? 'bg-indigo-950/20' : ''
+                    className={`transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40 ${
+                      isSelected ? 'bg-sky-50/70 dark:bg-sky-950/20' : ''
                     }`}
                   >
                     <td className="p-3 text-center">
-                      <button onClick={() => toggleSelectOne(p.id)} className="focus:outline-none">
+                      <button
+                        onClick={() => toggleSelectOne(p.id)}
+                        className="focus:outline-none"
+                      >
                         {isSelected ? (
-                          <CheckSquare className="w-4 h-4 text-indigo-400" />
+                          <CheckSquare className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                         ) : (
-                          <Square className="w-4 h-4 text-slate-600" />
+                          <Square className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600" />
                         )}
                       </button>
                     </td>
-                    <td className="px-4 py-3 font-mono font-medium text-indigo-300">{p.sku}</td>
-                    <td className="px-4 py-3 font-medium text-slate-200">{p.name}</td>
-                    <td className="px-4 py-3 text-slate-400">{p.category}</td>
-                    <td className="px-4 py-3 font-semibold text-white">{p.price.toFixed(2)} EGP</td>
-                    <td className="px-4 py-3 text-slate-400">{p.cost.toFixed(2)} EGP</td>
-                    <td className="px-4 py-3 font-medium text-slate-200">{p.stock}</td>
-                    <td className="px-4 py-3">{stockBadge}</td>
+                    <td className="px-4 py-2.5 font-mono text-sky-600 dark:text-sky-400 font-semibold">
+                      {p.sku}
+                    </td>
+                    <td className="px-4 py-2.5 font-medium text-slate-900 dark:text-slate-200">
+                      {p.name}
+                    </td>
+                    <td className="px-4 py-2.5 font-mono text-slate-900 dark:text-slate-100 font-bold">
+                      {p.price?.toLocaleString()} ج.م
+                    </td>
+                    <td className="px-4 py-2.5 font-mono text-slate-700 dark:text-slate-200">
+                      {p.stock}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border ${
+                          isLow
+                            ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border-rose-200 dark:border-rose-800'
+                            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                        }`}
+                      >
+                        {isLow ? 'مخزون حرج' : 'متوفر'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-center">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            setEditingProduct(p);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-1 rounded text-slate-500 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          title="تعديل"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(p.id, p.name)}
+                          className="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          title="حذف"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -296,6 +258,14 @@ export const ProductsGridPage: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <ProductFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveProduct}
+        initialData={editingProduct}
+        categories={categories}
+      />
     </div>
   );
 };

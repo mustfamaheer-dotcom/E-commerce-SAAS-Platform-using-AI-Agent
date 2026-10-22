@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
+import { Users, Tag } from 'lucide-react';
 
 export interface SegmentInfo {
   segment_name: string;
@@ -42,10 +43,10 @@ export interface CustomerSegmentsCardProps {
 
 const COLOR_MAP: Record<string, string> = {
   emerald: '#10B981',
-  blue: '#3B82F6',
+  blue: '#38BDF8',
   amber: '#F59E0B',
-  rose: '#EF4444',
-  gray: '#6B7280',
+  rose: '#F43F5E',
+  gray: '#64748B',
 };
 
 export const CustomerSegmentsCard: React.FC<CustomerSegmentsCardProps> = ({
@@ -59,40 +60,45 @@ export const CustomerSegmentsCard: React.FC<CustomerSegmentsCardProps> = ({
     name: seg.segment_name,
     customers: seg.customer_count,
     spend: seg.avg_monetary_egp,
-    color: COLOR_MAP[seg.badge_color] || '#4F46E5',
+    color: COLOR_MAP[seg.badge_color] || '#38BDF8',
   }));
 
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
-      className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4 max-w-2xl font-sans"
+      className="bg-slate-900 rounded-lg border border-slate-800 shadow-sm p-4 space-y-3.5 max-w-2xl font-sans text-slate-100"
     >
-      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-        <div>
-          <h3 className="text-lg font-bold text-slate-800">
-            {isAr ? '📊 تحليل شرائح العملاء (Log-RFM)' : '📊 Customer RFM Segments'}
-          </h3>
-          <p className="text-xs text-slate-500">
-            {isAr
-              ? `إجمالي العملاء: ${data.total_customers} | جودة التجميع (Silhouette): ${data.silhouette_score}`
-              : `Total Customers: ${data.total_customers} | Cluster Quality (Silhouette): ${data.silhouette_score}`}
-          </p>
+      <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-sky-950/60 border border-sky-800/80 flex items-center justify-center text-sky-400">
+            <Users className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold text-slate-200">
+              {isAr ? 'تحليل شرائح العملاء (Log-RFM)' : 'Customer RFM Segmentation'}
+            </h3>
+            <p className="text-[11px] text-slate-400">
+              {isAr
+                ? `إجمالي العملاء: ${data.total_customers} | جودة التجميع (Silhouette): ${data.silhouette_score}`
+                : `Total: ${data.total_customers} | Silhouette Score: ${data.silhouette_score}`}
+            </p>
+          </div>
         </div>
-        <span className="px-2.5 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">
+        <span className="px-2 py-0.5 text-[10px] font-mono font-medium bg-slate-950 text-slate-300 rounded-md border border-slate-800">
           K-Means (K=5)
         </span>
       </div>
 
       {/* Recharts Bar Chart */}
-      <div className="h-52 w-full pt-2">
+      <div className="h-44 w-full pt-1">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-            <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748B' }} interval={0} angle={-12} textAnchor="end" />
-            <YAxis tick={{ fontSize: 10, fill: '#64748B' }} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1E293B" />
+            <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#94A3B8' }} interval={0} angle={-12} textAnchor="end" />
+            <YAxis tick={{ fontSize: 10, fill: '#94A3B8' }} />
             <Tooltip
               formatter={(val: number) => [`${val} ${isAr ? 'عميل' : 'customers'}`, isAr ? 'العدد' : 'Count']}
-              contentStyle={{ borderRadius: 8, fontSize: 12, border: '1px solid #CBD5E1' }}
+              contentStyle={{ backgroundColor: '#0F172A', borderRadius: 6, fontSize: 11, border: '1px solid #334155', color: '#F1F5F9' }}
             />
             <Bar dataKey="customers" radius={[4, 4, 0, 0]}>
               {chartData.map((entry, index) => (
@@ -104,38 +110,39 @@ export const CustomerSegmentsCard: React.FC<CustomerSegmentsCardProps> = ({
       </div>
 
       {/* Segment Details & Action Recommendations */}
-      <div className="grid grid-cols-1 gap-2.5 pt-2">
+      <div className="grid grid-cols-1 gap-2 pt-1">
         {(data.segments || []).map((seg) => (
           <div
             key={seg.segment_name}
-            className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-150 hover:bg-slate-100 transition-colors"
+            className="flex items-center justify-between p-2.5 rounded-md bg-slate-950 border border-slate-800/80 hover:border-slate-700 transition-colors"
           >
             <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <span
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ backgroundColor: COLOR_MAP[seg.badge_color] || '#6B7280' }}
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: COLOR_MAP[seg.badge_color] || '#64748B' }}
                 />
-                <span className="font-semibold text-sm text-slate-800">{seg.segment_name}</span>
-                <span className="text-xs text-slate-500">
+                <span className="font-medium text-xs text-slate-200">{seg.segment_name}</span>
+                <span className="text-[11px] text-slate-400 font-mono">
                   ({seg.customer_count} {isAr ? 'عميل' : 'cust'})
                 </span>
               </div>
-              <p className="text-xs text-slate-600">
+              <p className="text-[11px] text-slate-400">
                 {isAr ? seg.recommended_action_ar : seg.recommended_action_en}
               </p>
             </div>
 
-            <div className="text-right flex items-center gap-3">
-              <div className="text-xs text-slate-700">
-                <span className="font-bold text-slate-900">{seg.avg_monetary_egp.toLocaleString()}</span> ج.م
+            <div className="text-right flex items-center gap-2.5 shrink-0">
+              <div className="text-xs text-slate-300 font-mono">
+                {seg.avg_monetary_egp.toLocaleString()} ج.م
               </div>
               <button
                 type="button"
                 onClick={() => onCreatePromo?.(seg.segment_name)}
-                className="px-2.5 py-1 text-xs font-medium text-indigo-600 bg-white border border-indigo-200 rounded hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                className="px-2 py-1 text-[11px] font-medium text-sky-400 bg-slate-900 border border-sky-800/60 rounded hover:bg-slate-800 transition-colors whitespace-nowrap flex items-center gap-1"
               >
-                {isAr ? 'إنشاء خصم' : 'Create Promo'}
+                <Tag className="w-3 h-3" />
+                <span>{isAr ? 'إنشاء خصم' : 'Promo'}</span>
               </button>
             </div>
           </div>

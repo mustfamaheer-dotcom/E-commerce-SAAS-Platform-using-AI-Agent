@@ -311,9 +311,9 @@ export class ProductsService {
       const audit = await tx.agentAction.create({
         data: {
           tenantId,
-          action: 'bulk_update_prices',
-          status: 'executed',
-          payload: {
+          toolName: 'bulk_update_prices',
+          status: 'EXECUTED',
+          params: {
             actionId: dto.actionId,
             discountPct: discount,
             category: dto.category,

@@ -1,5 +1,6 @@
 // apps/web/src/pages/dashboard/AuditLogPage.tsx
 import React, { useState } from 'react';
+import { ShieldCheck, Filter, X, Code2 } from 'lucide-react';
 
 export interface AuditActionItem {
   id: string;
@@ -69,35 +70,39 @@ export const AuditLogPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'EXECUTED':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/80';
       case 'PENDING_CONFIRMATION':
-        return 'bg-amber-50 text-amber-800 border-amber-200';
+        return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800/80';
       case 'REJECTED':
-        return 'bg-rose-50 text-rose-700 border-rose-200';
+        return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/60 dark:text-red-400 dark:border-red-800/80';
       default:
-        return 'bg-slate-50 text-slate-700 border-slate-200';
+        return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 font-sans space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+    <div className="space-y-5 font-sans">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">سجل عمليات الوكيل الذكي (Audit Log)</h1>
-          <p className="text-sm text-slate-500">
-            سجل غير قابل للتعديل (Immutable) لجميع استدعاءات الأدوات والعمليات الحساسة
+          <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+            <span>سجل عمليات وتدقيق الوكيل الذكي (Audit Log)</span>
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            سجل غير قابل للتعديل (Immutable) لجميع استدعاءات الأدوات وعمليات التحليل وتعديل الأسعار
           </p>
         </div>
       </div>
 
       {/* Filter Controls */}
-      <div className="flex gap-4 bg-white p-4 rounded-xl border border-slate-200 text-xs shadow-sm">
-        <div className="space-y-1">
-          <label className="font-semibold text-slate-700">تصفية حسب الحالة:</label>
+      <div className="flex flex-wrap items-center gap-4 bg-white dark:bg-slate-900 p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs shadow-xs">
+        <div className="flex items-center gap-2">
+          <Filter className="w-3.5 h-3.5 text-slate-400" />
+          <span className="font-medium text-slate-700 dark:text-slate-300">تصفية حسب الحالة:</span>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="p-2 border border-slate-300 rounded-lg bg-white block text-xs"
+            className="p-1.5 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 text-xs focus:outline-none focus:border-sky-500"
           >
             <option value="ALL">جميع الحالات</option>
             <option value="EXECUTED">EXECUTED</option>
@@ -106,12 +111,12 @@ export const AuditLogPage: React.FC = () => {
           </select>
         </div>
 
-        <div className="space-y-1">
-          <label className="font-semibold text-slate-700">تصفية حسب الأداة:</label>
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-slate-700 dark:text-slate-300">تصفية حسب الأداة:</span>
           <select
             value={filterTool}
             onChange={(e) => setFilterTool(e.target.value)}
-            className="p-2 border border-slate-300 rounded-lg bg-white block text-xs"
+            className="p-1.5 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 text-xs focus:outline-none focus:border-sky-500"
           >
             <option value="ALL">جميع الأدوات</option>
             <option value="create_promotion_for_segment">create_promotion_for_segment</option>
@@ -123,38 +128,39 @@ export const AuditLogPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden text-xs">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden text-xs">
         <table className="w-full text-right">
-          <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+          <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px]">
             <tr>
-              <th className="p-3">معرّف العملية</th>
-              <th className="p-3">اسم الأداة (Tool)</th>
-              <th className="p-3">الحالة</th>
-              <th className="p-3">الوقت والتاريخ</th>
-              <th className="p-3">التفاصيل</th>
+              <th className="p-3 font-medium">معرّف العملية</th>
+              <th className="p-3 font-medium">اسم الأداة (Tool)</th>
+              <th className="p-3 font-medium">الحالة</th>
+              <th className="p-3 font-medium">الوقت والتاريخ</th>
+              <th className="p-3 font-medium">المعاملات</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {filtered.map((item) => (
-              <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                <td className="p-3 font-mono font-semibold text-slate-800">{item.id}</td>
-                <td className="p-3 font-mono text-indigo-700">{item.toolName}</td>
+              <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                <td className="p-3 font-mono font-medium text-slate-700 dark:text-slate-300">{item.id}</td>
+                <td className="p-3 font-mono text-sky-600 dark:text-sky-400">{item.toolName}</td>
                 <td className="p-3">
                   <span
-                    className={`px-2 py-0.5 rounded-full font-semibold border text-[11px] ${getStatusBadge(
+                    className={`inline-block px-2 py-0.5 rounded-md font-medium border text-[11px] ${getStatusBadge(
                       item.status
                     )}`}
                   >
                     {item.status}
                   </span>
                 </td>
-                <td className="p-3 text-slate-500">{item.createdAt}</td>
+                <td className="p-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">{item.createdAt}</td>
                 <td className="p-3">
                   <button
                     onClick={() => setSelectedAction(item)}
-                    className="text-indigo-600 hover:text-indigo-800 font-semibold underline"
+                    className="text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 font-medium inline-flex items-center gap-1 hover:underline"
                   >
-                    عرض المعاملات (JSON)
+                    <Code2 className="w-3.5 h-3.5" />
+                    <span>عرض التفاصيل</span>
                   </button>
                 </td>
               </tr>
@@ -165,35 +171,38 @@ export const AuditLogPage: React.FC = () => {
 
       {/* JSON Drawer Modal */}
       {selectedAction && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-xl">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h3 className="font-bold text-sm text-slate-900">تفاصيل العملية {selectedAction.id}</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg max-w-lg w-full p-5 space-y-4 shadow-xl text-slate-900 dark:text-slate-100">
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="font-semibold text-xs flex items-center gap-1.5">
+                <Code2 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <span>تفاصيل العملية {selectedAction.id}</span>
+              </h3>
               <button
                 onClick={() => setSelectedAction(null)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="text-xs space-y-2">
-              <div>
-                <span className="text-slate-500">الأداة: </span>
-                <span className="font-mono font-bold text-slate-800">{selectedAction.toolName}</span>
+              <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">الأداة: </span>
+                <span className="font-mono text-sky-600 dark:text-sky-400 font-medium">{selectedAction.toolName}</span>
               </div>
-              <div>
-                <span className="text-slate-500">الحالة: </span>
-                <span className="font-bold text-slate-800">{selectedAction.status}</span>
+              <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">الحالة: </span>
+                <span className="font-medium text-slate-800 dark:text-slate-200">{selectedAction.status}</span>
               </div>
               {selectedAction.errorMessage && (
-                <div className="p-2 bg-rose-50 text-rose-700 rounded border border-rose-200">
+                <div className="p-2.5 bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 rounded-md border border-red-200 dark:border-red-800/80 text-[11px]">
                   {selectedAction.errorMessage}
                 </div>
               )}
               <div className="pt-2">
-                <span className="text-slate-500 block mb-1">المعاملات (Payload):</span>
-                <pre className="p-3 bg-slate-900 text-slate-100 rounded-lg text-[11px] overflow-x-auto font-mono">
+                <span className="text-slate-500 dark:text-slate-400 block mb-1 text-[11px]">المعاملات (Payload):</span>
+                <pre className="p-3 bg-slate-900 text-slate-100 rounded-md border border-slate-800 text-[11px] overflow-x-auto font-mono">
                   {JSON.stringify(selectedAction.params, null, 2)}
                 </pre>
               </div>
@@ -202,7 +211,7 @@ export const AuditLogPage: React.FC = () => {
             <div className="text-left pt-2">
               <button
                 onClick={() => setSelectedAction(null)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold"
+                className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-md text-xs font-medium transition-colors"
               >
                 إغلاق
               </button>

@@ -24,7 +24,7 @@ export class ReadonlyPoolProvider {
 
     // 3. Execute in an isolated transaction with statement_timeout = 3000ms
     try {
-      const rows: any[] = await this.prisma.$queryRawUnsafe(
+      const rows: any = await this.prisma.$queryRawUnsafe(
         `
         BEGIN;
         SET LOCAL statement_timeout = '3000ms';

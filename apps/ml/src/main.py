@@ -10,6 +10,18 @@ from apps.ml.src.routers.anomaly_detection import router as anomaly_router
 from apps.ml.src.routers.forecast import router as forecast_router
 from apps.ml.src.routers.rfm_segmentation import router as rfm_router
 from apps.ml.src.routers.agent_chat import router as agent_chat_router
+from backend.api.routes.stores import router as stores_router
+from backend.api.routes.products import router as products_router
+from backend.api.routes.categories import router as categories_router
+from backend.api.routes.orders import router as orders_router
+from backend.api.routes.coupons import router as coupons_router
+from backend.api.routes.customers import router as customers_router
+from backend.api.routes.inventory import router as inventory_router
+from backend.api.routes.analytics import router as analytics_router
+from backend.api.routes.agent import router as agent_router
+from backend.db.database import init_db
+
+init_db()
 
 
 @asynccontextmanager
@@ -45,9 +57,25 @@ app.add_middleware(
 app.include_router(catalog_router)
 app.include_router(inventory_risk_router)
 app.include_router(anomaly_router)
+import os
+from fastapi.staticfiles import StaticFiles
+
+uploads_dir = os.path.join(os.getcwd(), "backend", "static", "uploads")
+os.makedirs(uploads_dir, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
 app.include_router(forecast_router)
 app.include_router(rfm_router)
 app.include_router(agent_chat_router)
+app.include_router(stores_router, prefix="/api/v1")
+app.include_router(products_router, prefix="/api/v1")
+app.include_router(categories_router, prefix="/api/v1")
+app.include_router(orders_router, prefix="/api/v1")
+app.include_router(coupons_router, prefix="/api/v1")
+app.include_router(customers_router, prefix="/api/v1")
+app.include_router(inventory_router, prefix="/api/v1")
+app.include_router(analytics_router, prefix="/api/v1")
+app.include_router(agent_router, prefix="/api/v1")
 
 
 @app.get("/", include_in_schema=False)
