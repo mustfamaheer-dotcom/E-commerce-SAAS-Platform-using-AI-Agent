@@ -5,6 +5,8 @@ export interface UserAccount {
   email: string;
   phone: string;
   businessType: string;
+  storeName?: string;
+  tenantId?: string;
   createdAt: string;
 }
 
@@ -22,14 +24,8 @@ const INITIAL_ACCOUNTS: StoredAccount[] = [
     email: 'owner@moustafatech.eg',
     phone: '+20 100 123 4567',
     businessType: 'electronics',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'user_techzone',
-    name: 'تاجر تيك زون',
-    email: 'merchant@techzone.eg',
-    phone: '+20 102 987 6543',
-    businessType: 'electronics',
+    storeName: 'Moustafa Tech',
+    tenantId: 'tenant-moustafa-tech',
     createdAt: new Date().toISOString(),
   },
 ];
@@ -67,24 +63,53 @@ export const setCurrentUser = (user: UserAccount | null) => {
   } catch (_) {}
 };
 
-export const registerUser = (data: {
+export const registerUser = async (data: {
   name: string;
   email: string;
   phone: string;
   password?: string;
   businessType: string;
-}): UserAccount => {
+  storeName?: string;
+}): Promise<UserAccount> => {
   const users = getRegisteredUsers();
   const cleanEmail = data.email.trim().toLowerCase();
   const cleanName = data.name.trim();
+  const cleanStoreName = (data.storeName || `متجر ${cleanName}`).trim();
 
-  // Check if existing
+  // 1. Create dedicated isolated store in PostgreSQL database
+  let tenantId = `tenant_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '')}_${Date.now()}`;
+  try {
+    const res = await fetch('http://127.0.0.1:8001/api/v1/stores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: cleanStoreName,
+        category: data.businessType || 'تجارة عامة وإلكترونيات',
+        currency: 'EGP',
+        owner_name: cleanName,
+        owner_email: cleanEmail,
+        phone: data.phone.trim(),
+        theme_mode: 'dark',
+      }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json.store?.id) {
+        tenantId = json.store.id;
+      }
+    }
+  } catch (err) {
+    console.warn('Backend store registration fallback:', err);
+  }
+
+  // 2. Check if existing user account in localStorage
   const existing = users.find((u) => u.email.toLowerCase() === cleanEmail);
   if (existing) {
-    // Update name and info
     existing.name = cleanName || existing.name;
     existing.phone = data.phone.trim() || existing.phone;
     existing.businessType = data.businessType || existing.businessType;
+    existing.storeName = cleanStoreName || existing.storeName;
+    existing.tenantId = tenantId || existing.tenantId;
     try {
       localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
     } catch (_) {}
@@ -94,10 +119,12 @@ export const registerUser = (data: {
 
   const newUser: StoredAccount = {
     id: `user_${Date.now()}`,
-    name: cleanName || 'تاجر تيك زون',
+    name: cleanName || 'التاجر الجديد',
     email: cleanEmail,
     phone: data.phone.trim() || '+20 100 000 0000',
     businessType: data.businessType || 'electronics',
+    storeName: cleanStoreName,
+    tenantId,
     createdAt: new Date().toISOString(),
   };
 
@@ -110,12 +137,41 @@ export const registerUser = (data: {
   return newUser;
 };
 
-export const loginUser = (email: string, password?: string): UserAccount => {
+export const loginUser = async (email: string, password?: string): Promise<UserAccount> => {
   const users = getRegisteredUsers();
   const cleanEmail = email.trim().toLowerCase();
 
+  // If Moustafa Maher demo account
+  if (cleanEmail === 'owner@moustafatech.eg' || cleanEmail.includes('moustafa')) {
+    const moustafaUser: StoredAccount = {
+      id: 'user_moustafa',
+      name: 'مصطفى ماهر',
+      email: 'owner@moustafatech.eg',
+      phone: '+20 100 123 4567',
+      businessType: 'electronics',
+      storeName: 'Moustafa Tech',
+      tenantId: 'tenant-moustafa-tech',
+      createdAt: new Date().toISOString(),
+    };
+    setCurrentUser(moustafaUser);
+    return moustafaUser;
+  }
+
   const match = users.find((u) => u.email.toLowerCase() === cleanEmail);
   if (match) {
+    // If missing tenantId, fetch from backend
+    if (!match.tenantId) {
+      try {
+        const res = await fetch(`http://127.0.0.1:8001/api/v1/stores?owner_email=${cleanEmail}`);
+        if (res.ok) {
+          const stores = await res.json();
+          if (Array.isArray(stores) && stores.length > 0) {
+            match.tenantId = stores[0].id;
+            match.storeName = stores[0].name;
+          }
+        }
+      } catch (_) {}
+    }
     setCurrentUser(match);
     return match;
   }
@@ -125,12 +181,48 @@ export const loginUser = (email: string, password?: string): UserAccount => {
   const prettyName =
     prefix.charAt(0).toUpperCase() + prefix.slice(1).replace(/[._-]/g, ' ');
 
+  // Fetch or create store for this email
+  let tenantId = `tenant_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '')}_${Date.now()}`;
+  let storeName = `متجر ${prettyName}`;
+  try {
+    const res = await fetch(`http://127.0.0.1:8001/api/v1/stores?owner_email=${cleanEmail}`);
+    if (res.ok) {
+      const stores = await res.json();
+      if (Array.isArray(stores) && stores.length > 0) {
+        tenantId = stores[0].id;
+        storeName = stores[0].name;
+      } else {
+        // Auto-provision store for newly logged in merchant
+        const createRes = await fetch('http://127.0.0.1:8001/api/v1/stores', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: storeName,
+            category: 'تجارة عامة',
+            currency: 'EGP',
+            owner_name: prettyName,
+            owner_email: cleanEmail,
+          }),
+        });
+        if (createRes.ok) {
+          const json = await createRes.json();
+          if (json.store?.id) {
+            tenantId = json.store.id;
+            storeName = json.store.name;
+          }
+        }
+      }
+    }
+  } catch (_) {}
+
   const fallbackUser: StoredAccount = {
     id: `user_${Date.now()}`,
     name: prettyName,
     email: cleanEmail,
     phone: '+20 100 123 4567',
     businessType: 'electronics',
+    storeName,
+    tenantId,
     createdAt: new Date().toISOString(),
   };
 

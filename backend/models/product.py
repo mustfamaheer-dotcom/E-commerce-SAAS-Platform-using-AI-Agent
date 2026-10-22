@@ -1,6 +1,6 @@
 # backend/models/product.py
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, Float, Boolean, Text, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, String, Integer, Float, Boolean, Text, DateTime, ForeignKey, JSON, Index
 from backend.db.database import Base
 
 class Product(Base):
@@ -26,6 +26,11 @@ class Product(Base):
     featured = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        Index("idx_products_tenant_active", "tenant_id", "is_active"),
+        Index("idx_products_tenant_cat", "tenant_id", "category_id"),
+    )
 
 
 class ProductVariant(Base):

@@ -16,25 +16,27 @@ interface CartState {
   promoCode: string | null;
 }
 
+const CART_STORAGE_KEY = 'techzone_cart_items';
+
+const loadSavedCart = (): CartItem[] => {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return [];
+};
+
+const saveCart = (items: CartItem[]) => {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+};
+
 const initialState: CartState = {
-  items: [
-    {
-      id: 'prod_101',
-      name: 'سماعة سبيكر JBL Flip 6 مقاومة للماء',
-      price: 5000,
-      quantity: 1,
-      image: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=300&auto=format&fit=crop&q=80',
-      sku: 'SPK-JBL-01',
-    },
-    {
-      id: 'prod_104',
-      name: 'شاحن أنكر 65 واط GaN سريع 3 منافذ',
-      price: 1450,
-      quantity: 1,
-      image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=300&auto=format&fit=crop&q=80',
-      sku: 'CHG-ANK-65W',
-    },
-  ],
+  items: loadSavedCart(),
   discountAmount: 0,
   promoCode: null,
 };
@@ -50,15 +52,18 @@ export const cartSlice = createSlice({
       } else {
         state.items.push({ ...action.payload, quantity: action.payload.quantity || 1 });
       }
+      saveCart(state.items);
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
+      saveCart(state.items);
     },
     updateQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
       const existing = state.items.find((item) => item.id === action.payload.id);
       if (existing) {
         existing.quantity = Math.max(1, action.payload.quantity);
       }
+      saveCart(state.items);
     },
     applyDiscount: (state, action: PayloadAction<{ code: string; amount: number }>) => {
       state.promoCode = action.payload.code;
@@ -68,6 +73,7 @@ export const cartSlice = createSlice({
       state.items = [];
       state.discountAmount = 0;
       state.promoCode = null;
+      saveCart([]);
     },
   },
 });

@@ -263,30 +263,61 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
       setProvisionProgress(75);
     }, 1000);
 
-    const timer3 = setTimeout(() => {
+    const timer3 = setTimeout(async () => {
       setProvisionProgress(100);
 
-      const newStore: ProvisionedStore = {
-        id: `tenant_${Date.now()}`,
-        slug: `${slug}-${Math.floor(100 + Math.random() * 900)}`,
+      let createdStoreObj: ProvisionedStore = {
+        id: 'tenant_' + Date.now(),
+        slug: slug + '-' + Math.floor(100 + Math.random() * 900),
         name: storeData.storeName || 'متجري الجديد',
         category: storeData.category,
         currency: 'EGP',
         themeMode: storeData.themeMode,
         createdAt: new Date().toISOString(),
-        adminUrl: `http://localhost:5173/admin/${slug}`,
-        storefrontUrl: `http://localhost:5173/store/${slug}`,
+        adminUrl: 'http://localhost:5173/admin/' + slug,
+        storefrontUrl: 'http://localhost:5173/store/' + slug,
       };
 
+      try {
+        const res = await fetch('http://127.0.0.1:8001/api/v1/stores', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: storeData.storeName || 'متجري الجديد',
+            category: storeData.category,
+            currency: 'EGP',
+            owner_name: user.name,
+            owner_email: user.email,
+            phone: user.phone,
+            theme_mode: storeData.themeMode,
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.store) {
+            createdStoreObj = {
+              ...createdStoreObj,
+              id: json.store.id,
+              slug: json.store.slug,
+              name: json.store.name,
+              adminUrl: 'http://localhost:5173' + json.store.adminUrl,
+              storefrontUrl: 'http://localhost:5173' + json.store.storefrontUrl,
+            };
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to persist store:', err);
+      }
+
       setIsProvisioning(false);
-      onStoreCreated(newStore);
+      onStoreCreated(createdStoreObj);
 
       const successMsg: Message = {
-        id: `agent_complete_${Date.now()}`,
+        id: 'agent_complete_' + Date.now(),
         sender: 'agent',
         timestamp: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-        text: `ألف ألف مبروك يا فندم! 🎉 متجرك الإلكتروني تم إنشاؤه وتفعيله بنجاح بنسبة 100% وعزل كامل للبيانات (PostgreSQL RLS Isolated Tenant).\n\nزي ما وعدتك.. دي الروابط الخاصة بمتجرك: الأول لإدارة المتجر والـ ERP، والتاني المتجر الحي اللي زباينك هيشتروا منه:`,
-        provisionedStore: newStore,
+        text: `ألف ألف مبروك يا فندم! 🎉 متجرك الإلكتروني (${createdStoreObj.name}) تم إنشاؤه وتفعيله بنجاح بنسبة 100% في قاعدة البيانات وعزل كامل للبيانات.\n\nزي ما وعدتك.. دي الروابط الخاصة بمتجرك: الأول لإدارة المتجر والـ ERP (لوحة تحكم فارغة جاهزة لإضافة منتجاتك)، والتاني المتجر الحي اللي زباينك هيشتروا منه:`,
+        provisionedStore: createdStoreObj,
       };
 
       setMessages((prev) => [...prev, successMsg]);

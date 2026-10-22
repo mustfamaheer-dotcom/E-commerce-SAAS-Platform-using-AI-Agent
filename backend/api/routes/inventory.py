@@ -14,9 +14,21 @@ class StockAdjustPayload(BaseModel):
     low_stock_threshold: int = 5
 
 
+from typing import Optional
+
 @router.get("")
-def get_inventory(tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    products = db.query(Product).filter_by(tenant_id=tenant_id).order_by(Product.stock_qty.asc()).all()
+def get_inventory(
+    tenant_id: Optional[str] = "tenant-moustafa-tech",
+    limit: Optional[int] = 300,
+    db: Session = Depends(get_db),
+):
+    query = db.query(Product)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    query = query.order_by(Product.stock_qty.asc())
+    if limit:
+        query = query.limit(limit)
+    products = query.all()
     return [
         {
             "id": p.id,
@@ -36,10 +48,13 @@ def get_inventory(tenant_id: str = "tenant-moustafa-tech", db: Session = Depends
 def update_stock(
     product_id: str,
     payload: StockAdjustPayload,
-    tenant_id: str = "tenant-moustafa-tech",
+    tenant_id: Optional[str] = "tenant-moustafa-tech",
     db: Session = Depends(get_db),
 ):
-    prod = db.query(Product).filter_by(tenant_id=tenant_id, id=product_id).first()
+    query = db.query(Product).filter_by(id=product_id)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    prod = query.first()
     if not prod:
         raise HTTPException(status_code=404, detail="Product not found")
 

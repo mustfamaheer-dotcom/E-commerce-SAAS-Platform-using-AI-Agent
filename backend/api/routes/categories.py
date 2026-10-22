@@ -19,8 +19,11 @@ class CategoryCreatePayload(BaseModel):
 
 
 @router.get("")
-def list_categories(tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    categories = db.query(Category).filter_by(tenant_id=tenant_id, is_active=True).all()
+def list_categories(tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    query = db.query(Category).filter_by(is_active=True)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    categories = query.order_by(Category.name_ar.asc()).all()
     return [
         {
             "id": c.id,
@@ -52,8 +55,11 @@ def create_category(payload: CategoryCreatePayload, tenant_id: str = "tenant-mou
 
 
 @router.delete("/{category_id}")
-def delete_category(category_id: str, tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    cat = db.query(Category).filter_by(tenant_id=tenant_id, id=category_id).first()
+def delete_category(category_id: str, tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    query = db.query(Category).filter_by(id=category_id)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    cat = query.first()
     if not cat:
         raise HTTPException(status_code=404, detail="Category not found")
     db.delete(cat)

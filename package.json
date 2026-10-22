@@ -4,6 +4,9 @@
   "private": true,
   "description": "TechZone Agentic Multi-Tenant E-Commerce Platform",
   "scripts": {
+    "dev": "node scripts/dev.js",
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:backend": "node scripts/run-backend.js",
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint"

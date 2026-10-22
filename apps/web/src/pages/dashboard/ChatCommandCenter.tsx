@@ -27,9 +27,23 @@ export interface ChatMessage {
   timestamp: string;
 }
 
-export const ChatCommandCenter: React.FC = () => {
+interface ChatCommandCenterProps {
+  tenantId?: string;
+  merchantName?: string;
+  storeName?: string;
+}
+
+export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
+  tenantId,
+  merchantName,
+  storeName,
+}) => {
+  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const displayName = merchantName || 'يا فندم';
+  const displayStore = storeName ? `متجر "${storeName}"` : 'متجرك الخاص';
+
   const [sessions, setSessions] = useState<any[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string>('sess_default');
+  const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isThinking, setIsThinking] = useState(false);
@@ -37,12 +51,15 @@ export const ChatCommandCenter: React.FC = () => {
 
   const loadSessions = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8001/api/v1/agent/sessions');
+      const res = await fetch(`http://127.0.0.1:8001/api/v1/agent/sessions?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
         setSessions(data);
-        if (data.length > 0 && currentSessionId === 'sess_default') {
+        if (data.length > 0) {
           setCurrentSessionId(data[0].id);
+        } else {
+          const freshId = `sess_${activeTid.replace(/[^a-zA-Z0-9]/g, '')}_main`;
+          setCurrentSessionId(freshId);
         }
       }
     } catch (_) {}
@@ -50,7 +67,7 @@ export const ChatCommandCenter: React.FC = () => {
 
   const loadSessionMessages = async (sessId: string) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8001/api/v1/agent/sessions/${sessId}`);
+      const res = await fetch(`http://127.0.0.1:8001/api/v1/agent/sessions/${sessId}?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
         if (data.messages && data.messages.length > 0) {
@@ -71,21 +88,23 @@ export const ChatCommandCenter: React.FC = () => {
       }
     } catch (_) {}
 
-    // Initial greeting if session has no messages
+    // Initial greeting personalized strictly to this merchant and store
     setMessages([
       {
-        id: 'msg_init',
+        id: `msg_init_${activeTid}`,
         role: 'assistant',
-        content:
-          'أهلاً بك يا مصطفى في مركز قيادة تيك زون (TechZone Real AI Agent)! 🇪🇬\n\nأنا وكيلك الذكي لإدارة متجرك والـ ERP بالكامل بالمحادثة الحقيقية.\nتقدر تطلب مني دلوقتي:\n• "أضف منتج ماوس لاسلكي بسعر 450 جنيه"\n• "ايه هي الطلبات الجديدة؟"\n• "افحص نواقص المخزون"\n• "انشئ كوبون خصم SALE20 بنسبة 20%"\n• "اعرض لي ملخص الإيرادات والأرباح"',
+        content: `أهلاً بك يا ${displayName} في مركز قيادة ${displayStore}! 🇪🇬\n\nأنا وكيلك الذكي لإدارة متجرك والـ ERP بالكامل بالمحادثة الحقيقية.\nتقدر تطلب مني دلوقتي:\n• "أضف منتج ماوس لاسلكي بسعر 450 جنيه"\n• "ايه هي الطلبات الجديدة؟"\n• "افحص نواقص المخزون"\n• "انشئ كوبون خصم SALE20 بنسبة 20%"\n• "اعرض لي ملخص الإيرادات والأرباح"`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       },
     ]);
   };
 
   useEffect(() => {
+    setSessions([]);
+    setMessages([]);
+    setCurrentSessionId('');
     loadSessions();
-  }, []);
+  }, [tenantId]);
 
   useEffect(() => {
     if (currentSessionId) {
@@ -99,10 +118,10 @@ export const ChatCommandCenter: React.FC = () => {
 
   const handleStartNewSession = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8001/api/v1/agent/sessions', {
+      const res = await fetch(`http://127.0.0.1:8001/api/v1/agent/sessions?tenant_id=${activeTid}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'محادثة جديدة' }),
+        body: JSON.stringify({ title: 'محادثة جديدة', tenant_id: activeTid }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -134,7 +153,7 @@ export const ChatCommandCenter: React.FC = () => {
         body: JSON.stringify({
           message: text,
           session_id: currentSessionId,
-          tenant_id: 'tenant-moustafa-tech',
+          tenant_id: activeTid,
         }),
       });
 
@@ -205,7 +224,12 @@ export const ChatCommandCenter: React.FC = () => {
             سجل المحادثات السابقة
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            {sessions.map((s) => (
+            {sessions.length === 0 ? (
+              <div className="p-3 text-center text-slate-400 text-[11px] leading-relaxed">
+                لا توجد محادثات سابقة لهذا المتجر.
+              </div>
+            ) : (
+              sessions.map((s) => (
               <button
                 key={s.id}
                 onClick={() => setCurrentSessionId(s.id)}
@@ -218,7 +242,7 @@ export const ChatCommandCenter: React.FC = () => {
                 <MessageSquare className="w-3.5 h-3.5 shrink-0 opacity-60" />
                 <span className="truncate">{s.title || 'محادثة'}</span>
               </button>
-            ))}
+            ))) }
           </div>
         </div>
 

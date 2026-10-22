@@ -45,9 +45,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }
 
     setIsLoading(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        const user = loginUser(email, password);
+        const user = await loginUser(email, password);
         setIsLoading(false);
         onSuccess(user);
       } catch (err: any) {
@@ -57,9 +57,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }, 450);
   };
 
-  const handleQuickLoginMoustafa = () => {
-    const user = loginUser('owner@moustafatech.eg', '123456');
-    onSuccess(user);
+  const handleQuickLoginMoustafa = async () => {
+    try {
+      const user = await loginUser('owner@moustafatech.eg', '123456');
+      onSuccess(user);
+    } catch (err) {
+      setErrorMsg('تعذر تسجيل الدخول بالحساب التجريبي');
+    }
   };
 
   return (

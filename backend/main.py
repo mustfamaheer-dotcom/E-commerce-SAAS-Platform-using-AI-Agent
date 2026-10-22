@@ -63,3 +63,9 @@ def root():
         "status": "online",
         "docs": "/docs",
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    from backend.config import PORT, HOST
+    uvicorn.run("backend.main:app", host=HOST, port=PORT, reload=True)

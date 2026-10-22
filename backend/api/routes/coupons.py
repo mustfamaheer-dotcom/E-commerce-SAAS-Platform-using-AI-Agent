@@ -25,8 +25,11 @@ class CouponValidatePayload(BaseModel):
 
 
 @router.get("")
-def list_coupons(tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    coupons = db.query(Coupon).filter_by(tenant_id=tenant_id).all()
+def list_coupons(tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    query = db.query(Coupon)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    coupons = query.all()
     return [
         {
             "id": c.id,
@@ -66,9 +69,12 @@ def create_coupon(payload: CouponCreatePayload, tenant_id: str = "tenant-moustaf
 
 
 @router.post("/validate")
-def validate_coupon(payload: CouponValidatePayload, tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+def validate_coupon(payload: CouponValidatePayload, tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
     clean_code = payload.code.upper().strip()
-    coup = db.query(Coupon).filter_by(tenant_id=tenant_id, code=clean_code, is_active=True).first()
+    query = db.query(Coupon).filter_by(code=clean_code, is_active=True)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    coup = query.first()
     if not coup:
         raise HTTPException(status_code=404, detail="كود الكوبون غير صحيح أو منتهي الصلاحية")
 
@@ -94,8 +100,11 @@ def validate_coupon(payload: CouponValidatePayload, tenant_id: str = "tenant-mou
 
 
 @router.delete("/{coupon_id}")
-def delete_coupon(coupon_id: str, tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    coup = db.query(Coupon).filter_by(tenant_id=tenant_id, id=coupon_id).first()
+def delete_coupon(coupon_id: str, tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    query = db.query(Coupon).filter_by(id=coupon_id)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    coup = query.first()
     if not coup:
         raise HTTPException(status_code=404, detail="Coupon not found")
     db.delete(coup)

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Search,
   ShoppingCart,
+  ShoppingBag,
   Heart,
   Star,
   Truck,
@@ -25,16 +26,19 @@ import { toggleWishlist } from '../../store/wishlistSlice';
 import { useAppTheme } from '../../contexts/ThemeContext';
 
 interface StorefrontHomePageProps {
+  tenantId?: string;
   onSelectProduct?: (product: any) => void;
   onOpenCart?: () => void;
   onOpenCheckout?: () => void;
 }
 
 export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
+  tenantId,
   onSelectProduct,
   onOpenCart,
   onOpenCheckout,
 }) => {
+  const activeTid = tenantId || 'tenant-moustafa-tech';
   const dispatch = useDispatch();
   const { theme, updateThemeColors } = useAppTheme();
   const primaryColor = theme?.primaryColor || '#0ea5e9';
@@ -53,7 +57,7 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
 
   useEffect(() => {
     // Fetch live theme from backend
-    fetch('http://127.0.0.1:8001/api/v1/stores/me')
+    fetch(`http://127.0.0.1:8001/api/v1/stores/me?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.theme?.primaryColor) {
@@ -68,21 +72,23 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
       .catch(() => {});
 
     // Fetch live products from backend
-    fetch('http://127.0.0.1:8001/api/v1/products')
+    fetch(`http://127.0.0.1:8001/api/v1/products?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setProducts(data);
+        else setProducts([]);
       })
-      .catch(() => {});
+      .catch(() => { setProducts([]); });
 
     // Fetch live categories
-    fetch('http://127.0.0.1:8001/api/v1/categories')
+    fetch(`http://127.0.0.1:8001/api/v1/categories?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setCategories(data);
+        else setCategories([]);
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => { setCategories([]); });
+  }, [tenantId]);
 
   const filteredProducts = products.filter((p) => {
     const matchesCat = selectedCategory === 'all' || p.categoryId === selectedCategory;
@@ -227,7 +233,14 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
 
         {/* Products Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {filteredProducts.map((p) => {
+          {filteredProducts.length === 0 ? (
+            <div className="col-span-full py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-8 space-y-3">
+              <ShoppingBag className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600" />
+              <h4 className="font-bold text-sm text-slate-700 dark:text-slate-300">لا توجد منتجات معروضة حالياً</h4>
+              <p className="text-xs text-slate-400">سيبدأ هذا المتجر بعرض المنتجات فور إضافتها من لوحة التحكم.</p>
+            </div>
+          ) : (
+            filteredProducts.map((p) => {
             const isWish = wishlistItems.some((w) => w.id === p.id);
             return (
               <div
@@ -322,7 +335,7 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
                 </div>
               </div>
             );
-          })}
+          }))}
         </div>
       </div>
 

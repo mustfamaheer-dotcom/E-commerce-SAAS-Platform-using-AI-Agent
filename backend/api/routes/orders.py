@@ -25,14 +25,20 @@ class OrderStatusUpdatePayload(BaseModel):
 
 @router.get("")
 def list_orders(
-    tenant_id: str = "tenant-moustafa-tech",
+    tenant_id: Optional[str] = "tenant-moustafa-tech",
     status: Optional[str] = None,
+    limit: Optional[int] = 300,
     db: Session = Depends(get_db),
 ):
-    q = db.query(Order).filter_by(tenant_id=tenant_id)
-    if status:
+    q = db.query(Order)
+    if tenant_id and tenant_id != "all":
+        q = q.filter_by(tenant_id=tenant_id)
+    if status and status != "ALL":
         q = q.filter_by(status=status.upper())
-    orders = q.order_by(Order.created_at.desc()).all()
+    q = q.order_by(Order.created_at.desc())
+    if limit:
+        q = q.limit(limit)
+    orders = q.all()
     return [
         {
             "id": o.id,
@@ -142,9 +148,40 @@ def place_order(
     }
 
 
+@router.get("/audit-logs")
+def list_audit_logs(
+    tenant_id: Optional[str] = "tenant-moustafa-tech",
+    limit: int = 50,
+    db: Session = Depends(get_db),
+):
+    query = db.query(OrderStatusLog, Order).join(Order, OrderStatusLog.order_id == Order.id)
+    if tenant_id and tenant_id != "all":
+        query = query.filter(Order.tenant_id == tenant_id)
+    logs = query.order_by(OrderStatusLog.created_at.desc()).limit(limit).all()
+    return [
+        {
+            "id": log.OrderStatusLog.id,
+            "tenantId": log.Order.tenant_id,
+            "toolName": f"order_status_update ({log.OrderStatusLog.status})",
+            "params": {
+                "order_id": log.OrderStatusLog.order_id,
+                "status": log.OrderStatusLog.status,
+                "note": log.OrderStatusLog.note,
+                "created_by": log.OrderStatusLog.created_by,
+            },
+            "status": "EXECUTED",
+            "createdAt": log.OrderStatusLog.created_at.strftime("%Y-%m-%d %H:%M:%S") if log.OrderStatusLog.created_at else "",
+        }
+        for log in logs
+    ]
+
+
 @router.get("/{order_id}")
-def get_order(order_id: str, tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    order = db.query(Order).filter_by(tenant_id=tenant_id, id=order_id).first()
+def get_order(order_id: str, tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    q = db.query(Order).filter_by(id=order_id)
+    if tenant_id and tenant_id != "all":
+        q = q.filter_by(tenant_id=tenant_id)
+    order = q.first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     logs = db.query(OrderStatusLog).filter_by(order_id=order_id).order_by(OrderStatusLog.created_at.asc()).all()
@@ -173,10 +210,13 @@ def get_order(order_id: str, tenant_id: str = "tenant-moustafa-tech", db: Sessio
 def update_order_status(
     order_id: str,
     payload: OrderStatusUpdatePayload,
-    tenant_id: str = "tenant-moustafa-tech",
+    tenant_id: Optional[str] = "tenant-moustafa-tech",
     db: Session = Depends(get_db),
 ):
-    order = db.query(Order).filter_by(tenant_id=tenant_id, id=order_id).first()
+    q = db.query(Order).filter_by(id=order_id)
+    if tenant_id and tenant_id != "all":
+        q = q.filter_by(tenant_id=tenant_id)
+    order = q.first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 

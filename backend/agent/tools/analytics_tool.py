@@ -13,8 +13,14 @@ def get_analytics_summary_tool(tenant_id: str) -> Dict[str, Any]:
         total_customers = db.query(Customer).filter_by(tenant_id=tenant_id).count()
         aov = round(total_revenue / max(1, total_orders), 2)
 
+        if total_orders == 0:
+            summary_msg = f"متجرك لسه جديد! إجمالي الإيرادات حالياً: 0 ج.م، وعدد المنتجات: {total_products} منتج. في انتظار أول عملية شراء لتبدأ مؤشرات النمو والأرباح في الظهور! 📈"
+        else:
+            summary_msg = f"إجمالي الإيرادات حتى الآن: {total_revenue:,.2f} ج.م عبر {total_orders} طلب بمعدل {aov:,.2f} ج.م لكل طلب."
+
         return {
             "status": "success",
+            "message": summary_msg,
             "kpis": {
                 "totalRevenue": round(total_revenue, 2),
                 "totalOrders": total_orders,
@@ -22,7 +28,7 @@ def get_analytics_summary_tool(tenant_id: str) -> Dict[str, Any]:
                 "totalCustomers": total_customers,
                 "averageOrderValue": aov,
             },
-            "recentOrdersSummary": f"إجمالي الإيرادات حتى الآن: {total_revenue:,.2f} ج.م عبر {total_orders} طلب بمعدل {aov:,.2f} ج.م لكل طلب.",
+            "recentOrdersSummary": summary_msg,
         }
     finally:
         db.close()

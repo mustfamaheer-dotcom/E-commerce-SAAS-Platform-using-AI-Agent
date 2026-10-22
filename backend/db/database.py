@@ -3,12 +3,14 @@ import os
 from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from dotenv import load_dotenv
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    # Use local sqlite database for robust, zero-friction local execution
-    db_path = Path(__file__).resolve().parent.parent / "techzone.db"
-    DATABASE_URL = f"sqlite:///{db_path}"
+# Ensure .env is loaded from backend directory
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR.parent / ".env")
+
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:admin@localhost:5432/techzone?schema=public")
 
 # SQLite specific connect args
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}

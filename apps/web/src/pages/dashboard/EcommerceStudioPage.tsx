@@ -24,12 +24,15 @@ import { useAppTheme } from '../../contexts/ThemeContext';
 import { LogoUploader } from '../../components/LogoUploader';
 
 interface EcommerceStudioPageProps {
+  tenantId?: string;
   onOpenStorefront?: () => void;
 }
 
 export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
+  tenantId,
   onOpenStorefront,
 }) => {
+  const activeTid = tenantId || 'tenant-moustafa-tech';
   const { theme, updateThemeColors } = useAppTheme();
 
   // Storefront Config State
@@ -64,7 +67,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
 
   // Load existing store settings
   useEffect(() => {
-    fetch('http://127.0.0.1:8001/api/v1/stores/me')
+    fetch(`http://127.0.0.1:8001/api/v1/stores/me?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.tenant?.name) setStoreName(data.tenant.name);
@@ -80,7 +83,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
     setIsSaved(true);
     updateThemeColors({ primaryColor });
     try {
-      await fetch('http://127.0.0.1:8001/api/v1/stores/me', {
+      await fetch(`http://127.0.0.1:8001/api/v1/stores/me?tenant_id=${activeTid}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -88,7 +91,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
           shipping_zones: { default_rate: parseFloat(carrierRate) || 45 },
         }),
       });
-      await fetch('http://127.0.0.1:8001/api/v1/stores/me/theme', {
+      await fetch(`http://127.0.0.1:8001/api/v1/stores/me/theme?tenant_id=${activeTid}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,17 +1,23 @@
 // apps/web/src/pages/dashboard/OrdersPage.tsx
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Truck, CheckCircle2, Clock, Filter, Eye } from 'lucide-react';
+import { ShoppingCart, Truck, CheckCircle2, Clock, Filter, Eye, PackageOpen } from 'lucide-react';
 
-export const OrdersPage: React.FC = () => {
+interface OrdersPageProps {
+  tenantId?: string;
+}
+
+export const OrdersPage: React.FC<OrdersPageProps> = ({ tenantId }) => {
   const [orders, setOrders] = useState<any[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
+
+  const activeTid = tenantId || 'tenant-moustafa-tech';
 
   const loadOrders = async () => {
     try {
       const url =
         selectedStatus === 'ALL'
-          ? 'http://127.0.0.1:8001/api/v1/orders'
-          : `http://127.0.0.1:8001/api/v1/orders?status=${selectedStatus}`;
+          ? `http://127.0.0.1:8001/api/v1/orders?tenant_id=${activeTid}`
+          : `http://127.0.0.1:8001/api/v1/orders?tenant_id=${activeTid}&status=${selectedStatus}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -22,10 +28,10 @@ export const OrdersPage: React.FC = () => {
 
   useEffect(() => {
     loadOrders();
-  }, [selectedStatus]);
+  }, [tenantId, selectedStatus]);
 
   const handleUpdateStatus = async (orderId: string, nextStatus: string) => {
-    await fetch(`http://127.0.0.1:8001/api/v1/orders/${orderId}/status`, {
+    await fetch(`http://127.0.0.1:8001/api/v1/orders/${orderId}/status?tenant_id=${activeTid}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: nextStatus, note: `Staff marked order as ${nextStatus}` }),
@@ -48,13 +54,13 @@ export const OrdersPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Status Filters */}
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
           {statuses.map((st) => (
             <button
               key={st}
               onClick={() => setSelectedStatus(st)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shrink-0 ${
                 selectedStatus === st
                   ? 'bg-sky-600 text-white shadow-xs'
                   : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
@@ -82,74 +88,92 @@ export const OrdersPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {orders.map((o) => {
-                const isShipped = o.status === 'SHIPPED' || o.status === 'DELIVERED';
-                return (
-                  <tr key={o.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="px-4 py-3 font-mono font-bold text-sky-600 dark:text-sky-400">
-                      {o.id}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="font-semibold text-slate-900 dark:text-slate-100">
-                        {o.shippingAddress?.name || 'عميل مباشر'}
+              {orders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-12 text-center text-slate-400">
+                    <div className="space-y-2">
+                      <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+                        <PackageOpen className="w-5 h-5" />
                       </div>
-                      <div className="text-[10px] text-slate-400">
-                        {o.shippingAddress?.city} • {o.shippingAddress?.phone}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="font-mono text-slate-700 dark:text-slate-300 font-medium">
-                        {o.paymentMethod}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-mono font-bold text-slate-900 dark:text-slate-100">
-                      {o.total?.toLocaleString()} ج.م
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="font-mono text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-semibold">
-                        <Truck className="w-3.5 h-3.5" />
-                        <span>{o.trackingNumber || 'جاهز للشحن'}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                          isShipped
-                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
-                            : 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border-amber-200 dark:border-amber-800'
-                        }`}
-                      >
-                        {o.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        {o.status === 'CONFIRMED' && (
-                          <button
-                            onClick={() => handleUpdateStatus(o.id, 'SHIPPED')}
-                            className="px-2.5 py-1 rounded bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
-                          >
-                            <Truck className="w-3 h-3" />
-                            <span>شحن الطلب</span>
-                          </button>
-                        )}
-                        {o.status === 'SHIPPED' && (
-                          <button
-                            onClick={() => handleUpdateStatus(o.id, 'DELIVERED')}
-                            className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
-                          >
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span>تم التسليم</span>
-                          </button>
-                        )}
-                        {o.status === 'DELIVERED' && (
-                          <span className="text-[11px] text-slate-400 font-semibold">مكتمل ✓</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      <p className="font-semibold text-xs text-slate-600 dark:text-slate-300">
+                        لا توجد طلبات شراء مسجلة في متجرك حالياً
+                      </p>
+                      <p className="text-[11px]">
+                        عندما يقوم العملاء بالشراء من متجر العملاء الخاص بك ستظهر الطلبات هنا
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                orders.map((o) => {
+                  const isShipped = o.status === 'SHIPPED' || o.status === 'DELIVERED';
+                  return (
+                    <tr key={o.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-sky-600 dark:text-sky-400">
+                        {o.id}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-slate-900 dark:text-slate-100">
+                          {o.shippingAddress?.name || 'عميل مباشر'}
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          {o.shippingAddress?.city} • {o.shippingAddress?.phone}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="font-mono text-slate-700 dark:text-slate-300 font-medium">
+                          {o.paymentMethod}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-mono font-bold text-slate-900 dark:text-slate-100">
+                        {o.total?.toLocaleString()} ج.م
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-mono text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-semibold">
+                          <Truck className="w-3.5 h-3.5" />
+                          <span>{o.trackingNumber || 'جاهز للشحن'}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            isShipped
+                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                              : 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+                          }`}
+                        >
+                          {o.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          {o.status === 'CONFIRMED' && (
+                            <button
+                              onClick={() => handleUpdateStatus(o.id, 'SHIPPED')}
+                              className="px-2.5 py-1 rounded bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
+                            >
+                              <Truck className="w-3 h-3" />
+                              <span>شحن الطلب</span>
+                            </button>
+                          )}
+                          {o.status === 'SHIPPED' && (
+                            <button
+                              onClick={() => handleUpdateStatus(o.id, 'DELIVERED')}
+                              className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
+                            >
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>تم التسليم</span>
+                            </button>
+                          )}
+                          {o.status === 'DELIVERED' && (
+                            <span className="text-[11px] text-slate-400 font-semibold">مكتمل ✓</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

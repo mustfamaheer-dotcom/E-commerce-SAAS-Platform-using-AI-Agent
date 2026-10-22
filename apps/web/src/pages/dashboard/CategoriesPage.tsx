@@ -1,16 +1,22 @@
 // apps/web/src/pages/dashboard/CategoriesPage.tsx
 import React, { useState, useEffect } from 'react';
-import { Layers, Plus, Trash2, CheckCircle2 } from 'lucide-react';
+import { Layers, Plus, Trash2, CheckCircle2, FolderPlus } from 'lucide-react';
 
-export const CategoriesPage: React.FC = () => {
+interface CategoriesPageProps {
+  tenantId?: string;
+}
+
+export const CategoriesPage: React.FC<CategoriesPageProps> = ({ tenantId }) => {
   const [categories, setCategories] = useState<any[]>([]);
   const [nameAr, setNameAr] = useState('');
   const [slug, setSlug] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
+  const activeTid = tenantId || 'tenant-moustafa-tech';
+
   const loadCategories = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8001/api/v1/categories');
+      const res = await fetch(`http://127.0.0.1:8001/api/v1/categories?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
         setCategories(data);
@@ -20,14 +26,14 @@ export const CategoriesPage: React.FC = () => {
 
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, [tenantId]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameAr.trim()) return;
     setIsAdding(true);
     try {
-      await fetch('http://127.0.0.1:8001/api/v1/categories', {
+      await fetch(`http://127.0.0.1:8001/api/v1/categories?tenant_id=${activeTid}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name_ar: nameAr, slug: slug.trim() || undefined }),
@@ -42,7 +48,7 @@ export const CategoriesPage: React.FC = () => {
 
   const handleDelete = async (id: string, name: string) => {
     if (!window.confirm(`هل أنت متأكد من حذف القسم "${name}"؟`)) return;
-    await fetch(`http://127.0.0.1:8001/api/v1/categories/${id}`, { method: 'DELETE' });
+    await fetch(`http://127.0.0.1:8001/api/v1/categories/${id}?tenant_id=${activeTid}`, { method: 'DELETE' });
     await loadCategories();
   };
 
@@ -109,24 +115,38 @@ export const CategoriesPage: React.FC = () => {
             <span>الأقسام الحالية ({categories.length})</span>
           </div>
 
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {categories.map((c) => (
-              <div key={c.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                <div>
-                  <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100">{c.name}</h4>
-                  <div className="font-mono text-[11px] text-slate-400 mt-0.5">/{c.slug}</div>
-                </div>
-
-                <button
-                  onClick={() => handleDelete(c.id, c.name)}
-                  className="p-1.5 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  title="حذف القسم"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+          {categories.length === 0 ? (
+            <div className="p-10 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-500 flex items-center justify-center mx-auto">
+                <FolderPlus className="w-6 h-6" />
               </div>
-            ))}
-          </div>
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                لا توجد أقسام في متجرك حالياً
+              </p>
+              <p className="text-[11px] text-slate-400">
+                استخدم النموذج الجانبي لإنشاء أول قسم لتصنيف منتجاتك
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {categories.map((c) => (
+                <div key={c.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100">{c.name}</h4>
+                    <div className="font-mono text-[11px] text-slate-400 mt-0.5">/{c.slug}</div>
+                  </div>
+
+                  <button
+                    onClick={() => handleDelete(c.id, c.name)}
+                    className="p-1.5 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="حذف القسم"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

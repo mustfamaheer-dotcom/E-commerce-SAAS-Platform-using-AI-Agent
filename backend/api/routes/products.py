@@ -40,14 +40,17 @@ class ProductUpdatePayload(BaseModel):
 
 @router.get("")
 def list_products(
-    tenant_id: str = "tenant-moustafa-tech",
+    tenant_id: Optional[str] = "tenant-moustafa-tech",
     category_id: Optional[str] = None,
     featured: Optional[bool] = None,
     search: Optional[str] = None,
+    limit: Optional[int] = None,
     db: Session = Depends(get_db),
 ):
-    query = db.query(Product).filter_by(tenant_id=tenant_id, is_active=True)
-    if category_id:
+    query = db.query(Product).filter_by(is_active=True)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    if category_id and category_id not in ("ALL", "all"):
         query = query.filter_by(category_id=category_id)
     if featured is not None:
         query = query.filter_by(featured=featured)
@@ -55,6 +58,8 @@ def list_products(
         query = query.filter(
             (Product.name_ar.ilike(f"%{search}%")) | (Product.sku.ilike(f"%{search}%"))
         )
+    if limit:
+        query = query.limit(limit)
     products = query.order_by(Product.created_at.desc()).all()
     return [
         {
@@ -112,13 +117,11 @@ def create_product(
 
 
 @router.get("/{product_id}")
-def get_product(product_id: str, tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    prod = (
-        db.query(Product)
-        .filter_by(tenant_id=tenant_id)
-        .filter((Product.id == product_id) | (Product.slug == product_id))
-        .first()
-    )
+def get_product(product_id: str, tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    query = db.query(Product).filter((Product.id == product_id) | (Product.slug == product_id))
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    prod = query.first()
     if not prod:
         raise HTTPException(status_code=404, detail="Product not found")
     return {
@@ -142,10 +145,13 @@ def get_product(product_id: str, tenant_id: str = "tenant-moustafa-tech", db: Se
 def update_product(
     product_id: str,
     payload: ProductUpdatePayload,
-    tenant_id: str = "tenant-moustafa-tech",
+    tenant_id: Optional[str] = "tenant-moustafa-tech",
     db: Session = Depends(get_db),
 ):
-    prod = db.query(Product).filter_by(tenant_id=tenant_id, id=product_id).first()
+    query = db.query(Product).filter_by(id=product_id)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    prod = query.first()
     if not prod:
         raise HTTPException(status_code=404, detail="Product not found")
 
@@ -171,8 +177,11 @@ def update_product(
 
 
 @router.delete("/{product_id}")
-def delete_product(product_id: str, tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    prod = db.query(Product).filter_by(tenant_id=tenant_id, id=product_id).first()
+def delete_product(product_id: str, tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    query = db.query(Product).filter_by(id=product_id)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    prod = query.first()
     if not prod:
         raise HTTPException(status_code=404, detail="Product not found")
     db.delete(prod)

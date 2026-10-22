@@ -10,8 +10,15 @@ def list_orders_tool(tenant_id: str, status: Optional[str] = None) -> Dict[str, 
         if status:
             q = q.filter_by(status=status.upper())
         orders = q.order_by(Order.created_at.desc()).limit(15).all()
+
+        if len(orders) == 0:
+            msg = "لا توجد أي طلبات شراء مسجلة في متجرك حالياً. بمجرد أن يطلب عملاؤك ستظهر الطلبات وتفاصيل الشحن هنا فوراً! 🛒"
+        else:
+            msg = f"لديك حالياً {len(orders)} طلبات شراء مسجلة في متجرك."
+
         return {
             "status": "success",
+            "message": msg,
             "count": len(orders),
             "orders": [
                 {
@@ -35,7 +42,7 @@ def update_order_status_tool(tenant_id: str, order_id: str, new_status: str) -> 
     try:
         order = db.query(Order).filter_by(tenant_id=tenant_id, id=order_id).first()
         if not order:
-            return {"status": "error", "message": f"الطلب رقم '{order_id}' غير موجود."}
+            return {"status": "error", "message": f"الطلب رقم '{order_id}' غير موجود في متجرك."}
         old_status = order.status
         order.status = new_status.upper()
         db.commit()

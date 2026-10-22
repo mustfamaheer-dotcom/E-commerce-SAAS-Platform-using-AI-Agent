@@ -10,8 +10,18 @@ router = APIRouter(prefix="/customers", tags=["Customer CRM"])
 
 
 @router.get("")
-def list_customers(tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    customers = db.query(Customer).filter_by(tenant_id=tenant_id).order_by(Customer.total_spent.desc()).all()
+def list_customers(
+    tenant_id: Optional[str] = "tenant-moustafa-tech",
+    limit: Optional[int] = 300,
+    db: Session = Depends(get_db),
+):
+    query = db.query(Customer)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    query = query.order_by(Customer.total_spent.desc())
+    if limit:
+        query = query.limit(limit)
+    customers = query.all()
     return [
         {
             "id": c.id,
@@ -29,11 +39,17 @@ def list_customers(tenant_id: str = "tenant-moustafa-tech", db: Session = Depend
 
 
 @router.get("/{customer_id}")
-def get_customer(customer_id: str, tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    cust = db.query(Customer).filter_by(tenant_id=tenant_id, id=customer_id).first()
+def get_customer(customer_id: str, tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    q = db.query(Customer).filter_by(id=customer_id)
+    if tenant_id and tenant_id != "all":
+        q = q.filter_by(tenant_id=tenant_id)
+    cust = q.first()
     if not cust:
         raise HTTPException(status_code=404, detail="Customer not found")
-    orders = db.query(Order).filter_by(tenant_id=tenant_id).filter(Order.shipping_address["phone"].astext == cust.phone).all() if cust.phone else []
+    oq = db.query(Order)
+    if tenant_id and tenant_id != "all":
+        oq = oq.filter_by(tenant_id=tenant_id)
+    orders = oq.filter(Order.shipping_address["phone"].astext == cust.phone).all() if cust.phone else []
     return {
         "id": cust.id,
         "name": cust.name,

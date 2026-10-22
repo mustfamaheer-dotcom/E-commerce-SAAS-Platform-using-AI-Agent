@@ -20,8 +20,17 @@ def get_inventory_alerts_tool(tenant_id: str) -> Dict[str, Any]:
                     "dailyProfitAtRisk": daily_profit_at_risk,
                     "recommendedReorderQty": max(20, (p.low_stock_threshold or 5) * 4),
                 })
+
+        if len(products) == 0:
+            msg = "كتالوج متجرك لسه جديد ومفيهوش منتجات. تقدر تقولي 'ضيف منتج جديد' ونبدأ نضيف البضاعة في المخزن! 📦"
+        elif len(low_stock_items) == 0:
+            msg = f"مخزون متجرك تمام ومفيش أي نواقص! كل الـ {len(products)} منتجات متوفرة بكميات آمنة. ✨"
+        else:
+            msg = f"يوجد {len(low_stock_items)} منتجات اقتربت من النفاد في مخزن متجرك وبحاجة لإعادة طلب."
+
         return {
             "status": "success",
+            "message": msg,
             "totalAlerts": len(low_stock_items),
             "alerts": low_stock_items,
         }
@@ -34,7 +43,7 @@ def adjust_stock_tool(tenant_id: str, sku: str, quantity: int) -> Dict[str, Any]
     try:
         prod = db.query(Product).filter_by(tenant_id=tenant_id, sku=sku).first()
         if not prod:
-            return {"status": "error", "message": f"المنتج ذو الرمز {sku} غير موجود."}
+            return {"status": "error", "message": f"المنتج ذو الرمز {sku} غير موجود في متجرك."}
         prod.stock_qty = max(0, prod.stock_qty + quantity)
         db.commit()
         return {

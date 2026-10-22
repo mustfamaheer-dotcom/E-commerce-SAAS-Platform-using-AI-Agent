@@ -1,6 +1,6 @@
 # backend/models/order.py
 from datetime import datetime
-from sqlalchemy import Column, String, Float, Text, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, String, Float, Text, DateTime, ForeignKey, JSON, Index
 from backend.db.database import Base
 
 class Order(Base):
@@ -8,8 +8,8 @@ class Order(Base):
 
     id = Column(String(64), primary_key=True, index=True)
     tenant_id = Column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
-    user_id = Column(String(64), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    status = Column(String(32), default="PENDING")  # PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+    user_id = Column(String(64), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    status = Column(String(32), default="PENDING", index=True)  # PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED
     items = Column(JSON, nullable=False)  # [{product_id, name, price, qty, total}]
     subtotal = Column(Float, nullable=False)
     shipping_cost = Column(Float, default=0.0)
@@ -20,8 +20,13 @@ class Order(Base):
     payment_ref = Column(String(128), nullable=True)
     bosta_tracking_number = Column(String(128), nullable=True)
     shipping_address = Column(JSON, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        Index("idx_orders_tenant_created", "tenant_id", "created_at"),
+        Index("idx_orders_tenant_status", "tenant_id", "status"),
+    )
 
 
 class OrderStatusLog(Base):

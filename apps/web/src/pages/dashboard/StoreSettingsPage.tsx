@@ -3,17 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { Settings, Save, CheckCircle2, ShieldCheck, Truck, CreditCard } from 'lucide-react';
 import { LogoUploader } from '../../components/LogoUploader';
 
-export const StoreSettingsPage: React.FC = () => {
-  const [storeName, setStoreName] = useState('Moustafa Tech');
+interface StoreSettingsPageProps {
+  tenantId?: string;
+}
+
+export const StoreSettingsPage: React.FC<StoreSettingsPageProps> = ({ tenantId }) => {
+  const [storeName, setStoreName] = useState('متجري');
   const [currency, setCurrency] = useState('EGP');
-  const [email, setEmail] = useState('owner@moustafatech.eg');
-  const [phone, setPhone] = useState('+20 100 123 4567');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [carrierRate, setCarrierRate] = useState('45');
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const activeTid = tenantId || 'tenant-moustafa-tech';
+
   useEffect(() => {
-    fetch('http://127.0.0.1:8001/api/v1/stores/me')
+    fetch(`http://127.0.0.1:8001/api/v1/stores/me?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.tenant?.name) setStoreName(data.tenant.name);
@@ -24,7 +30,7 @@ export const StoreSettingsPage: React.FC = () => {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [tenantId]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +38,7 @@ export const StoreSettingsPage: React.FC = () => {
     setIsSaved(false);
 
     try {
-      await fetch('http://127.0.0.1:8001/api/v1/stores/me', {
+      await fetch(`http://127.0.0.1:8001/api/v1/stores/me?tenant_id=${activeTid}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -58,113 +64,120 @@ export const StoreSettingsPage: React.FC = () => {
             <span>إعدادات المتجر والهوية البصرية (Store Settings)</span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            تخصيص بيانات المتجر، شعار العلامة التجارية، بوابات الدفع وشحن بوسطة
+            التحكم في بيانات المتجر، الشحن، وبوابات الدفع الإلكترونية
           </p>
         </div>
       </div>
 
-      {isSaved && (
-        <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4" />
-          <span>تم حفظ وتحديث إعدادات المتجر بنجاح!</span>
-        </div>
-      )}
-
-      {/* AI Logo & Brand Theme Generator */}
-      <LogoUploader />
-
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* Basic Store Info */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Left col: Logo Uploader */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
           <h3 className="font-bold text-xs text-slate-900 dark:text-slate-100">
-            البيانات الأساسية للمتجر
+            شعار وهوية المتجر
           </h3>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            ارفع شعار متجرك لتحليل الألوان آلياً وتطبيقها على متجر العملاء
+          </p>
+          <LogoUploader />
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+        {/* Right col: Form */}
+        <div className="md:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+          <form onSubmit={handleSave} className="space-y-4 text-xs">
             <div>
-              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">اسم المتجر التجاري</label>
+              <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">اسم المتجر</label>
               <input
                 type="text"
                 required
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
-                className="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-sky-500"
+                className="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-sky-500 font-semibold"
               />
             </div>
 
-            <div>
-              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">العملة الافتراضية</label>
-              <input
-                type="text"
-                disabled
-                value={currency}
-                className="w-full p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500 font-mono"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">البريد الإلكتروني للتواصل</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-sky-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">رقم الهاتف (واتساب)</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-sky-500 font-mono"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">بريد خدمة العملاء</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-sky-500"
-              />
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <h4 className="font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-1.5">
+                <Truck className="w-4 h-4 text-sky-500" />
+                <span>إعدادات الشحن والتوصيل (Bosta Express)</span>
+              </h4>
+
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  سعر الشحن الافتراضي (ج.م) لجميع المحافظات
+                </label>
+                <input
+                  type="number"
+                  value={carrierRate}
+                  onChange={(e) => setCarrierRate(e.target.value)}
+                  className="w-full sm:w-48 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-sky-500 font-mono"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">هاتف / واتساب المتجر</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-sky-500 font-mono"
-              />
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <h4 className="font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-1.5">
+                <CreditCard className="w-4 h-4 text-emerald-500" />
+                <span>بوابات الدفع الإلكتروني</span>
+              </h4>
+
+              <div className="space-y-2 text-slate-600 dark:text-slate-400">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span>الدفع عند الاستلام (COD) مفعل تلقائياً</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span>بوابة Paymob للبطاقات البنكية وميزة</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span>التحويل اللحظي عبر InstaPay مفعل</span>
+                </div>
+              </div>
             </div>
-          </div>
+
+            <div className="pt-4 flex items-center gap-3">
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" />
+                <span>{isSaving ? 'جاري الحفظ...' : 'حفظ التعديلات'}</span>
+              </button>
+
+              {isSaved && (
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 text-xs">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>تم حفظ الإعدادات بنجاح!</span>
+                </span>
+              )}
+            </div>
+          </form>
         </div>
-
-        {/* Shipping & Gateways */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-          <h3 className="font-bold text-xs text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Truck className="w-4 h-4 text-sky-500" />
-            <span>إعدادات الشحن اللوجستي (Bosta Express)</span>
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div>
-              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">سعر الشحن الافتراضي (ج.م)</label>
-              <input
-                type="number"
-                value={carrierRate}
-                onChange={(e) => setCarrierRate(e.target.value)}
-                className="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-mono focus:outline-none focus:border-sky-500"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">شركة الشحن المعتمدة</label>
-              <input
-                type="text"
-                disabled
-                value="بوسطة (Bosta Logistics) — تكامل API مباشر"
-                className="w-full p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500 text-xs"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Submit */}
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="px-6 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-colors disabled:opacity-50"
-          >
-            <Save className="w-4 h-4" />
-            <span>{isSaving ? 'جاري الحفظ...' : 'حفظ التعديلات الآن'}</span>
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };

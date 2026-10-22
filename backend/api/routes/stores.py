@@ -5,10 +5,20 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
 from backend.db.database import get_db
-from backend.models import Tenant, StoreSettings, ThemeConfig
+from backend.models import Tenant, StoreSettings, ThemeConfig, User
 from backend.services.logo_analyzer import analyze_logo_and_generate_theme
 
 router = APIRouter(prefix="/stores", tags=["Store Configuration"])
+
+
+class StoreCreatePayload(BaseModel):
+    name: str
+    category: Optional[str] = "تجارة عامة وإلكترونيات"
+    currency: Optional[str] = "EGP"
+    owner_name: Optional[str] = None
+    owner_email: str
+    phone: Optional[str] = None
+    theme_mode: Optional[str] = "dark"
 
 
 class StoreUpdatePayload(BaseModel):
@@ -29,13 +39,133 @@ class ThemeUpdatePayload(BaseModel):
     font_family: Optional[str] = None
 
 
+@router.post("")
+def create_store(payload: StoreCreatePayload, db: Session = Depends(get_db)):
+    import re, uuid
+    raw_slug = re.sub(r'[^a-zA-Z0-9]+', '-', payload.name.lower()).strip('-')
+    if not raw_slug:
+        raw_slug = "store"
+    unique_suffix = uuid.uuid4().hex[:6]
+    slug = f"{raw_slug}-{unique_suffix}"
+    tenant_id = f"tenant-{slug}"
+
+    new_tenant = Tenant(
+        id=tenant_id,
+        slug=slug,
+        name=payload.name,
+        currency=payload.currency or "EGP",
+        theme_config={"mode": payload.theme_mode or "dark"},
+    )
+    db.add(new_tenant)
+    db.flush()
+
+    settings = StoreSettings(
+        tenant_id=tenant_id,
+        display_name=payload.name,
+        currency=payload.currency or "EGP",
+        business_sector=payload.category or "electronics",
+        contact_email=payload.owner_email.strip().lower(),
+        contact_phone=payload.phone or "",
+    )
+    db.add(settings)
+
+    theme = ThemeConfig(
+        tenant_id=tenant_id,
+        mode=payload.theme_mode or "dark",
+        primary_color="#0ea5e9",
+        secondary_color="#6366f1",
+        accent_color="#10b981",
+    )
+    db.add(theme)
+
+    email_clean = payload.owner_email.strip().lower()
+    user = db.query(User).filter_by(email=email_clean).first()
+    if not user:
+        user = User(
+            id=f"usr_{tenant_id}_owner",
+            tenant_id=tenant_id,
+            email=email_clean,
+            full_name=payload.owner_name or payload.name,
+            phone=payload.phone or "",
+            role="owner",
+        )
+        db.add(user)
+    else:
+        user.tenant_id = tenant_id
+
+    db.commit()
+    db.refresh(new_tenant)
+
+    return {
+        "status": "success",
+        "message": f"تم إنشاء المتجر '{new_tenant.name}' بنجاح",
+        "store": {
+            "id": new_tenant.id,
+            "slug": new_tenant.slug,
+            "name": new_tenant.name,
+            "category": payload.category or "تجارة عامة",
+            "currency": new_tenant.currency,
+            "themeMode": payload.theme_mode or "dark",
+            "createdAt": new_tenant.created_at.isoformat() if new_tenant.created_at else None,
+            "adminUrl": f"/admin/{new_tenant.slug}",
+            "storefrontUrl": f"/store/{new_tenant.slug}",
+            "logoUrl": new_tenant.logo_url,
+        },
+    }
+
+
+@router.get("")
+def list_stores(owner_email: Optional[str] = None, db: Session = Depends(get_db)):
+    if owner_email:
+        email_clean = owner_email.strip().lower()
+        if email_clean in ["owner@moustafatech.eg", "owner.1.1@-moustafa-tech--102.eg"]:
+            tenants = db.query(Tenant).filter_by(id="tenant-moustafa-tech").all()
+        else:
+            setting_tenant_ids = [
+                s.tenant_id
+                for s in db.query(StoreSettings).filter(StoreSettings.contact_email.ilike(email_clean)).all()
+            ]
+            user_tenant_ids = [
+                u.tenant_id
+                for u in db.query(User).filter(User.email.ilike(email_clean)).all()
+                if u.tenant_id
+            ]
+            allowed_ids = set(setting_tenant_ids + user_tenant_ids)
+            if allowed_ids:
+                tenants = db.query(Tenant).filter(Tenant.id.in_(allowed_ids)).all()
+            else:
+                tenants = []
+    else:
+        # Default unauthenticated access only gets demo store, never leaking competitors
+        tenants = db.query(Tenant).filter_by(id="tenant-moustafa-tech").all()
+
+    return [
+        {
+            "id": t.id,
+            "slug": t.slug,
+            "name": t.name,
+            "category": "بيع أجهزة وإلكترونيات",
+            "currency": t.currency or "EGP",
+            "themeMode": "dark",
+            "createdAt": t.created_at.isoformat() if t.created_at else None,
+            "adminUrl": f"/admin/{t.slug}",
+            "storefrontUrl": f"/store/{t.slug}",
+            "logoUrl": t.logo_url,
+        }
+        for t in tenants
+    ]
+
+
 @router.get("/me")
-def get_current_store(tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    tenant = db.query(Tenant).filter_by(id=tenant_id).first()
+def get_current_store(tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    tid = tenant_id if tenant_id and tenant_id != "all" else "tenant-moustafa-tech"
+    tenant = db.query(Tenant).filter_by(id=tid).first()
+    if not tenant:
+        tenant = db.query(Tenant).filter_by(id="tenant-moustafa-tech").first()
     if not tenant:
         raise HTTPException(status_code=404, detail="Store not found")
-    settings = db.query(StoreSettings).filter_by(tenant_id=tenant_id).first()
-    theme = db.query(ThemeConfig).filter_by(tenant_id=tenant_id).first()
+    settings = db.query(StoreSettings).filter_by(tenant_id=tenant.id).first()
+    theme = db.query(ThemeConfig).filter_by(tenant_id=tenant.id).first()
     return {
         "tenant": {
             "id": tenant.id,
@@ -146,8 +276,9 @@ async def upload_logo_and_generate_theme(
 
 
 @router.get("/me/theme")
-def get_store_theme(tenant_id: str = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    theme = db.query(ThemeConfig).filter_by(tenant_id=tenant_id).first()
+def get_store_theme(tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
+    tid = tenant_id if tenant_id and tenant_id != "all" else "tenant-moustafa-tech"
+    theme = db.query(ThemeConfig).filter_by(tenant_id=tid).first()
     if not theme:
         return {
             "mode": "dark",
