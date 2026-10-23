@@ -1,6 +1,6 @@
 # backend/models/tenant.py
 from datetime import datetime
-from sqlalchemy import Column, String, Text, DateTime, JSON
+from sqlalchemy import Column, String, Text, DateTime, JSON, ForeignKey
 from backend.db.database import Base
 
 class Tenant(Base):
@@ -19,7 +19,7 @@ class Tenant(Base):
 class StoreSettings(Base):
     __tablename__ = "store_settings"
 
-    tenant_id = Column(String(64), primary_key=True)
+    tenant_id = Column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), primary_key=True)
     display_name = Column(String(255), nullable=False)
     currency = Column(String(10), default="EGP")
     business_sector = Column(String(100), default="electronics")
@@ -35,7 +35,7 @@ class StoreSettings(Base):
 class ThemeConfig(Base):
     __tablename__ = "theme_config"
 
-    tenant_id = Column(String(64), primary_key=True)
+    tenant_id = Column(String(64), ForeignKey("tenants.id", ondelete="CASCADE"), primary_key=True)
     mode = Column(String(10), default="dark")
     primary_color = Column(String(32), default="#0ea5e9")
     secondary_color = Column(String(32), default="#6366f1")

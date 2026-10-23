@@ -13,3 +13,8 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY", "pk-demo-techzone")
 LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY", "sk-demo-techzone")
 LANGFUSE_HOST = os.getenv("LANGFUSE_HOST", "http://localhost:3000")
+
+# Production JWT Authentication Settings
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-techzone-jwt-key-2026-production")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(60 * 24 * 7)))  # 7 days

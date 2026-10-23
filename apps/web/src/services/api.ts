@@ -6,8 +6,11 @@ export async function apiFetch<T = any>(endpoint: string, options: RequestInit =
     ? endpoint 
     : `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
+  const token = typeof window !== 'undefined' ? localStorage.getItem('techzone_access_token') : null;
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers as Record<string, string> || {}),
   };
 
