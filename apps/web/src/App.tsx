@@ -8,6 +8,7 @@ import { LandingPage } from './pages/landing/LandingPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { getCurrentUser, setCurrentUser, UserAccount } from './services/auth';
+import { API_BASE_URL } from './services/api';
 import { ServicesHubPage, ProvisionedStore } from './pages/hub/ServicesHubPage';
 import { AiStoreBuilderPage } from './pages/onboarding/AiStoreBuilderPage';
 import { ChatCommandCenter } from './pages/dashboard/ChatCommandCenter';
@@ -220,7 +221,7 @@ const MainAppContent: React.FC = () => {
 
   useEffect(() => {
     const emailParam = user?.email ? `?owner_email=${encodeURIComponent(user.email)}` : '';
-    fetch(`http://127.0.0.1:8001/api/v1/stores${emailParam}`)
+    fetch(`${API_BASE_URL}/stores${emailParam}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -249,7 +250,7 @@ const MainAppContent: React.FC = () => {
 
   useEffect(() => {
     const tid = activeStore?.id || user?.tenantId || 'tenant-moustafa-tech';
-    fetch(`http://127.0.0.1:8001/api/v1/analytics/summary?tenant_id=${tid}`)
+    fetch(`${API_BASE_URL}/analytics/summary?tenant_id=${tid}`)
       .then((r) => r.json())
       .then((d) => {
         if (d) {
@@ -364,38 +365,64 @@ const MainAppContent: React.FC = () => {
       {/* ============================================================== */}
       {currentView === 'storefront' && (
         <div dir="rtl" className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans flex flex-col">
-          {/* Pure Customer Header - No Admin bars, No switchers, No ERP controls */}
-          <header className="bg-slate-900 text-slate-200 px-4 sm:px-8 py-3.5 text-xs flex items-center justify-between border-b border-slate-800 shrink-0 sticky top-0 z-40 shadow-sm">
+          {/* Pure Customer Header - World-class E-Commerce Navigation */}
+          <header className="bg-slate-900/95 backdrop-blur-md text-slate-200 px-4 sm:px-8 py-3 text-xs flex items-center justify-between border-b border-slate-800 shrink-0 sticky top-0 z-40 shadow-sm">
             <div className="flex items-center gap-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-              <span className="font-black text-white text-base tracking-tight">
-                {activeStore?.name || 'Moustafa Tech'}
-              </span>
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-xs">
+                <Store className="w-4 h-4" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-black text-white text-sm sm:text-base tracking-tight">
+                  {activeStore?.name || 'Moustafa Tech'}
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  متجر رسمي معتمد
+                </span>
+              </div>
             </div>
 
             {/* Standard E-Commerce Customer Navigation */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Owner quick switch to Admin */}
+              {user && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentView('dashboard');
+                    setActiveTab('ecommerce');
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl border border-sky-500/30 bg-sky-950/40 hover:bg-sky-900/50 text-sky-400 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  title="العودة كمدير للمتجر"
+                >
+                  <Store className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">العودة للوحة التحكم والـ ERP</span>
+                </button>
+              )}
+
               <button
+                type="button"
                 onClick={() => setStorefrontSubView('home')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   storefrontSubView === 'home'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-300 hover:text-white'
+                    ? 'bg-sky-600 text-white shadow-xs'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
                 }`}
               >
                 تصفح المنتجات
               </button>
 
               <button
+                type="button"
                 onClick={() => setStorefrontSubView('cart')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors relative flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all relative flex items-center gap-1.5 ${
                   storefrontSubView === 'cart'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-300 hover:text-white'
+                    ? 'bg-sky-600 text-white shadow-xs'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
                 }`}
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
-                <span>سلة المشتريات</span>
+                <span>السلة</span>
                 {totalCartCount > 0 && (
                   <span className="w-4 h-4 rounded-full bg-rose-500 text-white font-mono text-[9px] flex items-center justify-center font-bold">
                     {totalCartCount}
@@ -404,11 +431,12 @@ const MainAppContent: React.FC = () => {
               </button>
 
               <button
+                type="button"
                 onClick={() => setStorefrontSubView('checkout')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   storefrontSubView === 'checkout'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-300 hover:text-white'
+                    ? 'bg-sky-600 text-white shadow-xs'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
                 }`}
               >
                 الدفع والشحن
@@ -419,7 +447,7 @@ const MainAppContent: React.FC = () => {
               <button
                 type="button"
                 onClick={toggleMode}
-                className="p-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white transition-colors"
+                className="p-1.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white transition-colors"
                 title={theme.mode === 'dark' ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
               >
                 {theme.mode === 'dark' ? (
@@ -645,6 +673,8 @@ const MainAppContent: React.FC = () => {
                 className={
                   activeTab === 'chat'
                     ? 'flex-1 flex flex-col overflow-hidden min-h-0 p-0 w-full'
+                    : activeTab === 'analytics'
+                    ? 'flex-1 flex flex-col overflow-y-auto lg:overflow-hidden min-h-0 p-4 sm:p-6 max-w-[1600px] w-full mx-auto'
                     : 'flex-1 overflow-auto p-6 max-w-7xl w-full mx-auto'
                 }
               >

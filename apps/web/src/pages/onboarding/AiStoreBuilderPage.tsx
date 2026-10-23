@@ -22,6 +22,8 @@ import {
 import { UserAccount } from '../../components/auth/AuthModal';
 import { ProvisionedStore } from '../hub/ServicesHubPage';
 import { useAppTheme } from '../../contexts/ThemeContext';
+import { API_BASE_URL } from '../../services/api';
+import { copyToClipboard as safeCopyToClipboard } from '../../utils/clipboard';
 
 interface Message {
   id: string;
@@ -279,7 +281,7 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
       };
 
       try {
-        const res = await fetch('http://127.0.0.1:8001/api/v1/stores', {
+        const res = await fetch(`${API_BASE_URL}/stores`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -330,8 +332,8 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
     };
   };
 
-  const copyToClipboard = (text: string, type: 'admin' | 'storefront') => {
-    navigator.clipboard.writeText(text);
+  const handleCopyLink = async (text: string, type: 'admin' | 'storefront') => {
+    await safeCopyToClipboard(text);
     setCopiedLink(type);
     setTimeout(() => setCopiedLink(null), 2500);
   };
@@ -509,7 +511,7 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
                           />
                           <button
                             onClick={() =>
-                              copyToClipboard(msg.provisionedStore!.adminUrl, 'admin')
+                              handleCopyLink(msg.provisionedStore!.adminUrl, 'admin')
                             }
                             className="px-2.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs transition-colors flex items-center gap-1"
                             title="نسخ الرابط"
@@ -556,7 +558,7 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
                           />
                           <button
                             onClick={() =>
-                              copyToClipboard(msg.provisionedStore!.storefrontUrl, 'storefront')
+                              handleCopyLink(msg.provisionedStore!.storefrontUrl, 'storefront')
                             }
                             className="px-2.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs transition-colors flex items-center gap-1"
                             title="نسخ الرابط"

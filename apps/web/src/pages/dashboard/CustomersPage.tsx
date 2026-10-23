@@ -1,6 +1,7 @@
 // apps/web/src/pages/dashboard/CustomersPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Users, UserX } from 'lucide-react';
+import { API_BASE_URL } from '../../services/api';
 
 interface CustomersPageProps {
   tenantId?: string;
@@ -11,7 +12,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ tenantId }) => {
   const activeTid = tenantId || 'tenant-moustafa-tech';
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8001/api/v1/customers?tenant_id=${activeTid}`)
+    fetch(`${API_BASE_URL}/customers?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setCustomers(data);

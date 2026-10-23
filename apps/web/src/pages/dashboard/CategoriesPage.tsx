@@ -1,6 +1,7 @@
 // apps/web/src/pages/dashboard/CategoriesPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Layers, Plus, Trash2, CheckCircle2, FolderPlus } from 'lucide-react';
+import { API_BASE_URL } from '../../services/api';
 
 interface CategoriesPageProps {
   tenantId?: string;
@@ -16,7 +17,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({ tenantId }) => {
 
   const loadCategories = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8001/api/v1/categories?tenant_id=${activeTid}`);
+      const res = await fetch(`${API_BASE_URL}/categories?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
         setCategories(data);
@@ -33,7 +34,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({ tenantId }) => {
     if (!nameAr.trim()) return;
     setIsAdding(true);
     try {
-      await fetch(`http://127.0.0.1:8001/api/v1/categories?tenant_id=${activeTid}`, {
+      await fetch(`${API_BASE_URL}/categories?tenant_id=${activeTid}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name_ar: nameAr, slug: slug.trim() || undefined }),
@@ -48,7 +49,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({ tenantId }) => {
 
   const handleDelete = async (id: string, name: string) => {
     if (!window.confirm(`هل أنت متأكد من حذف القسم "${name}"؟`)) return;
-    await fetch(`http://127.0.0.1:8001/api/v1/categories/${id}?tenant_id=${activeTid}`, { method: 'DELETE' });
+    await fetch(`${API_BASE_URL}/categories/${id}?tenant_id=${activeTid}`, { method: 'DELETE' });
     await loadCategories();
   };
 

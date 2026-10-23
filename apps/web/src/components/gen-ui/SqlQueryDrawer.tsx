@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Terminal, Copy, Check, ShieldCheck, Clock, Hash, ChevronDown, ChevronUp } from 'lucide-react';
+import { copyToClipboard } from '../../utils/clipboard';
 
 interface SqlQueryDrawerProps {
   sql: string;
@@ -21,8 +22,8 @@ export const SqlQueryDrawer: React.FC<SqlQueryDrawerProps> = ({
   const [copied, setCopied] = useState(false);
   const isRtl = i18n.language.startsWith('ar');
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(sql);
+  const handleCopy = async () => {
+    await copyToClipboard(sql);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

@@ -1,6 +1,7 @@
 // apps/web/src/pages/dashboard/AuditLogPage.tsx
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Filter, X, Code2 } from 'lucide-react';
+import { API_BASE_URL } from '../../services/api';
 
 export interface AuditActionItem {
   id: string;
@@ -25,7 +26,7 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ tenantId }) => {
   const activeTid = tenantId || 'tenant-moustafa-tech';
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8001/api/v1/orders/audit-logs?tenant_id=${activeTid}`)
+    fetch(`${API_BASE_URL}/orders/audit-logs?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setActions(data);

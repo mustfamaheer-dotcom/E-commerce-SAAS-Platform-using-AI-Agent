@@ -1,6 +1,7 @@
 // apps/web/src/pages/dashboard/InventoryPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Package, AlertTriangle, Plus, Minus, CheckCircle2, PackageSearch } from 'lucide-react';
+import { API_BASE_URL } from '../../services/api';
 
 interface InventoryPageProps {
   tenantId?: string;
@@ -12,7 +13,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({ tenantId }) => {
 
   const loadInventory = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8001/api/v1/inventory?tenant_id=${activeTid}`);
+      const res = await fetch(`${API_BASE_URL}/inventory?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
         setItems(data);
@@ -26,7 +27,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({ tenantId }) => {
 
   const handleAdjustStock = async (productId: string, currentStock: number, delta: number) => {
     const nextStock = Math.max(0, currentStock + delta);
-    await fetch(`http://127.0.0.1:8001/api/v1/inventory/${productId}?tenant_id=${activeTid}`, {
+    await fetch(`${API_BASE_URL}/inventory/${productId}?tenant_id=${activeTid}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ stock_qty: nextStock }),

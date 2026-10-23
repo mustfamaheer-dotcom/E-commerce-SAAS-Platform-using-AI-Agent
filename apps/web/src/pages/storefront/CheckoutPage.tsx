@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { clearCart } from '../../store/cartSlice';
 import { CheckCircle2, CreditCard, Truck, ShieldCheck, Tag, ArrowRight, ExternalLink } from 'lucide-react';
+import { API_BASE_URL } from '../../services/api';
 
 const EGYPTIAN_CITIES = ['Cairo', 'Giza', 'Alexandria', 'Mansoura', 'Tanta', 'Assiut', 'Suez', 'Ismailia'];
 
@@ -47,7 +48,7 @@ export const CheckoutPage: React.FC = () => {
     setPromoMessage('');
 
     try {
-      const res = await fetch('http://127.0.0.1:8001/api/v1/coupons/validate', {
+      const res = await fetch(`${API_BASE_URL}/coupons/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: formData.promoCode, subtotal }),
@@ -82,7 +83,7 @@ export const CheckoutPage: React.FC = () => {
         promo_code: formData.promoCode,
       };
 
-      const res = await fetch('http://127.0.0.1:8001/api/v1/orders', {
+      const res = await fetch(`${API_BASE_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

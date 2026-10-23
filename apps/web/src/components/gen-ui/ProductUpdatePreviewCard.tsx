@@ -54,40 +54,40 @@ export const ProductUpdatePreviewCard: React.FC<ProductUpdatePreviewCardProps> =
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="w-full max-w-lg rounded-lg border border-slate-800 bg-slate-900 text-slate-100 shadow-sm overflow-hidden my-3"
+      className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-md overflow-hidden my-3 transition-colors"
     >
-      <div className="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+      <div className="bg-slate-50 dark:bg-slate-950 px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Tag className="w-4 h-4 text-sky-400" />
-          <h4 className="font-semibold text-xs text-slate-200">
+          <Tag className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+          <h4 className="font-bold text-xs text-slate-900 dark:text-slate-200">
             {isRtl ? 'معاينة تعديل منتج فردي (HITL)' : 'Single Product Update Preview'}
           </h4>
         </div>
-        <span className="text-[11px] font-mono text-slate-400">{diff.sku}</span>
+        <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">{diff.sku}</span>
       </div>
 
       {diff.marginWarning && (
-        <div className="bg-red-950/60 px-4 py-2 border-b border-red-800/80 text-[11px] text-red-300 flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4 shrink-0 text-red-400" />
+        <div className="bg-rose-50 dark:bg-red-950/60 px-4 py-2 border-b border-rose-200 dark:border-red-800/80 text-[11px] text-rose-800 dark:text-red-300 flex items-center gap-2">
+          <ShieldAlert className="w-4 h-4 shrink-0 text-rose-600 dark:text-red-400" />
           <span>{isRtl ? 'تنبيه: السعر المقترح أقل من سعر التكلفة!' : 'Proposed price is below unit cost!'}</span>
         </div>
       )}
 
       <div className="p-4 space-y-3 text-xs">
-        <div className="text-slate-200 font-medium">{diff.before.name}</div>
+        <div className="text-slate-800 dark:text-slate-200 font-bold">{diff.before.name}</div>
 
         <div className="grid grid-cols-2 gap-2.5 pt-1">
-          <div className="p-2.5 rounded-md bg-slate-950 border border-slate-800">
-            <span className="text-slate-400 block mb-1 text-[11px]">{isRtl ? 'السعر الحالي' : 'Current'}</span>
-            <div className="text-xs font-mono font-semibold text-slate-300">{diff.before.price.toLocaleString()} ج.م</div>
-            <div className="text-[10px] text-slate-500 mt-0.5">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+            <span className="text-slate-500 dark:text-slate-400 block mb-1 text-[11px]">{isRtl ? 'السعر الحالي' : 'Current'}</span>
+            <div className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">{diff.before.price.toLocaleString()} ج.م</div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
               {isRtl ? 'التكلفة:' : 'Cost:'} {diff.before.cost.toLocaleString()} ج.م
             </div>
           </div>
 
-          <div className="p-2.5 rounded-md bg-slate-950 border border-sky-800/60">
-            <span className="text-sky-400 block mb-1 text-[11px]">{isRtl ? 'السعر المقترح' : 'Proposed'}</span>
-            <div className="text-xs font-mono font-semibold text-sky-400">
+          <div className="p-2.5 rounded-xl bg-sky-50/50 dark:bg-slate-950 border border-sky-300 dark:border-sky-800/60">
+            <span className="text-sky-600 dark:text-sky-400 block mb-1 text-[11px] font-bold">{isRtl ? 'السعر المقترح' : 'Proposed'}</span>
+            <div className="text-xs font-mono font-bold text-sky-600 dark:text-sky-400">
               {(diff.after.price ?? diff.before.price).toLocaleString()} ج.م
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">

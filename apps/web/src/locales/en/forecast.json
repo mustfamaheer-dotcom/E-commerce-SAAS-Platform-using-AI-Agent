@@ -26,6 +26,12 @@
     "month": "Seasonality",
     "is_holiday": "Holiday Season",
     "holiday_weight": "Holiday Strength",
-    "stock_level": "Stock Availability"
+    "stock_level": "Stock Availability",
+    "discount": "Promotional Discount",
+    "marketing_campaign": "Social Media Marketing",
+    "social_campaign": "Social Media Marketing",
+    "weekend_white_friday": "Weekend & White Friday",
+    "white_friday": "White Friday & Weekend",
+    "competitor_price_index": "Competitor Price Index"
   }
 }

@@ -26,6 +26,12 @@
     "month": "الموسمية",
     "is_holiday": "الموسم / العيد",
     "holiday_weight": "قوة الموسم",
-    "stock_level": "توفر المخزون"
+    "stock_level": "توفر المخزون",
+    "discount": "الخصم الترويجي الحالي (Discount)",
+    "marketing_campaign": "حملة التسويق على السوشيال ميديا",
+    "social_campaign": "حملة التسويق على السوشيال ميديا",
+    "weekend_white_friday": "عطلة نهاية الأسبوع والجمعة البيضاء",
+    "white_friday": "عطلة نهاية الأسبوع والجمعة البيضاء",
+    "competitor_price_index": "مؤشر أسعار المنافسين"
   }
 }

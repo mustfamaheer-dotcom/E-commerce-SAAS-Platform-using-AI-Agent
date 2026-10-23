@@ -1,6 +1,7 @@
 // apps/web/src/pages/dashboard/CouponsPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Tag, Plus, Trash2, CheckCircle2, TicketPercent } from 'lucide-react';
+import { API_BASE_URL } from '../../services/api';
 
 interface CouponsPageProps {
   tenantId?: string;
@@ -18,7 +19,7 @@ export const CouponsPage: React.FC<CouponsPageProps> = ({ tenantId }) => {
 
   const loadCoupons = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8001/api/v1/coupons?tenant_id=${activeTid}`);
+      const res = await fetch(`${API_BASE_URL}/coupons?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
         setCoupons(data);
@@ -35,7 +36,7 @@ export const CouponsPage: React.FC<CouponsPageProps> = ({ tenantId }) => {
     if (!code.trim() || !value) return;
     setIsAdding(true);
     try {
-      await fetch(`http://127.0.0.1:8001/api/v1/coupons?tenant_id=${activeTid}`, {
+      await fetch(`${API_BASE_URL}/coupons?tenant_id=${activeTid}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -56,7 +57,7 @@ export const CouponsPage: React.FC<CouponsPageProps> = ({ tenantId }) => {
 
   const handleDelete = async (id: string, codeStr: string) => {
     if (!window.confirm(`هل أنت متأكد من حذف الكوبون "${codeStr}"؟`)) return;
-    await fetch(`http://127.0.0.1:8001/api/v1/coupons/${id}?tenant_id=${activeTid}`, { method: 'DELETE' });
+    await fetch(`${API_BASE_URL}/coupons/${id}?tenant_id=${activeTid}`, { method: 'DELETE' });
     await loadCoupons();
   };
 

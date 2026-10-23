@@ -88,10 +88,10 @@ export const AnalyticsResultCard: React.FC<AnalyticsResultCardProps> = ({ data }
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl overflow-hidden my-4"
+      className="w-full max-w-4xl rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-xl overflow-hidden my-4 transition-colors"
     >
       {/* Card Header & Controls */}
-      <div className="bg-slate-800/80 px-6 py-4 border-b border-slate-700 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-slate-50 dark:bg-slate-800/80 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
             {chartType === 'line' ? (

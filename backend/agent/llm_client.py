@@ -27,7 +27,7 @@ def get_llm(streaming: bool = False) -> Optional[Any]:
             from langchain_google_genai import ChatGoogleGenerativeAI
             llm = ChatGoogleGenerativeAI(
                 model="gemini-1.5-flash",
-                temperature=0.2,
+                temperature=0.3,
                 streaming=streaming,
                 google_api_key=config.GEMINI_API_KEY,
             )
@@ -35,13 +35,38 @@ def get_llm(streaming: bool = False) -> Optional[Any]:
         except Exception as e:
             logger.warning(f"Failed to initialize Gemini LLM: {e}")
 
-    # 2. Try OpenAI / OpenRouter if Gemini not available or failed
+    # 2. Try Groq if key is provided
+    if llm is None and config.GROQ_API_KEY:
+        try:
+            from langchain_groq import ChatGroq
+            llm = ChatGroq(
+                model="llama-3.3-70b-versatile",
+                temperature=0.3,
+                streaming=streaming,
+                groq_api_key=config.GROQ_API_KEY,
+            )
+            logger.info("Initialized Groq LLaMA 3.3 70B LLM client.")
+        except Exception as e:
+            try:
+                from langchain_openai import ChatOpenAI
+                llm = ChatOpenAI(
+                    model="llama-3.3-70b-versatile",
+                    temperature=0.3,
+                    streaming=streaming,
+                    openai_api_key=config.GROQ_API_KEY,
+                    base_url="https://api.groq.com/openai/v1",
+                )
+                logger.info("Initialized Groq via OpenAI API endpoint.")
+            except Exception as e2:
+                logger.warning(f"Failed to initialize Groq LLM: {e2}")
+
+    # 3. Try OpenAI / OpenRouter if available
     if llm is None and config.OPENAI_API_KEY and config.OPENAI_API_KEY != "sk-demo-key":
         try:
             from langchain_openai import ChatOpenAI
             llm = ChatOpenAI(
                 model="gpt-4o-mini",
-                temperature=0.2,
+                temperature=0.3,
                 streaming=streaming,
                 openai_api_key=config.OPENAI_API_KEY,
             )

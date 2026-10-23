@@ -1,6 +1,7 @@
 // apps/web/src/pages/dashboard/OrdersPage.tsx
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Truck, CheckCircle2, Clock, Filter, Eye, PackageOpen } from 'lucide-react';
+import { API_BASE_URL } from '../../services/api';
 
 interface OrdersPageProps {
   tenantId?: string;
@@ -16,8 +17,8 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ tenantId }) => {
     try {
       const url =
         selectedStatus === 'ALL'
-          ? `http://127.0.0.1:8001/api/v1/orders?tenant_id=${activeTid}`
-          : `http://127.0.0.1:8001/api/v1/orders?tenant_id=${activeTid}&status=${selectedStatus}`;
+          ? `${API_BASE_URL}/orders?tenant_id=${activeTid}`
+          : `${API_BASE_URL}/orders?tenant_id=${activeTid}&status=${selectedStatus}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -31,7 +32,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ tenantId }) => {
   }, [tenantId, selectedStatus]);
 
   const handleUpdateStatus = async (orderId: string, nextStatus: string) => {
-    await fetch(`http://127.0.0.1:8001/api/v1/orders/${orderId}/status?tenant_id=${activeTid}`, {
+    await fetch(`${API_BASE_URL}/orders/${orderId}/status?tenant_id=${activeTid}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: nextStatus, note: `Staff marked order as ${nextStatus}` }),

@@ -18,11 +18,16 @@ import {
   Sparkles,
   BarChart2,
   Users,
+  Pin,
+  Pencil,
+  Check,
+  X,
 } from 'lucide-react';
 import { GenUiRegistry } from '../../components/chat/GenUiRegistry';
 import { useAgentStream } from '../../hooks/useAgentStream';
 import { ThinkingBubble } from '../../components/chat/ThinkingBubble';
 import { StreamingMessage } from '../../components/chat/StreamingMessage';
+import { API_BASE_URL } from '../../services/api';
 
 export interface ChatMessage {
   id: string;
@@ -54,6 +59,91 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Session management: Pin & Rename
+  const [pinnedSessionIds, setPinnedSessionIds] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem(`techzone_pinned_sessions_${activeTid}`);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>('');
+
+  const togglePinSession = (sessionId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setPinnedSessionIds((prev) => {
+      const isPinned = prev.includes(sessionId);
+      const updated = isPinned ? prev.filter((id) => id !== sessionId) : [sessionId, ...prev];
+      try {
+        localStorage.setItem(`techzone_pinned_sessions_${activeTid}`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleStartRename = (session: any, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setEditingSessionId(session.id);
+    setEditingTitle(session.title || 'محادثة');
+  };
+
+  const handleSaveRename = async (sessionId: string, e?: React.MouseEvent | React.FormEvent) => {
+    e?.stopPropagation();
+    if (!editingTitle.trim()) {
+      setEditingSessionId(null);
+      return;
+    }
+    const newTitle = editingTitle.trim();
+    try {
+      await fetch(`${API_BASE_URL}/agent/sessions/${sessionId}?tenant_id=${activeTid}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle }),
+      });
+      setSessions((prev) =>
+        prev.map((s) => (s.id === sessionId ? { ...s, title: newTitle } : s))
+      );
+    } catch (err) {
+      console.error('Failed to rename session:', err);
+    } finally {
+      setEditingSessionId(null);
+    }
+  };
+
+  const handleDeleteSession = async (sessionId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!window.confirm('هل أنت متأكد من حذف هذه المحادثة بالكامل؟')) return;
+
+    try {
+      await fetch(`${API_BASE_URL}/agent/sessions/${sessionId}?tenant_id=${activeTid}`, {
+        method: 'DELETE',
+      });
+      setSessions((prev) => {
+        const remaining = prev.filter((s) => s.id !== sessionId);
+        if (currentSessionId === sessionId) {
+          if (remaining.length > 0) {
+            setCurrentSessionId(remaining[0].id);
+          } else {
+            handleStartNewSession();
+          }
+        }
+        return remaining;
+      });
+      setPinnedSessionIds((prev) => {
+        const updated = prev.filter((id) => id !== sessionId);
+        try {
+          localStorage.setItem(`techzone_pinned_sessions_${activeTid}`, JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+    } catch (err) {
+      console.error('Failed to delete session:', err);
+    }
+  };
+
   // Streaming State
   const { isStreaming, thinkingStatus, currentTool, sendStreamMessage } = useAgentStream();
   const [streamingTokens, setStreamingTokens] = useState<string>('');
@@ -62,7 +152,7 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
 
   const loadSessions = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8001/api/v1/agent/sessions?tenant_id=${activeTid}`);
+      const res = await fetch(`${API_BASE_URL}/agent/sessions?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
         setSessions(data);
@@ -78,7 +168,7 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
 
   const loadSessionMessages = async (sessId: string) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8001/api/v1/agent/sessions/${sessId}?tenant_id=${activeTid}`);
+      const res = await fetch(`${API_BASE_URL}/agent/sessions/${sessId}?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
         if (data.messages && data.messages.length > 0) {
@@ -128,7 +218,7 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
 
   const handleStartNewSession = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8001/api/v1/agent/sessions?tenant_id=${activeTid}`, {
+      const res = await fetch(`${API_BASE_URL}/agent/sessions?tenant_id=${activeTid}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: 'محادثة جديدة', tenant_id: activeTid }),
@@ -262,20 +352,111 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
                 لا توجد محادثات سابقة لهذا المتجر.
               </div>
             ) : (
-              sessions.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => setCurrentSessionId(s.id)}
-                  className={`w-full text-right p-2.5 rounded-xl text-xs transition-colors flex items-center gap-2 truncate ${
-                    currentSessionId === s.id
-                      ? 'bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-bold border border-sky-200 dark:border-sky-800 shadow-2xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                  }`}
-                >
-                  <MessageSquare className="w-3.5 h-3.5 shrink-0 opacity-60" />
-                  <span className="truncate">{s.title || 'محادثة'}</span>
-                </button>
-              ))
+              [...sessions]
+                .sort((a, b) => {
+                  const aPinned = pinnedSessionIds.includes(a.id);
+                  const bPinned = pinnedSessionIds.includes(b.id);
+                  if (aPinned && !bPinned) return -1;
+                  if (!aPinned && bPinned) return 1;
+                  return 0;
+                })
+                .map((s) => {
+                  const isPinned = pinnedSessionIds.includes(s.id);
+                  const isEditing = editingSessionId === s.id;
+                  const isActive = currentSessionId === s.id;
+
+                  return (
+                    <div
+                      key={s.id}
+                      className={`group relative rounded-xl text-xs transition-all flex items-center justify-between p-1.5 ${
+                        isActive
+                          ? 'bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-bold border border-sky-200 dark:border-sky-800 shadow-2xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      {isEditing ? (
+                        <div className="flex items-center gap-1 w-full" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="text"
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveRename(s.id, e);
+                              if (e.key === 'Escape') setEditingSessionId(null);
+                            }}
+                            autoFocus
+                            className="flex-1 bg-white dark:bg-slate-800 border border-sky-400 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={(e) => handleSaveRename(s.id, e)}
+                            className="p-1 rounded-md text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
+                            title="حفظ"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingSessionId(null);
+                            }}
+                            className="p-1 rounded-md text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                            title="إلغاء"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => setCurrentSessionId(s.id)}
+                            className="flex-1 text-right flex items-center gap-2 truncate pr-1 cursor-pointer"
+                          >
+                            {isPinned ? (
+                              <Pin className="w-3.5 h-3.5 shrink-0 text-amber-500 fill-amber-500 rotate-45" />
+                            ) : (
+                              <MessageSquare className="w-3.5 h-3.5 shrink-0 opacity-60" />
+                            )}
+                            <span className="truncate">{s.title || 'محادثة'}</span>
+                          </button>
+
+                          {/* Quick Action Icons: Pin, Rename, Delete */}
+                          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity pl-1">
+                            <button
+                              type="button"
+                              onClick={(e) => togglePinSession(s.id, e)}
+                              className={`p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer ${
+                                isPinned ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500'
+                              }`}
+                              title={isPinned ? 'إلغاء التثبيت' : 'تثبيت في الأعلى'}
+                            >
+                              <Pin className={`w-3 h-3 ${isPinned ? 'fill-amber-500 rotate-45' : ''}`} />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={(e) => handleStartRename(s, e)}
+                              className="p-1 rounded-md text-slate-400 hover:text-sky-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
+                              title="تعديل اسم المحادثة"
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={(e) => handleDeleteSession(s.id, e)}
+                              className="p-1 rounded-md text-slate-400 hover:text-rose-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
+                              title="حذف المحادثة"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })
             )}
           </div>
         </div>

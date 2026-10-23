@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Save, CheckCircle2, ShieldCheck, Truck, CreditCard } from 'lucide-react';
 import { LogoUploader } from '../../components/LogoUploader';
+import { API_BASE_URL } from '../../services/api';
 
 interface StoreSettingsPageProps {
   tenantId?: string;
@@ -19,7 +20,7 @@ export const StoreSettingsPage: React.FC<StoreSettingsPageProps> = ({ tenantId }
   const activeTid = tenantId || 'tenant-moustafa-tech';
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8001/api/v1/stores/me?tenant_id=${activeTid}`)
+    fetch(`${API_BASE_URL}/stores/me?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.tenant?.name) setStoreName(data.tenant.name);
@@ -38,7 +39,7 @@ export const StoreSettingsPage: React.FC<StoreSettingsPageProps> = ({ tenantId }
     setIsSaved(false);
 
     try {
-      await fetch(`http://127.0.0.1:8001/api/v1/stores/me?tenant_id=${activeTid}`, {
+      await fetch(`${API_BASE_URL}/stores/me?tenant_id=${activeTid}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

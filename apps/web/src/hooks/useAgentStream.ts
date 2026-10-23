@@ -1,5 +1,6 @@
 // apps/web/src/hooks/useAgentStream.ts
 import { useState, useCallback, useRef } from 'react';
+import { API_BASE_URL } from '../services/api';
 
 export interface StreamCallbacks {
   onThinking?: (message?: string) => void;
@@ -28,7 +29,7 @@ export function useAgentStream() {
       abortControllerRef.current = new AbortController();
 
       try {
-        const response = await fetch('http://127.0.0.1:8001/api/v1/agent/chat/stream', {
+        const response = await fetch(`${API_BASE_URL}/agent/chat/stream`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

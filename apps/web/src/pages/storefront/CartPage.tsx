@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { removeFromCart, updateQuantity, applyDiscount } from '../../store/cartSlice';
+import { API_BASE_URL } from '../../services/api';
 import {
   Trash2,
   Plus,
@@ -43,7 +44,7 @@ export const CartPage: React.FC<CartPageProps> = ({
     setCouponSuccess(null);
 
     try {
-      const res = await fetch('http://127.0.0.1:8001/api/v1/coupons/validate', {
+      const res = await fetch(`${API_BASE_URL}/coupons/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: inputCoupon, subtotal }),

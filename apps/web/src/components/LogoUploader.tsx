@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { UploadCloud, CheckCircle2, Sparkles, Palette } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import { API_BASE_URL } from '../services/api';
 
 interface LogoUploaderProps {
   onThemeGenerated?: (colors: any) => void;
@@ -27,7 +28,7 @@ export const LogoUploader: React.FC<LogoUploaderProps> = ({ onThemeGenerated }) 
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://127.0.0.1:8001/api/v1/stores/me/logo', {
+      const res = await fetch(`${API_BASE_URL}/stores/me/logo`, {
         method: 'POST',
         body: formData,
       });

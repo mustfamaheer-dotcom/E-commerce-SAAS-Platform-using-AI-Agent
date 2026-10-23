@@ -23,6 +23,10 @@ class SessionCreatePayload(BaseModel):
     tenant_id: Optional[str] = None
 
 
+class SessionUpdatePayload(BaseModel):
+    title: Optional[str] = None
+
+
 class ChatMessagePayload(BaseModel):
     message: str
     session_id: Optional[str] = None
@@ -116,6 +120,21 @@ def delete_session(session_id: str, tenant_id: Optional[str] = None, db: Session
     db.delete(sess)
     db.commit()
     return {"status": "success", "message": "تم حذف جلسة المحادثة بنجاح"}
+
+
+@router.patch("/sessions/{session_id}")
+def update_session(session_id: str, payload: SessionUpdatePayload, tenant_id: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(AgentSession).filter_by(id=session_id)
+    if tenant_id and tenant_id != "all":
+        query = query.filter_by(tenant_id=tenant_id)
+    sess = query.first()
+    if not sess:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if payload.title is not None and payload.title.strip():
+        sess.title = payload.title.strip()
+        db.commit()
+        db.refresh(sess)
+    return {"status": "success", "session": {"id": sess.id, "title": sess.title}}
 
 
 @router.post("/chat")
@@ -243,12 +262,27 @@ async def stream_agent_chat(payload: ChatMessagePayload):
             db.add(u_msg)
             db.commit()
 
-            # 1. Thinking phase
+            # 1. Multi-Step Deep Thinking Phase
             yield format_sse_event("thinking", {
                 "status": "thinking",
-                "message": "وكيل تيك زون يحلل طلبك وينفذ في قاعدة البيانات...",
+                "step": 1,
+                "message": "🧠 تحليل الاستعلام واستنباط الأهداف التجارية...",
             })
-            await asyncio.sleep(THINKING_MIN_SECONDS)
+            await asyncio.sleep(0.7)
+
+            yield format_sse_event("thinking", {
+                "status": "thinking",
+                "step": 2,
+                "message": "📊 استعلام قاعدة البيانات ومطابقة سجلات المبيعات الحية...",
+            })
+            await asyncio.sleep(0.7)
+
+            yield format_sse_event("thinking", {
+                "status": "thinking",
+                "step": 3,
+                "message": "💡 صياغة الاستجابة الاستشارية الذكية والتوصيات المباشرة...",
+            })
+            await asyncio.sleep(0.5)
 
             # 2. History & state
             db_history = (

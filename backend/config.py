@@ -21,4 +21,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(6
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini" if GEMINI_API_KEY else ("openai" if OPENAI_API_KEY and OPENAI_API_KEY != "sk-demo-key" else "heuristic"))
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+LLM_PROVIDER = os.getenv(
+    "LLM_PROVIDER",
+    "gemini" if GEMINI_API_KEY
+    else ("groq" if GROQ_API_KEY
+    else ("openai" if OPENAI_API_KEY and OPENAI_API_KEY != "sk-demo-key"
+    else "generative"))
+)

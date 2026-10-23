@@ -96,6 +96,13 @@ def create_store(payload: StoreCreatePayload, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_tenant)
 
+    # Auto-seed the newly created tenant from demo catalog & ERP transactions
+    try:
+        from backend.services.tenant_seeder import seed_tenant_from_demo
+        seed_tenant_from_demo(db, target_tenant_id=tenant_id, source_tenant_id="tenant-moustafa-tech")
+    except Exception as exc:
+        print(f"Warning: Auto-seeding tenant '{tenant_id}' failed: {exc}")
+
     return {
         "status": "success",
         "message": f"تم إنشاء المتجر '{new_tenant.name}' بنجاح",
@@ -131,10 +138,12 @@ def list_stores(owner_email: Optional[str] = None, db: Session = Depends(get_db)
                 if u.tenant_id
             ]
             allowed_ids = set(setting_tenant_ids + user_tenant_ids)
+            # Always include demo store so user can seamlessly switch and test with baseline ERP data
+            allowed_ids.add("tenant-moustafa-tech")
             if allowed_ids:
                 tenants = db.query(Tenant).filter(Tenant.id.in_(allowed_ids)).all()
             else:
-                tenants = []
+                tenants = db.query(Tenant).filter_by(id="tenant-moustafa-tech").all()
     else:
         # Default unauthenticated access only gets demo store, never leaking competitors
         tenants = db.query(Tenant).filter_by(id="tenant-moustafa-tech").all()
