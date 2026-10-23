@@ -143,3 +143,94 @@ def list_products_tool(tenant_id: str, limit: int = 15) -> Dict[str, Any]:
         }
     finally:
         db.close()
+
+
+def bulk_update_prices_tool(
+    tenant_id: str,
+    percent_change: float,
+    category_name_or_slug: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Applies bulk percentage price change (e.g. +10% or -15%) to products"""
+    db = SessionLocal()
+    try:
+        query = db.query(Product).filter_by(tenant_id=tenant_id)
+        if category_name_or_slug:
+            cat = (
+                db.query(Category)
+                .filter(
+                    Category.tenant_id == tenant_id,
+                    (Category.slug == category_name_or_slug) | (Category.name_ar.ilike(f"%{category_name_or_slug}%")),
+                )
+                .first()
+            )
+            if cat:
+                query = query.filter_by(category_id=cat.id)
+
+        products = query.limit(50).all()
+        if not products:
+            return {"status": "error", "message": "لم يتم العثور على منتجات لتعديل أسعارها."}
+
+        factor = 1.0 + (percent_change / 100.0)
+        items_preview = []
+        for p in products:
+            old_p = p.price
+            new_p = round(old_p * factor, 2)
+            p.price = new_p
+            items_preview.append({
+                "sku": p.sku,
+                "name": p.name_ar,
+                "oldPrice": old_p,
+                "newPrice": new_p,
+                "delta": round(new_p - old_p, 2),
+            })
+        db.commit()
+
+        sign = "+" if percent_change > 0 else ""
+        return {
+            "status": "success",
+            "card_type": "bulk_price_preview",
+            "message": f"تم تطبيق تعديل الأسعار ({sign}{percent_change}%) بنجاح على {len(products)} منتج.",
+            "payload": {
+                "actionId": f"bulk_price_{uuid.uuid4().hex[:6]}",
+                "percentChange": percent_change,
+                "totalAffected": len(products),
+                "items": items_preview[:15],
+            },
+        }
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        db.close()
+
+
+def search_products_tool(tenant_id: str, query: str) -> Dict[str, Any]:
+    """Searches products by keyword or SKU"""
+    db = SessionLocal()
+    try:
+        products = (
+            db.query(Product)
+            .filter(
+                Product.tenant_id == tenant_id,
+                (Product.name_ar.ilike(f"%{query}%"))
+                | (Product.name_en.ilike(f"%{query}%"))
+                | (Product.sku.ilike(f"%{query}%")),
+            )
+            .limit(10)
+            .all()
+        )
+        if not products:
+            return {"status": "info", "message": f"لم يتم العثور على أي منتج يطابق '{query}' في الكتالوج."}
+
+        return {
+            "status": "success",
+            "card_type": "products_list_card",
+            "message": f"عثرت على {len(products)} منتجات تطابق بحثك '{query}':",
+            "products": [
+                {"id": p.id, "name": p.name_ar, "sku": p.sku, "price": p.price, "stock": p.stock_qty}
+                for p in products
+            ],
+        }
+    finally:
+        db.close()
+

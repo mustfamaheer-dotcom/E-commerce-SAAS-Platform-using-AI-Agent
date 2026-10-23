@@ -1,5 +1,5 @@
 # backend/agent/tools/order_tool.py
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from backend.db.database import SessionLocal
 from backend.models import Order
 
@@ -18,6 +18,7 @@ def list_orders_tool(tenant_id: str, status: Optional[str] = None) -> Dict[str, 
 
         return {
             "status": "success",
+            "card_type": "orders_card",
             "message": msg,
             "count": len(orders),
             "orders": [
@@ -48,7 +49,34 @@ def update_order_status_tool(tenant_id: str, order_id: str, new_status: str) -> 
         db.commit()
         return {
             "status": "success",
+            "card_type": "orders_card",
             "message": f"تم تحديث حالة الطلب {order_id} من {old_status} إلى {new_status.upper()} بنجاح.",
+        }
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        db.close()
+
+
+def bulk_update_order_status_tool(tenant_id: str, order_ids: List[str], new_status: str) -> Dict[str, Any]:
+    """Updates status of multiple orders at once (e.g. mark shipped)"""
+    db = SessionLocal()
+    try:
+        updated = []
+        for oid in order_ids:
+            clean_id = str(oid).strip()
+            o = db.query(Order).filter_by(tenant_id=tenant_id, id=clean_id).first()
+            if o:
+                o.status = new_status.upper()
+                updated.append(clean_id)
+        db.commit()
+        return {
+            "status": "success",
+            "card_type": "orders_card",
+            "message": f"تم تحديث حالة {len(updated)} طلبات إلى '{new_status.upper()}' بنجاح.",
+            "updatedCount": len(updated),
+            "orderIds": updated,
         }
     except Exception as e:
         db.rollback()

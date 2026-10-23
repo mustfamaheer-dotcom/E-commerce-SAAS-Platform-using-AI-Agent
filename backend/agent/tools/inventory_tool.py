@@ -1,5 +1,5 @@
 # backend/agent/tools/inventory_tool.py
-from typing import Dict, Any
+from typing import Dict, Any, List
 from backend.db.database import SessionLocal
 from backend.models import Product
 
@@ -30,9 +30,13 @@ def get_inventory_alerts_tool(tenant_id: str) -> Dict[str, Any]:
 
         return {
             "status": "success",
+            "card_type": "inventory_alerts",
             "message": msg,
             "totalAlerts": len(low_stock_items),
             "alerts": low_stock_items,
+            "payload": {
+                "alerts": low_stock_items,
+            },
         }
     finally:
         db.close()
@@ -48,6 +52,7 @@ def adjust_stock_tool(tenant_id: str, sku: str, quantity: int) -> Dict[str, Any]
         db.commit()
         return {
             "status": "success",
+            "card_type": "inventory_card",
             "message": f"تم تعديل مخزون '{prod.name_ar}' ليصبح {prod.stock_qty} قطعة.",
             "current_stock": prod.stock_qty,
         }
@@ -56,3 +61,18 @@ def adjust_stock_tool(tenant_id: str, sku: str, quantity: int) -> Dict[str, Any]
         return {"status": "error", "message": str(e)}
     finally:
         db.close()
+
+
+def get_reorder_suggestions_tool(tenant_id: str) -> Dict[str, Any]:
+    """Generates AI-driven restocking suggestions"""
+    alerts = get_inventory_alerts_tool(tenant_id)
+    items = alerts.get("alerts", [])
+    return {
+        "status": "success",
+        "card_type": "inventory_alerts",
+        "message": f"📦 تم إعداد قائمة بمقترحات إعادة الطلب لـ {len(items)} منتجات لتفادي نفاد المخزون:",
+        "suggestions": items,
+        "payload": {
+            "alerts": items,
+        },
+    }

@@ -15,8 +15,14 @@ import {
   AlertTriangle,
   CheckCircle2,
   Trash2,
+  Sparkles,
+  BarChart2,
+  Users,
 } from 'lucide-react';
 import { GenUiRegistry } from '../../components/chat/GenUiRegistry';
+import { useAgentStream } from '../../hooks/useAgentStream';
+import { ThinkingBubble } from '../../components/chat/ThinkingBubble';
+import { StreamingMessage } from '../../components/chat/StreamingMessage';
 
 export interface ChatMessage {
   id: string;
@@ -46,8 +52,13 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
   const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
-  const [isThinking, setIsThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Streaming State
+  const { isStreaming, thinkingStatus, currentTool, sendStreamMessage } = useAgentStream();
+  const [streamingTokens, setStreamingTokens] = useState<string>('');
+  const [streamingCardType, setStreamingCardType] = useState<string | null>(null);
+  const [streamingCardPayload, setStreamingCardPayload] = useState<any>(null);
 
   const loadSessions = async () => {
     try {
@@ -55,9 +66,9 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
       if (res.ok) {
         const data = await res.json();
         setSessions(data);
-        if (data.length > 0) {
+        if (data.length > 0 && !currentSessionId) {
           setCurrentSessionId(data[0].id);
-        } else {
+        } else if (!currentSessionId) {
           const freshId = `sess_${activeTid.replace(/[^a-zA-Z0-9]/g, '')}_main`;
           setCurrentSessionId(freshId);
         }
@@ -88,12 +99,11 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
       }
     } catch (_) {}
 
-    // Initial greeting personalized strictly to this merchant and store
     setMessages([
       {
         id: `msg_init_${activeTid}`,
         role: 'assistant',
-        content: `أهلاً بك يا ${displayName} في مركز قيادة ${displayStore}! 🇪🇬\n\nأنا وكيلك الذكي لإدارة متجرك والـ ERP بالكامل بالمحادثة الحقيقية.\nتقدر تطلب مني دلوقتي:\n• "أضف منتج ماوس لاسلكي بسعر 450 جنيه"\n• "ايه هي الطلبات الجديدة؟"\n• "افحص نواقص المخزون"\n• "انشئ كوبون خصم SALE20 بنسبة 20%"\n• "اعرض لي ملخص الإيرادات والأرباح"`,
+        content: `أهلاً بك يا ${displayName} في مركز قيادة ${displayStore}! 🇪🇬\n\nأنا وكيلك الذكي لإدارة متجرك والـ ERP بالكامل بالمحادثة الحقيقية وبث الردود الحية.\nجرب تطلب مني دلوقتي:\n• "قولي الارباح في الداشبورد"\n• "ضيف منتج جديد"\n• "توقع المبيعات القادمة"\n• "افحص نواقص المخزون"\n• "اعرض تقسيم العملاء"`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       },
     ]);
@@ -114,7 +124,7 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isThinking]);
+  }, [messages, isStreaming, streamingTokens, thinkingStatus]);
 
   const handleStartNewSession = async () => {
     try {
@@ -133,7 +143,7 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
-    if (!text || isThinking) return;
+    if (!text || isStreaming) return;
 
     const userMsg: ChatMessage = {
       id: `user_${Date.now()}`,
@@ -144,72 +154,92 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
 
     setMessages((prev) => [...prev, userMsg]);
     setInputText('');
-    setIsThinking(true);
 
-    try {
-      const res = await fetch('http://127.0.0.1:8001/api/v1/agent/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          session_id: currentSessionId,
-          tenant_id: activeTid,
-        }),
-      });
+    // Reset stream accumulators
+    setStreamingTokens('');
+    setStreamingCardType(null);
+    setStreamingCardPayload(null);
 
-      if (!res.ok) throw new Error('فشل تنفيذ أمر الوكيل');
-      const data = await res.json();
-
-      const aiMsg: ChatMessage = {
-        id: `ai_${Date.now()}`,
-        role: 'assistant',
-        content: data.reply,
-        cardType: data.cardType,
-        payload: data.payload,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-
-      setMessages((prev) => [...prev, aiMsg]);
-      await loadSessions();
-    } catch (err: any) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `ai_err_${Date.now()}`,
-          role: 'assistant',
-          content: 'عذراً، حدث خطأ أثناء معالجة الأمر. يرجى المحاولة مرة أخرى.',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    await sendStreamMessage(
+      {
+        message: text,
+        session_id: currentSessionId,
+        tenant_id: activeTid,
+      },
+      {
+        onToken: (tok) => {
+          setStreamingTokens((prev) => prev + tok);
         },
-      ]);
-    } finally {
-      setIsThinking(false);
-    }
+        onCard: (cardType, payload) => {
+          setStreamingCardType(cardType);
+          setStreamingCardPayload(payload);
+        },
+        onDone: (data) => {
+          const aiMsg: ChatMessage = {
+            id: `ai_${Date.now()}`,
+            role: 'assistant',
+            content: data.reply || streamingTokens,
+            cardType: data.cardType || streamingCardType || undefined,
+            payload: data.payload || streamingCardPayload || undefined,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          };
+          setMessages((prev) => [...prev, aiMsg]);
+          setStreamingTokens('');
+          setStreamingCardType(null);
+          setStreamingCardPayload(null);
+          loadSessions();
+        },
+        onError: (err) => {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `ai_err_${Date.now()}`,
+              role: 'assistant',
+              content: 'عذراً، حدث خطأ أثناء الاتصال بالوكيل. يرجى إعادة المحاولة.',
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            },
+          ]);
+          setStreamingTokens('');
+          setStreamingCardType(null);
+          setStreamingCardPayload(null);
+        },
+      }
+    );
   };
+
+  const QUICK_PROMPTS = [
+    { label: '📊 الأرباح والداشبورد', query: 'قولي الارباح في الداشبورد' },
+    { label: '📦 إضافة منتج', query: 'عايز اضيف منتج' },
+    { label: '📈 توقع المبيعات', query: 'توقع المبيعات القادمة' },
+    { label: '⚠️ فحص المخزون', query: 'افحص نواقص المخزون' },
+    { label: '👥 تقسيم العملاء', query: 'اعرض تقسيم العملاء' },
+    { label: '📄 تقرير مالي PDF', query: 'استخرج تقرير مالي pdf' },
+  ];
 
   return (
     <div dir="rtl" className="h-full flex flex-col font-sans text-slate-800 dark:text-slate-100">
       {/* Top Header */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between shrink-0">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between shrink-0 shadow-2xs">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+          <div className="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
             <Bot className="w-4 h-4" />
           </div>
           <div>
             <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <span>وكيل تيك زون الذكي (LangGraph Autonomous Agent)</span>
+              <span>وكيل تيك زون للـ ERP والمحادثة الذكية</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                Live AI
+                Streaming SSE Live
               </span>
             </h2>
             <p className="text-[10px] text-slate-500 dark:text-slate-400">
-              تحكم كامل في الكتالوج، المخزون، الطلبات، وبوابات الدفع عبر المحادثة
+              إدارة الكتالوج، المخزون، الطلبات، وبطاقات التحليلات التفاعلية عبر الشات 100%
             </p>
           </div>
         </div>
 
         <button
           onClick={handleStartNewSession}
-          className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+          className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
         >
           <Plus className="w-3.5 h-3.5 text-sky-500" />
           <span>محادثة جديدة</span>
@@ -219,9 +249,12 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
       {/* Main Container with Sidebar + Chat */}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sessions Sidebar */}
-        <div className="hidden md:flex w-60 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex-col shrink-0 min-h-0">
-          <div className="p-3 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            سجل المحادثات السابقة
+        <div className="hidden md:flex w-64 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex-col shrink-0 min-h-0">
+          <div className="p-3 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
+            <span>سجل الجلسات</span>
+            <span className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+              {sessions.length}
+            </span>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
             {sessions.length === 0 ? (
@@ -230,19 +263,20 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
               </div>
             ) : (
               sessions.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setCurrentSessionId(s.id)}
-                className={`w-full text-right p-2.5 rounded-xl text-xs transition-colors flex items-center gap-2 truncate ${
-                  currentSessionId === s.id
-                    ? 'bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-bold border border-sky-200 dark:border-sky-800'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                }`}
-              >
-                <MessageSquare className="w-3.5 h-3.5 shrink-0 opacity-60" />
-                <span className="truncate">{s.title || 'محادثة'}</span>
-              </button>
-            ))) }
+                <button
+                  key={s.id}
+                  onClick={() => setCurrentSessionId(s.id)}
+                  className={`w-full text-right p-2.5 rounded-xl text-xs transition-colors flex items-center gap-2 truncate ${
+                    currentSessionId === s.id
+                      ? 'bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-bold border border-sky-200 dark:border-sky-800 shadow-2xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  }`}
+                >
+                  <MessageSquare className="w-3.5 h-3.5 shrink-0 opacity-60" />
+                  <span className="truncate">{s.title || 'محادثة'}</span>
+                </button>
+              ))
+            )}
           </div>
         </div>
 
@@ -263,132 +297,62 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
                 </div>
 
                 <div
-                  className={`max-w-[88%] sm:max-w-[78%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs ${
+                  className={`max-w-[92%] sm:max-w-[82%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs ${
                     msg.role === 'user'
-                      ? 'bg-sky-600 text-white rounded-br-xs'
+                      ? 'bg-sky-600 text-white rounded-br-xs font-medium'
                       : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-xs'
                   }`}
                 >
                   <div className="whitespace-pre-line font-medium">{msg.content}</div>
 
-                  {/* Render Legacy GenUI cards if any */}
-                  {msg.cardType &&
-                    ['sales_forecast', 'inventory_alerts', 'bulk_price_preview'].includes(
-                      msg.cardType
-                    ) && (
-                      <div className="mt-3">
-                        <GenUiRegistry
-                          cardType={msg.cardType}
-                          payload={msg.payload || {}}
-                          onApprove={() => {}}
-                          onCancel={() => {}}
-                        />
-                      </div>
-                    )}
-
-                  {/* Render Native Tool Result Cards */}
-                  {msg.cardType === 'product_card' && msg.payload?.product && (
-                    <div className="mt-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
-                      <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                        <Package className="w-3.5 h-3.5 text-sky-500" />
-                        <span>تمت إضافة المنتج للكتالوج:</span>
-                      </div>
-                      <div className="flex justify-between font-mono text-[11px] pt-1 border-t border-slate-200 dark:border-slate-800">
-                        <span>{msg.payload.product.name}</span>
-                        <span className="font-bold text-sky-600">
-                          {msg.payload.product.price?.toLocaleString()} ج.م
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {msg.cardType === 'orders_card' && msg.payload?.orders && (
-                    <div className="mt-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
-                      <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                        <ShoppingCart className="w-3.5 h-3.5 text-sky-500" />
-                        <span>أحدث طلبات المتجر ({msg.payload.count}):</span>
-                      </div>
-                      <div className="space-y-1.5 font-mono text-[11px]">
-                        {msg.payload.orders.slice(0, 4).map((o: any) => (
-                          <div
-                            key={o.id}
-                            className="flex justify-between p-1.5 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
-                          >
-                            <span>{o.id}</span>
-                            <span className="font-bold">{o.total?.toLocaleString()} ج.م</span>
-                            <span className="text-[10px] text-sky-600">{o.status}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {msg.cardType === 'inventory_card' && msg.payload?.alerts && (
-                    <div className="mt-3 p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs space-y-1.5">
-                      <div className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                        <AlertTriangle className="w-3.5 h-3.5" />
-                        <span>نواقص المخزون المرصودة:</span>
-                      </div>
-                      {msg.payload.alerts.slice(0, 3).map((a: any, i: number) => (
-                        <div key={i} className="flex justify-between text-[11px]">
-                          <span>{a.productName}</span>
-                          <span className="font-mono text-rose-600 font-bold">
-                            {a.currentStock} قطع متبقية
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {msg.cardType === 'coupon_card' && msg.payload?.coupon && (
-                    <div className="mt-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-xs flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300">
-                        <Tag className="w-3.5 h-3.5" />
-                        <span>الكوبون النشط:</span>
-                        <span className="font-mono">{msg.payload.coupon.code}</span>
-                      </div>
-                      <span className="font-bold text-emerald-700 dark:text-emerald-400">
-                        خصم {msg.payload.coupon.value}%
-                      </span>
-                    </div>
-                  )}
-
-                  {msg.cardType === 'analytics_card' && msg.payload?.kpis && (
-                    <div className="mt-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
-                      <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                        <TrendingUp className="w-3.5 h-3.5 text-sky-500" />
-                        <span>مؤشرات أداء المتجر:</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-                        <div>الإيرادات: {msg.payload.kpis.totalRevenue?.toLocaleString()} ج.م</div>
-                        <div>الطلبات: {msg.payload.kpis.totalOrders}</div>
-                        <div>العملاء: {msg.payload.kpis.totalCustomers}</div>
-                        <div>متوسط السلة: {msg.payload.kpis.averageOrderValue} ج.م</div>
-                      </div>
+                  {/* Render GenUI Card via GenUiRegistry */}
+                  {msg.cardType && msg.cardType !== 'text' && (
+                    <div className="mt-3">
+                      <GenUiRegistry
+                        cardType={msg.cardType}
+                        payload={msg.payload || {}}
+                        onSendMessage={(cmd) => handleSendMessage(cmd)}
+                      />
                     </div>
                   )}
                 </div>
               </div>
             ))}
 
-            {isThinking && (
-              <div className="flex flex-col items-end space-y-1">
-                <div className="text-[10px] text-slate-400 px-1">الوكيل يفكر وينفذ في قاعدة البيانات...</div>
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl rounded-bl-xs px-4 py-2.5 shadow-xs flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-bounce"></span>
-                  <span
-                    className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-bounce"
-                    style={{ animationDelay: '150ms' }}
-                  ></span>
-                  <span
-                    className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-bounce"
-                    style={{ animationDelay: '300ms' }}
-                  ></span>
-                </div>
+            {/* Live Streaming Response / Thinking Indicator */}
+            {isStreaming && (
+              <div className="space-y-3">
+                {thinkingStatus && !streamingTokens && (
+                  <ThinkingBubble statusText={thinkingStatus} toolName={currentTool} />
+                )}
+
+                {(streamingTokens || streamingCardType) && (
+                  <StreamingMessage
+                    tokens={streamingTokens}
+                    cardType={streamingCardType}
+                    cardPayload={streamingCardPayload}
+                    isStreaming={isStreaming}
+                    onSendMessage={(cmd) => handleSendMessage(cmd)}
+                  />
+                )}
               </div>
             )}
 
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Prompt Suggestions */}
+          <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xs flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+            {QUICK_PROMPTS.map((p, i) => (
+              <button
+                key={i}
+                disabled={isStreaming}
+                onClick={() => handleSendMessage(p.query)}
+                className="whitespace-nowrap px-2.5 py-1 rounded-full bg-slate-100 hover:bg-sky-50 dark:bg-slate-800 dark:hover:bg-sky-950/60 text-slate-700 hover:text-sky-600 dark:text-slate-300 dark:hover:text-sky-400 text-[11px] font-semibold transition-colors shrink-0 border border-slate-200/60 dark:border-slate-700/60"
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
 
           {/* Input Box */}
@@ -404,13 +368,13 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="اطلب أي أمر بالمصري (مثال: أضف سماعة أنكر بـ 950 جنيه، أو اعرض الطلبات)..."
+                placeholder="اطلب أي أمر بالمصري (مثال: قولي الارباح في الداشبورد، أو ضيف منتج جديد)..."
                 className="flex-1 bg-transparent px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
               />
               <button
                 type="submit"
-                disabled={!inputText.trim() || isThinking}
-                className="p-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-colors disabled:opacity-40"
+                disabled={!inputText.trim() || isStreaming}
+                className="p-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-colors disabled:opacity-40 shadow-xs"
               >
                 <Send className="w-4 h-4" />
               </button>

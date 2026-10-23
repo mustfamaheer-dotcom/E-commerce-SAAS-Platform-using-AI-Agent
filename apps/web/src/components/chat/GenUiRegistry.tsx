@@ -1,6 +1,7 @@
 // apps/web/src/components/chat/GenUiRegistry.tsx
 import React from 'react';
-import { AnalyticsResultCard, AnalyticsResultPayload } from '../gen-ui/AnalyticsResultCard';
+import { AnalyticsDashboardCard, AnalyticsDashboardPayload } from '../gen-ui/AnalyticsDashboardCard';
+import { ClarificationCard, ClarificationPayload } from '../gen-ui/ClarificationCard';
 import { BulkPricePreviewCard, BulkPricePreviewPayload } from '../gen-ui/BulkPricePreviewCard';
 import { InventoryAlertsList, InventoryAlertData } from '../gen-ui/InventoryAlertsList';
 import { ProductUpdatePreviewCard, ProductUpdateDiff } from '../gen-ui/ProductUpdatePreviewCard';
@@ -10,17 +11,24 @@ import { CustomerSegmentsCard, CustomerSegmentsPayload } from '../gen-ui/Custome
 import { PromotionApprovalCard, PromotionApprovalPayload } from '../gen-ui/PromotionApprovalCard';
 
 export type GenUiCardType =
+  | 'analytics_dashboard'
+  | 'analytics_card'
   | 'analytics_result'
+  | 'clarification'
   | 'sales_forecast'
   | 'bulk_price_preview'
   | 'product_update_preview'
+  | 'price_card'
   | 'inventory_alerts'
+  | 'inventory_card'
   | 'store_creation_preview'
   | 'customer_segments'
-  | 'promotion_approval';
+  | 'promotion_approval'
+  | 'coupon_card'
+  | string;
 
 export interface GenUiRegistryProps {
-  cardType: GenUiCardType | string;
+  cardType: GenUiCardType;
   payload: Record<string, any>;
   onApprove?: (actionId: string) => void;
   onCancel?: (actionId: string) => void;
@@ -28,6 +36,7 @@ export interface GenUiRegistryProps {
   onHorizonChange?: (horizon: 7 | 14 | 30) => void;
   onRequestPurchase?: (quantity: number) => void;
   onCreatePromo?: (segment: string) => void;
+  onSendMessage?: (msg: string) => void;
   isSubmitting?: boolean;
 }
 
@@ -40,12 +49,27 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
   onHorizonChange,
   onRequestPurchase,
   onCreatePromo,
+  onSendMessage,
   isSubmitting = false,
 }) => {
   const safePayload = (payload?.payload || payload) as any;
 
   switch (cardType) {
+    case 'analytics_dashboard':
+    case 'analytics_card':
+    case 'analytics_result':
+      return <AnalyticsDashboardCard data={safePayload as AnalyticsDashboardPayload} />;
+
+    case 'clarification':
+      return (
+        <ClarificationCard
+          data={safePayload as ClarificationPayload}
+          onSubmit={(msg) => onSendMessage?.(msg)}
+        />
+      );
+
     case 'sales_forecast':
+    case 'forecast_card':
       return (
         <SalesForecastCard
           data={safePayload as SalesForecastPayload}
@@ -54,10 +78,7 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
         />
       );
 
-    case 'analytics_result':
-      return <AnalyticsResultCard data={safePayload as AnalyticsResultPayload} />;
-
-    case 'bulk_price_preview': {
+    case 'bulk_price_preview':
       return (
         <BulkPricePreviewCard
           payload={safePayload as BulkPricePreviewPayload}
@@ -66,9 +87,9 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
           isSubmitting={isSubmitting}
         />
       );
-    }
 
-    case 'product_update_preview': {
+    case 'product_update_preview':
+    case 'price_card':
       return (
         <ProductUpdatePreviewCard
           diff={safePayload as ProductUpdateDiff}
@@ -76,9 +97,9 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
           onCancel={(actionId) => onCancel?.(actionId)}
         />
       );
-    }
 
     case 'inventory_alerts':
+    case 'inventory_card':
       return (
         <InventoryAlertsList
           alerts={(safePayload.alerts || safePayload) as InventoryAlertData[]}
@@ -105,6 +126,7 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
       );
 
     case 'promotion_approval':
+    case 'coupon_card':
       return (
         <PromotionApprovalCard
           data={safePayload as PromotionApprovalPayload}
@@ -119,6 +141,8 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
 };
 
 export const GEN_UI_COMPONENTS: Record<string, string> = {
+  analytics_dashboard: 'AnalyticsDashboardCard',
+  clarification: 'ClarificationCard',
   sales_forecast: 'SalesForecastCard',
   analytics_result: 'AnalyticsResultCard',
   bulk_price_preview: 'BulkPricePreviewCard',

@@ -1,15 +1,19 @@
 # backend/api/routes/agent.py
 import json
 import uuid
+import asyncio
 from typing import Optional, Dict, Any, List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from langchain_core.messages import HumanMessage, AIMessage
 
-from backend.db.database import get_db
+from backend.db.database import get_db, SessionLocal
 from backend.models import AgentSession, AgentMessage, AgentAction
 from backend.agent.erp_agent import get_erp_agent
+from backend.agent.streaming_utils import format_sse_event, throttle_tokens, THINKING_MIN_SECONDS
+from backend.agent.session_manager import auto_title_session, extract_context_slots
 
 router = APIRouter(prefix="/agent", tags=["AI Agent Command Center"])
 
@@ -74,7 +78,6 @@ def get_session_history(session_id: str, tenant_id: Optional[str] = None, db: Se
         else:
             return {"session": {"id": session_id, "title": "محادثة جديدة"}, "messages": []}
     elif tenant_id and tenant_id != "all" and sess.tenant_id != tenant_id:
-        # Cross-tenant protection: refuse to leak other store's session history!
         return {
             "session": {"id": session_id, "title": "محادثة جديدة"},
             "messages": [],
@@ -121,24 +124,27 @@ def process_agent_chat(payload: ChatMessagePayload, db: Session = Depends(get_db
     session_id = payload.session_id
 
     # Cross-tenant safety check
+    is_new = False
     if session_id:
         existing_sess = db.query(AgentSession).filter_by(id=session_id).first()
         if not existing_sess:
             new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=payload.message[:35])
             db.add(new_sess)
             db.commit()
+            is_new = True
         elif existing_sess.tenant_id != tenant_id:
-            # Fork into a new session strictly owned by this tenant
             session_id = f"sess_{uuid.uuid4().hex[:8]}"
             new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=payload.message[:35])
             db.add(new_sess)
             db.commit()
+            is_new = True
     else:
         session_id = f"sess_{uuid.uuid4().hex[:8]}"
         title = payload.message[:35] + ("..." if len(payload.message) > 35 else "")
         new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=title)
         db.add(new_sess)
         db.commit()
+        is_new = True
 
     # Save user message
     user_msg_id = f"msg_{uuid.uuid4().hex[:8]}"
@@ -151,7 +157,7 @@ def process_agent_chat(payload: ChatMessagePayload, db: Session = Depends(get_db
     db.add(u_msg)
     db.commit()
 
-    # Load recent conversation history for this specific session
+    # Load 20 recent messages
     db_history = (
         db.query(AgentMessage)
         .filter_by(session_id=session_id)
@@ -159,18 +165,19 @@ def process_agent_chat(payload: ChatMessagePayload, db: Session = Depends(get_db
         .all()
     )
     history_messages = []
-    for m in db_history[-10:]:
+    for m in db_history[-20:]:
         if m.role == "user":
             history_messages.append(HumanMessage(content=m.content))
         else:
             history_messages.append(AIMessage(content=m.content))
 
-    # Invoke LangGraph agent with strict tenant isolation
     agent = get_erp_agent()
+    slots = extract_context_slots(db_history)
     state = {
         "messages": history_messages if history_messages else [HumanMessage(content=payload.message)],
         "tenant_id": tenant_id,
         "session_id": session_id,
+        "context_slots": slots,
     }
     result = agent.invoke(state)
 
@@ -198,3 +205,135 @@ def process_agent_chat(payload: ChatMessagePayload, db: Session = Depends(get_db
         "cardType": card_type,
         "payload": tool_output,
     }
+
+
+@router.post("/chat/stream")
+async def stream_agent_chat(payload: ChatMessagePayload):
+    """
+    Server-Sent Events endpoint for streaming agent responses.
+    Emits:
+      - thinking: agent is reasoning or fetching data
+      - tool_call: tool is executing
+      - token: streaming typewriter token
+      - card: rich generated UI card payload
+      - done: stream finished with final output
+      - error: error occurred
+    """
+    tenant_id = payload.tenant_id
+    session_id = payload.session_id or f"sess_{uuid.uuid4().hex[:8]}"
+
+    async def event_generator():
+        db = SessionLocal()
+        try:
+            # Session verification
+            existing_sess = db.query(AgentSession).filter_by(id=session_id).first()
+            if not existing_sess:
+                new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=payload.message[:35])
+                db.add(new_sess)
+                db.commit()
+
+            # Save user message
+            user_msg_id = f"msg_{uuid.uuid4().hex[:8]}"
+            u_msg = AgentMessage(
+                id=user_msg_id,
+                session_id=session_id,
+                role="user",
+                content=payload.message,
+            )
+            db.add(u_msg)
+            db.commit()
+
+            # 1. Thinking phase
+            yield format_sse_event("thinking", {
+                "status": "thinking",
+                "message": "وكيل تيك زون يحلل طلبك وينفذ في قاعدة البيانات...",
+            })
+            await asyncio.sleep(THINKING_MIN_SECONDS)
+
+            # 2. History & state
+            db_history = (
+                db.query(AgentMessage)
+                .filter_by(session_id=session_id)
+                .order_by(AgentMessage.created_at.asc())
+                .all()
+            )
+            history_messages = []
+            for m in db_history[-20:]:
+                if m.role == "user":
+                    history_messages.append(HumanMessage(content=m.content))
+                else:
+                    history_messages.append(AIMessage(content=m.content))
+
+            agent = get_erp_agent()
+            slots = extract_context_slots(db_history)
+            state = {
+                "messages": history_messages,
+                "tenant_id": tenant_id,
+                "session_id": session_id,
+                "context_slots": slots,
+            }
+
+            # 3. Execution
+            yield format_sse_event("tool_call", {
+                "tool": "erp_execution_engine",
+                "status": "running",
+                "message": "جاري معالجة البيانات واستخراج النتائج...",
+            })
+
+            result = agent.invoke(state)
+            messages = result.get("messages", [])
+            reply_text = messages[-1].content if messages else "تم تنفيذ طلبك بنجاح."
+            card_type = result.get("card_type", "text")
+            tool_output = result.get("tool_result") or {}
+
+            # 4. Emit rich card if any
+            if card_type and card_type != "text":
+                yield format_sse_event("card", {
+                    "card_type": card_type,
+                    "payload": tool_output.get("payload", tool_output),
+                })
+
+            # 5. Stream response tokens (typewriter feel)
+            async for chunk in throttle_tokens(reply_text, chunk_size=4):
+                yield format_sse_event("token", {"token": chunk})
+
+            # 6. Save assistant message to DB
+            ai_msg_id = f"msg_{uuid.uuid4().hex[:8]}"
+            ai_msg = AgentMessage(
+                id=ai_msg_id,
+                session_id=session_id,
+                role="assistant",
+                content=reply_text,
+                card_type=card_type,
+                payload=tool_output,
+            )
+            db.add(ai_msg)
+            db.commit()
+
+            # 7. Done event
+            yield format_sse_event("done", {
+                "status": "complete",
+                "sessionId": session_id,
+                "reply": reply_text,
+                "cardType": card_type,
+                "payload": tool_output,
+            })
+
+            # Auto-title in background if needed
+            if len(db_history) <= 2:
+                asyncio.create_task(auto_title_session(session_id, payload.message, tenant_id))
+
+        except Exception as e:
+            yield format_sse_event("error", {"error": str(e), "message": "حدث خطأ أثناء معالجة الطلب."})
+        finally:
+            db.close()
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )

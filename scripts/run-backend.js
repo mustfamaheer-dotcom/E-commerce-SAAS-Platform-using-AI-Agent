@@ -33,6 +33,7 @@ const env = {
   ...process.env,
   PORT: process.env.PORT || '8001',
   PYTHONUNBUFFERED: '1',
+  PYTHONPATH: process.env.PYTHONPATH ? `${rootDir};${process.env.PYTHONPATH}` : rootDir,
 };
 
 const child = spawn(
