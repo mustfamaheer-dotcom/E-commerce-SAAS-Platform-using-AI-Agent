@@ -28,9 +28,15 @@ class SessionUpdatePayload(BaseModel):
 
 
 class ChatMessagePayload(BaseModel):
-    message: str
+    message: Optional[str] = None
+    query: Optional[str] = None
+    content: Optional[str] = None
     session_id: Optional[str] = None
     tenant_id: str = "tenant-moustafa-tech"
+
+    @property
+    def effective_message(self) -> str:
+        return (self.message or self.query or self.content or "").strip()
 
 
 @router.get("/sessions")
@@ -142,24 +148,26 @@ def process_agent_chat(payload: ChatMessagePayload, db: Session = Depends(get_db
     tenant_id = payload.tenant_id
     session_id = payload.session_id
 
+    msg_text = payload.effective_message
+
     # Cross-tenant safety check
     is_new = False
     if session_id:
         existing_sess = db.query(AgentSession).filter_by(id=session_id).first()
         if not existing_sess:
-            new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=payload.message[:35])
+            new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=msg_text[:35])
             db.add(new_sess)
             db.commit()
             is_new = True
         elif existing_sess.tenant_id != tenant_id:
             session_id = f"sess_{uuid.uuid4().hex[:8]}"
-            new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=payload.message[:35])
+            new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=msg_text[:35])
             db.add(new_sess)
             db.commit()
             is_new = True
     else:
         session_id = f"sess_{uuid.uuid4().hex[:8]}"
-        title = payload.message[:35] + ("..." if len(payload.message) > 35 else "")
+        title = msg_text[:35] + ("..." if len(msg_text) > 35 else "")
         new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=title)
         db.add(new_sess)
         db.commit()
@@ -171,7 +179,7 @@ def process_agent_chat(payload: ChatMessagePayload, db: Session = Depends(get_db
         id=user_msg_id,
         session_id=session_id,
         role="user",
-        content=payload.message,
+        content=msg_text,
     )
     db.add(u_msg)
     db.commit()
@@ -241,13 +249,15 @@ async def stream_agent_chat(payload: ChatMessagePayload):
     tenant_id = payload.tenant_id
     session_id = payload.session_id or f"sess_{uuid.uuid4().hex[:8]}"
 
+    stream_msg = payload.effective_message
+
     async def event_generator():
         db = SessionLocal()
         try:
             # Session verification
             existing_sess = db.query(AgentSession).filter_by(id=session_id).first()
             if not existing_sess:
-                new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=payload.message[:35])
+                new_sess = AgentSession(id=session_id, tenant_id=tenant_id, title=stream_msg[:35])
                 db.add(new_sess)
                 db.commit()
 
@@ -257,7 +267,7 @@ async def stream_agent_chat(payload: ChatMessagePayload):
                 id=user_msg_id,
                 session_id=session_id,
                 role="user",
-                content=payload.message,
+                content=stream_msg,
             )
             db.add(u_msg)
             db.commit()
@@ -355,7 +365,7 @@ async def stream_agent_chat(payload: ChatMessagePayload):
 
             # Auto-title in background if needed
             if len(db_history) <= 2:
-                asyncio.create_task(auto_title_session(session_id, payload.message, tenant_id))
+                asyncio.create_task(auto_title_session(session_id, stream_msg, tenant_id))
 
         except Exception as e:
             yield format_sse_event("error", {"error": str(e), "message": "حدث خطأ أثناء معالجة الطلب."})

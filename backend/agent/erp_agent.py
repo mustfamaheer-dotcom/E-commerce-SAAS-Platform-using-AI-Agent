@@ -152,6 +152,61 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
         tool_result = res
         card_type = "analytics_dashboard"
 
+    elif intent == "clarification_add_category":
+        tool_result = {
+            "status": "need_details",
+            "message": "يا أهلاً بك يا فندم! 🏷️ لإضافة قسم أو تصنيف جديد لكتالوج متجرك، يرجى كتابة اسم القسم أو إدخاله عبر النموذج التالي:",
+            "payload": {
+                "question": "إضافة قسم / تصنيف جديد للمتجر:",
+                "formType": "category",
+                "submitLabel": "تأكيد وإضافة القسم للكتالوج",
+                "slots": [
+                    {
+                        "field": "name",
+                        "label": "اسم القسم أو التصنيف",
+                        "type": "text",
+                        "required": True,
+                        "placeholder": "مثال: إلكترونيات، شاشات وتلفزيونات، ملابس...",
+                    },
+                ],
+            },
+        }
+        card_type = "clarification"
+
+    elif intent == "add_category":
+        cat_name = re.sub(
+            r"(?:عايز|عاوز|اريد|ممكن|ياريت|ضيف|اضف|أضف|اضافة|إضافة|انشئ|أنشئ|قسم|تصنيف|فئة|فئه|جديد|جديدة|جديده|اسمه|اسم|باسم|كتالوج|المتجر)",
+            " ",
+            raw_query,
+            flags=re.IGNORECASE,
+        ).strip()
+        cat_name = re.sub(r"[:=،,\-\.]+", " ", cat_name).strip()
+        cat_name = " ".join(cat_name.split())
+        if not cat_name or len(cat_name) < 2 or cat_name in ["واحد", "لي", "لنا"]:
+            return execute_action("clarification_add_category", raw_query, tenant_id, session_id, history)
+
+        res = add_category_tool(tenant_id=tenant_id, name_ar=cat_name)
+        tool_result = {
+            "status": "success",
+            "message": f"✅ تم إنشاء القسم الجديد **'{cat_name}'** بنجاح وإضافته للكتالوج الرسمي لمتجرك! يمكنك الآن تصنيف المنتجات وربطها به.",
+            "payload": {
+                "category": res.get("category", {"name": cat_name, "slug": f"cat-{cat_name}"}),
+                "name": cat_name,
+            },
+        }
+        card_type = "category_card"
+
+    elif intent == "list_categories":
+        res = list_categories_tool(tenant_id=tenant_id)
+        cats = res.get("categories", [])
+        cats_formatted = "\n".join([f"{idx}. 🏷️ **{c['name']}**" for idx, c in enumerate(cats[:12], 1)])
+        tool_result = {
+            "status": "success",
+            "message": f"📂 كتالوج المتجر يحتوي حالياً على **{len(cats)} أقسام نشطة**:\n\n{cats_formatted}",
+            "payload": res,
+        }
+        card_type = "categories_list_card"
+
     elif intent == "clarification_add_product":
         tool_result = {
             "status": "need_details",
@@ -313,14 +368,20 @@ def classify_intent_node(state: ErpAgentState) -> Dict[str, Any]:
             if prev_content:
                 break
 
+    norm_words = set(norm_query.split())
     # 0. Check for consultative / advisory / questions about growth, how-to, why, strategy:
-    is_advice_query = any(k in norm_query for k in [
-        "كيف", "ازاي", "إزاي", "ليه", "لماذا", "طريقة", "طريقه", "افكار", "أفكار",
-        "استراتيجية", "استراتيجيه", "نصيحة", "نصيحه", "انصحني", "انصحنى", "اقترح",
-        "رايك", "رأيك", "شرح", "اشرح", "وضح", "يعني ايه", "ما معنى", "ما هو", "ما هي",
-        "help", "how to", "why", "suggest", "tips", "ideas", "advice",
-    ]) and not any(k in norm_query for k in [
-        "اكتر منتج", "اكثر منتج", "بيتباع", "مبيعا", "مبيعات", "ارباح", "داشبورد", "توقع", "نواقص", "مخزون", "شرايح", "عملاء"
+    # Single-word advice keywords must match as whole words so 'ليه' doesn't match 'منزلية' or 'مالية'
+    is_advice_query = any(
+        (k in norm_words if len(k.split()) == 1 else k in norm_query)
+        for k in [
+            "كيف", "ازاي", "إزاي", "ليه", "لماذا", "طريقة", "طريقه", "افكار", "أفكار",
+            "استراتيجية", "استراتيجيه", "نصيحة", "نصيحه", "انصحني", "انصحنى", "اقترح",
+            "رايك", "رأيك", "شرح", "اشرح", "وضح", "يعني ايه", "ما معنى", "ما هو", "ما هي",
+            "help", "how to", "why", "suggest", "tips", "ideas", "advice",
+        ]
+    ) and not any(k in norm_query for k in [
+        "اكتر منتج", "اكثر منتج", "بيتباع", "مبيعا", "مبيعات", "ارباح", "داشبورد", "توقع", "نواقص", "مخزون", "شرايح", "عملاء",
+        "قسم", "اقسام", "تصنيف", "فئة", "منتج", "ضيف", "اضف", "أضف",
     ])
     if is_advice_query:
         return {"intent": "general_chat"}
@@ -363,18 +424,57 @@ def classify_intent_node(state: ErpAgentState) -> Dict[str, Any]:
     if any(k in norm_query for k in ["عدل سعر", "غير سعر", "خصم على", "تخفيض سعر", "update price"]):
         return {"intent": "update_price"}
 
-    # 8. Clarification trigger: User says "ضيف منتج" or "عايز اضيف منتج" without name/price
-    short_add_triggers = ["ضيف منتج", "اضف منتج", "أضف منتج", "عايز اضيف منتج", "عاوز اضيف منتج", "اضافة منتج", "إضافة منتج", "add product"]
-    is_bare_add = any(norm_query == t or norm_query == f"{t} جديد" or norm_query == f"ياريت {t}" for t in short_add_triggers)
+    # 8. Category & Department Intents (checked before product to prevent collision)
+    is_cat_keyword = any(k in norm_query for k in [
+        "قسم", "اقسام", "أقسام", "الاقسام", "الأقسام",
+        "تصنيف", "تصنيفات", "التصنيفات",
+        "فئة", "فئات", "الفئات", "فئه",
+        "category", "categories",
+    ]) and not any(k in norm_query for k in ["تصنيف العملاء", "شرائح العملاء", "شرايح العملاء"])
+
+    if is_cat_keyword:
+        # Check if list/view categories
+        if any(k in norm_query for k in ["عرض", "وريني", "قائمة", "كل", "ايه", "ماهي", "ما هي", "list", "show"]) and not any(k in norm_query for k in ["ضيف", "اضف", "أضف", "اضافة", "إضافة", "انشئ", "أنشئ"]):
+            return {"intent": "list_categories"}
+
+        # Bare category addition trigger without name -> show category clarification form
+        bare_cat_triggers = [
+            "عايز اضيف قسم", "عاوز اضيف قسم", "عايز اضيف تصنيف", "عاوز اضيف تصنيف",
+            "عايز اضيف فئة", "عاوز اضيف فئة", "عايز اضيف فئه", "عاوز اضيف فئه",
+            "ضيف قسم", "اضف قسم", "أضف قسم", "اضافة قسم", "إضافة قسم",
+            "ضيف تصنيف", "اضف تصنيف", "أضف تصنيف", "اضافة تصنيف", "إضافة تصنيف",
+            "ضيف فئة", "اضف فئة", "أضف فئة", "اضافة فئة", "إضافة فئة",
+            "انشئ قسم", "أنشئ قسم", "انشاء قسم", "إنشاء قسم",
+            "انشئ تصنيف", "أنشئ تصنيف", "انشاء تصنيف", "إنشاء تصنيف",
+            "قسم جديد", "تصنيف جديد", "فئة جديدة", "فئه جديده",
+            "add category", "create category", "new category",
+        ]
+        is_bare_cat = any(
+            norm_query == t or norm_query == f"{t} جديد" or norm_query == f"{t} جديدة" or norm_query == f"{t} جديده" or norm_query == f"ياريت {t}" or norm_query == f"ممكن {t}"
+            for t in bare_cat_triggers
+        ) or norm_query in ["قسم", "تصنيف", "فئة", "فئه", "الاقسام", "التصنيفات"]
+
+        if is_bare_cat:
+            return {"intent": "clarification_add_category"}
+
+        # Add category with specific name (e.g., "أضف قسم ملابس رجالي")
+        if any(k in norm_query for k in ["اضف", "أضف", "ضيف", "عايز اضيف", "عاوز اضيف", "اضافة", "إضافة", "انشئ", "أنشئ", "new"]):
+            return {"intent": "add_category"}
+
+        return {"intent": "list_categories"}
+
+    # 9. Clarification trigger: User says "ضيف منتج" or "عايز اضيف منتج" without name/price
+    short_add_triggers = ["ضيف منتج", "اضف منتج", "أضف منتج", "عايز اضيف منتج", "عاوز اضيف منتج", "اضافة منتج", "إضافة منتج", "منتج جديد", "add product"]
+    is_bare_add = any(norm_query == t or norm_query == f"{t} جديد" or norm_query == f"ياريت {t}" or norm_query == f"ممكن {t}" for t in short_add_triggers)
     if is_bare_add:
         return {"intent": "clarification_add_product"}
 
-    # 9. Add product with details
+    # 10. Add product with details
     add_triggers = ["اضف", "أضف", "ضيف", "منتج جديد", "عايز اضيف", "عاوز اضيف"]
     if any(k in norm_query for k in add_triggers):
         return {"intent": "add_product"}
 
-    # 10. List products
+    # 11. List products
     if any(k in norm_query for k in [
         "منتجات", "المنتجات", "عرض المنتجات", "الكتالوج", "list products", "show products",
         "المنتجات اللي عندي", "عايز اعرف المنتجات", "ايه المنتجات", "وريني المنتجات",
@@ -382,21 +482,62 @@ def classify_intent_node(state: ErpAgentState) -> Dict[str, Any]:
     ]):
         return {"intent": "list_products"}
 
-    # 11. Orders
+    # 12. Orders
     if any(k in norm_query for k in ["الطلبات", "الاوردرات", "طلبات اليوم", "طلبات جديدة", "orders", "view orders", "شحن"]):
         return {"intent": "view_orders"}
 
-    # 12. Inventory Alerts
+    # 13. Inventory Alerts
     if any(k in norm_query for k in ["مخزون", "نواقص", "نفاد", "كميات", "inventory", "stock", "low stock", "تنبيهات المخزون"]):
         return {"intent": "inventory_alerts"}
 
-    # 13. Coupon
+    # 14. Coupon
     if any(k in norm_query for k in ["كوبون", "خصم ترويجي", "انشئ كوبون", "coupon", "promo"]):
         return {"intent": "create_coupon"}
 
-    # 14. Theme
+    # 15. Theme
     if any(k in norm_query for k in ["لون المتجر", "مظهر المتجر", "وضع ليلي", "وضع نهاري", "theme", "colors"]):
         return {"intent": "update_theme"}
+
+    # 16. Local LLM / Cloud LLM Intent Fallback for complex queries
+    llm = get_llm()
+    if llm and not is_advice_query:
+        try:
+            from langchain_core.messages import SystemMessage, HumanMessage
+            sys_prompt = (
+                "You are an intent classification assistant for an Arabic e-commerce ERP system.\n"
+                "Determine the user's intent from their query:\n"
+                "- clarification_add_category: Wants to add a category/department (قسم/تصنيف/فئة) without specifying details\n"
+                "- add_category: Adds a specific category with name\n"
+                "- list_categories: Wants to see existing categories/departments\n"
+                "- clarification_add_product: Wants to add a product (منتج) without details\n"
+                "- add_product: Adds a specific product\n"
+                "- list_products: Lists products in catalog\n"
+                "- top_products: Inquires about best sellers / top revenue products\n"
+                "- update_price: Updates single product price\n"
+                "- bulk_price: Storewide percentage price discount or increase\n"
+                "- view_orders: Views orders / shipping\n"
+                "- inventory_alerts: Checks stock shortages / low inventory\n"
+                "- sales_forecast: Asks for future sales forecast\n"
+                "- customer_segments: Asks for customer RFM segments\n"
+                "- pdf_report: Asks for PDF or export report\n"
+                "- analytics_dashboard: Asks for general store analytics / revenue dashboard\n"
+                "- general_chat: Advice, strategy, question, or general discussion\n\n"
+                "Respond ONLY with the intent string and nothing else."
+            )
+            res = llm.invoke([SystemMessage(content=sys_prompt), HumanMessage(content=raw_query)])
+            llm_text = getattr(res, "content", "").strip().lower()
+            valid_intents = [
+                "clarification_add_category", "add_category", "list_categories",
+                "clarification_add_product", "add_product", "list_products",
+                "top_products", "update_price", "bulk_price", "view_orders",
+                "inventory_alerts", "sales_forecast", "customer_segments",
+                "pdf_report", "analytics_dashboard", "general_chat"
+            ]
+            for vi in valid_intents:
+                if vi in llm_text:
+                    return {"intent": vi}
+        except Exception:
+            pass
 
     return {"intent": "general_chat"}
 

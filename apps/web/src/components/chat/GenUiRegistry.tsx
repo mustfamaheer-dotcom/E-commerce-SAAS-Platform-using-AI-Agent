@@ -9,6 +9,7 @@ import { SalesForecastCard, SalesForecastPayload } from '../gen-ui/SalesForecast
 import { StoreCreationPreviewCard, StorePreviewData } from '../gen-ui/StoreCreationPreviewCard';
 import { CustomerSegmentsCard, CustomerSegmentsPayload } from '../gen-ui/CustomerSegmentsCard';
 import { PromotionApprovalCard, PromotionApprovalPayload } from '../gen-ui/PromotionApprovalCard';
+import { CategoryCard, CategoryCardPayload } from '../gen-ui/CategoryCard';
 
 export type GenUiCardType =
   | 'analytics_dashboard'
@@ -25,6 +26,8 @@ export type GenUiCardType =
   | 'customer_segments'
   | 'promotion_approval'
   | 'coupon_card'
+  | 'category_card'
+  | 'categories_list_card'
   | string;
 
 export interface GenUiRegistryProps {
@@ -132,6 +135,15 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
           data={safePayload as PromotionApprovalPayload}
           onConfirm={(actionId) => onApprove?.(actionId)}
           onCancel={(actionId) => onCancel?.(actionId)}
+        />
+      );
+
+    case 'category_card':
+    case 'categories_list_card':
+      return (
+        <CategoryCard
+          payload={safePayload as CategoryCardPayload}
+          onSendMessage={onSendMessage}
         />
       );
 

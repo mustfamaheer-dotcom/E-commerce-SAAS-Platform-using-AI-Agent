@@ -74,6 +74,36 @@ def get_llm(streaming: bool = False) -> Optional[Any]:
         except Exception as e:
             logger.warning(f"Failed to initialize OpenAI LLM: {e}")
 
+    # 4. Try Local LLM (Ollama / LM Studio / LocalAI / vLLM)
+    if llm is None and config.LOCAL_LLM_URL:
+        try:
+            import urllib.request
+            # Fast ping with 0.4s timeout to check if local LLM server is up
+            base_url = config.LOCAL_LLM_URL.replace("/v1", "").rstrip("/")
+            is_up = False
+            for test_path in ["/api/tags", "/v1/models", "/models"]:
+                try:
+                    req = urllib.request.Request(f"{base_url}{test_path}", headers={"User-Agent": "TechZone"})
+                    with urllib.request.urlopen(req, timeout=0.4) as resp:
+                        if resp.status == 200:
+                            is_up = True
+                            break
+                except Exception:
+                    continue
+
+            if is_up:
+                from langchain_openai import ChatOpenAI
+                llm = ChatOpenAI(
+                    model=config.LOCAL_LLM_MODEL,
+                    temperature=0.3,
+                    streaming=streaming,
+                    openai_api_key="local-llm-token",
+                    base_url=config.LOCAL_LLM_URL,
+                )
+                logger.info(f"Initialized Local LLM client ({config.LOCAL_LLM_MODEL}) at {config.LOCAL_LLM_URL}.")
+        except Exception as e:
+            logger.warning(f"Failed to connect to Local LLM at {config.LOCAL_LLM_URL}: {e}")
+
     if streaming:
         _streaming_llm_instance = llm
     else:

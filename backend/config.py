@@ -22,10 +22,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(6
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+LOCAL_LLM_URL = os.getenv("LOCAL_LLM_URL", "http://localhost:11434/v1")
+LOCAL_LLM_MODEL = os.getenv("LOCAL_LLM_MODEL", "qwen2.5-coder:3b")
 LLM_PROVIDER = os.getenv(
     "LLM_PROVIDER",
     "gemini" if GEMINI_API_KEY
     else ("groq" if GROQ_API_KEY
     else ("openai" if OPENAI_API_KEY and OPENAI_API_KEY != "sk-demo-key"
-    else "generative"))
+    else ("local" if os.getenv("USE_LOCAL_LLM", "").lower() in ["1", "true", "yes"]
+    else "generative")))
 )

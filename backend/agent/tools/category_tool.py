@@ -19,7 +19,12 @@ def add_category_tool(tenant_id: str, name_ar: str, slug: str = None) -> Dict[st
         )
         db.add(cat)
         db.commit()
-        return {"status": "success", "message": f"تم إنشاء القسم '{name_ar}' بنجاح."}
+        db.refresh(cat)
+        return {
+            "status": "success",
+            "message": f"تم إنشاء القسم '{name_ar}' بنجاح.",
+            "category": {"id": cat.id, "name": cat.name_ar, "slug": cat.slug, "isActive": cat.is_active},
+        }
     except Exception as e:
         db.rollback()
         return {"status": "error", "message": str(e)}
