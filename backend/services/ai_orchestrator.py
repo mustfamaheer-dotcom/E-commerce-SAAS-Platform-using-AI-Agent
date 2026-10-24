@@ -707,7 +707,7 @@ class AIOrchestrationService:
                     # Provide concise contextual catalog info to the model
                     sample_prods = (
                         self.db.query(Product)
-                        .filter_by(tenant_id=tenant_id, status="active")
+                        .filter_by(tenant_id=tenant_id, is_active=True)
                         .order_by(Product.price.desc())
                         .limit(8)
                         .all()
@@ -726,10 +726,10 @@ class AIOrchestrationService:
                         f"الطرف الذي يخاطبك: {role_desc}.\n"
                         f"أمثلة من منتجات المتجر الحالية: {sample_text}.\n\n"
                         f"سياق المحادثة السابق:\n{history_context}\n"
-                        f"رسالة المستخدم الحالية: '{raw_query}'\n\n"
+                        f"رسالة المستخدم الحالية: '{request.message}'\n\n"
                         "المطلوب:\n"
                         "1. رد باللهجة المصرية الطبيعية الودية والمهذبة بشكل مباشر وموجز جداً (جملة أو جملتين فقط كحد أقصى).\n"
-                        "2. لا تكرر ديباجات أو رسائل ترحيب محفوظة إذا كان المستخدم يسأل سؤالاً محدداً.\n"
+                        "2. لا تكرر ديباجات أو رسائل ترحيب محفوظة إذا كان المستخدم يسأل سؤالاً محدداً أو يطلب شيئاً (مثل 'محتاج اعمل طلب'). وجهه للخطوة التالية مباشرة.\n"
                         "3. قدم المعلومة أو التوجيه المفيد مباشرة."
                     )
                     gemini_ans = extract_llm_text(llm.invoke(prompt)).strip()
