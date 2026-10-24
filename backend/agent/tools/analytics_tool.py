@@ -248,10 +248,8 @@ def get_customer_segments_tool(tenant_id: str) -> Dict[str, Any]:
 def get_top_products_tool(tenant_id: str, limit: int = 5, sort_by: str = "revenue") -> Dict[str, Any]:
     db = SessionLocal()
     try:
-        active_tid = tenant_id if tenant_id and tenant_id != "all" else "tenant-moustafa-tech"
-        products = db.query(Product).filter_by(tenant_id=active_tid).order_by(desc(Product.price)).limit(limit).all()
-        if not products:
-            products = db.query(Product).filter_by(tenant_id="tenant-moustafa-tech").order_by(desc(Product.price)).limit(limit).all()
+        active_tid = tenant_id
+        products = db.query(Product).filter_by(tenant_id=active_tid).order_by(desc(Product.price)).limit(limit).all() if active_tid else []
 
         top_list = []
         for idx, p in enumerate(products):

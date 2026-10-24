@@ -243,12 +243,10 @@ def list_stores(owner_email: Optional[str] = None, db: Session = Depends(get_db)
                 if u.tenant_id
             ]
             allowed_ids = set(setting_tenant_ids + user_tenant_ids)
-            # Always include demo store so user can seamlessly switch and test with baseline ERP data
-            allowed_ids.add("tenant-moustafa-tech")
             if allowed_ids:
                 tenants = db.query(Tenant).filter(Tenant.id.in_(allowed_ids)).all()
             else:
-                tenants = db.query(Tenant).filter_by(id="tenant-moustafa-tech").all()
+                tenants = []
     else:
         # Default unauthenticated access only gets demo store, never leaking competitors
         tenants = db.query(Tenant).filter_by(id="tenant-moustafa-tech").all()

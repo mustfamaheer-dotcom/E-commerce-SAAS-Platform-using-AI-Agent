@@ -58,17 +58,14 @@ def generate_intelligent_ai_reply(query: str, tenant_id: str, history: List[Any]
     try:
         from sqlalchemy import func
         from backend.models import Order, Product, Customer
-        total_rev = db.query(func.sum(Order.total)).filter_by(tenant_id=tenant_id).scalar() or 0.0
+        total_rev = float(db.query(func.sum(Order.total)).filter_by(tenant_id=tenant_id).scalar() or 0.0)
         total_orders = db.query(Order).filter_by(tenant_id=tenant_id).count()
-        if total_rev == 0 or total_orders == 0:
-            total_rev = db.query(func.sum(Order.total)).filter_by(tenant_id="tenant-moustafa-tech").scalar() or 103505948.0
-            total_orders = db.query(Order).filter_by(tenant_id="tenant-moustafa-tech").count() or 2833
-        total_prods = db.query(Product).filter_by(tenant_id=tenant_id).count() or 445
+        total_prods = db.query(Product).filter_by(tenant_id=tenant_id).count()
         top_prod = db.query(Product).filter_by(tenant_id=tenant_id).order_by(Product.price.desc()).first()
-        top_prod_name = top_prod.name_ar if top_prod else "Asus TUF Gaming A15 أصلي مع ضمان محلي"
-        aov = round(total_rev / max(1, total_orders), 2)
+        top_prod_name = top_prod.name_ar if top_prod else ("لا توجد منتجات مسجلة بعد" if total_prods == 0 else "منتجات المتجر")
+        aov = round(total_rev / max(1, total_orders), 2) if total_orders > 0 else 0.0
     except Exception:
-        total_rev, total_orders, total_prods, top_prod_name, aov = 103505948.0, 2833, 445, "Asus TUF Gaming A15", 36535.0
+        total_rev, total_orders, total_prods, top_prod_name, aov = 0.0, 0, 0, "لا توجد منتجات مسجلة بعد", 0.0
     finally:
         db.close()
 
