@@ -61,7 +61,7 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
 
   // Store Custom Configuration
   const [storeMeta, setStoreMeta] = useState<any>({
-    name: 'Moustafa Tech',
+    name: 'المتجر الإلكتروني',
     heroTitle: 'أفضل الأجهزة والإلكترونيات الذكية بأسعار لا تُنافس',
     heroSubtitle: 'تسوق الآن مع ضمان حقيقي، تقسيط وبطاقات بنكية Paymob، تحويل InstaPay فوري، وخيارات الدفع عند الاستلام.',
     announcementText: '🚚 شحن سريع لكافة محافظات مصر عبر بوسطة — شحن مجاني للطلبات فوق 1000 ج.م',
@@ -97,7 +97,7 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
           });
         }
         setStoreMeta({
-          name: data.tenant?.name || 'Moustafa Tech',
+          name: data.tenant?.name || 'المتجر الإلكتروني',
           heroTitle: data.settings?.displayName
             ? `أهلاً بكم في ${data.settings.displayName} — الإلكترونيات الأصلية`
             : 'أفضل الأجهزة والإلكترونيات الذكية بأسعار لا تُنافس',

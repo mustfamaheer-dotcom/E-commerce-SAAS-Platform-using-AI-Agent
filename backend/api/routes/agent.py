@@ -3,7 +3,7 @@ import json
 import uuid
 import asyncio
 from typing import Optional, Dict, Any, List
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Header
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -14,6 +14,9 @@ from backend.models import AgentSession, AgentMessage, AgentAction
 from backend.agent.erp_agent import get_erp_agent
 from backend.agent.streaming_utils import format_sse_event, throttle_tokens, THINKING_MIN_SECONDS
 from backend.agent.session_manager import auto_title_session, extract_context_slots
+from backend.schemas.ai import AIQueryRequestDTO, AIResponseDTO
+from backend.services.ai_orchestrator import AIOrchestrationService
+from backend.services.studio_copilot import process_studio_copilot_chat
 
 router = APIRouter(prefix="/agent", tags=["AI Agent Command Center"])
 
@@ -37,6 +40,41 @@ class ChatMessagePayload(BaseModel):
     @property
     def effective_message(self) -> str:
         return (self.message or self.query or self.content or "").strip()
+
+
+
+
+
+class StudioChatPayload(BaseModel):
+    message: str
+    tenant_id: Optional[str] = "tenant-moustafa-tech"
+    current_theme: Optional[Dict[str, Any]] = None
+    history: Optional[List[Dict[str, Any]]] = None
+
+
+@router.post("/studio/chat")
+def studio_agent_chat(payload: StudioChatPayload, db: Session = Depends(get_db)):
+    tenant_id = payload.tenant_id or "tenant-moustafa-tech"
+    return process_studio_copilot_chat(
+        message=payload.message,
+        tenant_id=tenant_id,
+        current_theme=payload.current_theme,
+        history=payload.history,
+        db=db,
+    )
+
+
+@router.post("/orchestrate", response_model=AIResponseDTO)
+def orchestrate_agent_query(
+    payload: AIQueryRequestDTO,
+    x_tenant_id: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    """Production endpoint for grounded conversational AI with GenUI and structured contracts."""
+    tenant_id = x_tenant_id or payload.tenant_id or "tenant-moustafa-tech"
+    service = AIOrchestrationService(db)
+    return service.process_query(tenant_id=tenant_id, request=payload)
+
 
 
 @router.get("/sessions")

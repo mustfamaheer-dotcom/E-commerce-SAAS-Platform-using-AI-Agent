@@ -127,3 +127,4 @@ def test_get_current_user_me_endpoint(client):
     user_data = resp_auth.json()
     assert user_data["user"]["email"] == test_email
     assert user_data["store"]["name"] == "متجر كريم"
+

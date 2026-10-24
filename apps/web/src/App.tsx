@@ -25,6 +25,7 @@ import { AuditLogPage } from './pages/dashboard/AuditLogPage';
 import { StorefrontHomePage } from './pages/storefront/StorefrontHomePage';
 import { CartPage } from './pages/storefront/CartPage';
 import { CheckoutPage } from './pages/storefront/CheckoutPage';
+import { StorefrontAiAssistant } from './components/chat/StorefrontAiAssistant';
 
 import {
   MessageSquare,
@@ -162,62 +163,85 @@ const NAV_CATEGORIES: NavCategory[] = [
 ];
 
 // Stores owned strictly by the logged-in merchant account
-const MERCHANT_OWNED_STORES: ProvisionedStore[] = [
-  {
-    id: 'tenant-moustafa-tech',
-    slug: '-moustafa-tech--102',
-    name: 'Moustafa Tech',
-    category: 'بيع موبايلات وإلكترونيات',
-    currency: 'EGP',
-    themeMode: 'dark',
-    createdAt: '2024-01-01T00:00:00Z',
-    adminUrl: '/admin/-moustafa-tech--102',
-    storefrontUrl: '/store/-moustafa-tech--102',
-  },
-];
+const MERCHANT_OWNED_STORES: ProvisionedStore[] = [];
 
 const MainAppContent: React.FC = () => {
   const { theme, toggleMode } = useAppTheme();
 
-  // Navigation / View state
-  // Check URL pathname for direct deep-linking
+  // Navigation / View state with LocalStorage session persistence & URL deep-linking
   const [currentView, setCurrentView] = useState<AppView>(() => {
     const path = window.location.pathname;
+    const curUser = getCurrentUser();
+
+    // 1. URL Path takes highest precedence
     if (path.startsWith('/store')) return 'storefront';
-    if (path.startsWith('/admin')) return 'dashboard';
-    if (path.startsWith('/hub')) return 'services_hub';
-    if (path.startsWith('/builder')) return 'ai_builder';
     if (path.startsWith('/login')) return 'login';
     if (path.startsWith('/register')) return 'register';
-    return 'dashboard';
+    if (path.startsWith('/admin')) return curUser ? 'dashboard' : 'login';
+    if (path.startsWith('/hub')) return curUser ? 'services_hub' : 'login';
+    if (path.startsWith('/builder')) return curUser ? 'ai_builder' : 'login';
+
+    // 2. Check saved session view from localStorage
+    const savedView = localStorage.getItem('techzone_current_view') as AppView | null;
+    if (savedView) {
+      if (['dashboard', 'services_hub', 'ai_builder'].includes(savedView)) {
+        return curUser ? savedView : 'landing';
+      }
+      return savedView;
+    }
+
+    return 'landing';
   });
 
-  const [activeTab, setActiveTab] = useState<NavItemKey>('analytics');
+  const [activeTab, setActiveTab] = useState<NavItemKey>(() => {
+    const savedTab = localStorage.getItem('techzone_active_tab') as NavItemKey | null;
+    return savedTab || 'analytics';
+  });
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Storefront sub-navigation (Home, Cart, Checkout)
-  const [storefrontSubView, setStorefrontSubView] = useState<StorefrontSubView>('home');
-
-  // Authentication State
-  const [user, setUser] = useState<UserAccount | null>(() => {
-    const cur = getCurrentUser();
-    if (cur) return cur;
-    return {
-      id: 'usr_-moustafa-tech--102_owner_1',
-      name: 'مصطفى ماهر',
-      email: 'owner@moustafatech.eg',
-      phone: '+20 100 123 4567',
-      businessType: 'electronics',
-      storeName: 'Moustafa Tech',
-      tenantId: 'tenant-moustafa-tech',
-      createdAt: '2024-01-01T00:00:00Z',
-    };
+  const [storefrontSubView, setStorefrontSubView] = useState<StorefrontSubView>(() => {
+    const savedSub = localStorage.getItem('techzone_storefront_subview') as StorefrontSubView | null;
+    return savedSub || 'home';
   });
 
+  // Authentication State - Defaults to null unless user explicitly logged in
+  const [user, setUser] = useState<UserAccount | null>(() => getCurrentUser());
+
   // Stores State - Loaded dynamically from live database tenants
-  const [merchantStores, setMerchantStores] = useState<ProvisionedStore[]>(MERCHANT_OWNED_STORES);
-  const [activeStore, setActiveStore] = useState<ProvisionedStore>(MERCHANT_OWNED_STORES[0]);
+  const [merchantStores, setMerchantStores] = useState<ProvisionedStore[]>([]);
+  const [activeStore, setActiveStore] = useState<ProvisionedStore | null>(() => {
+    const savedStore = localStorage.getItem('techzone_active_store');
+    if (savedStore) {
+      try {
+        return JSON.parse(savedStore);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
   const [navBadges, setNavBadges] = useState<Record<string, string>>({});
+
+  // Persist navigation & view state changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('techzone_current_view', currentView);
+  }, [currentView]);
+
+  useEffect(() => {
+    localStorage.setItem('techzone_active_tab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem('techzone_storefront_subview', storefrontSubView);
+  }, [storefrontSubView]);
+
+  useEffect(() => {
+    if (activeStore) {
+      localStorage.setItem('techzone_active_store', JSON.stringify(activeStore));
+    }
+  }, [activeStore]);
 
   useEffect(() => {
     const emailParam = user?.email ? `?owner_email=${encodeURIComponent(user.email)}` : '';
@@ -284,6 +308,9 @@ const MainAppContent: React.FC = () => {
   const handleLogout = () => {
     setUser(null);
     setCurrentUser(null);
+    localStorage.removeItem('techzone_current_view');
+    localStorage.removeItem('techzone_active_tab');
+    localStorage.removeItem('techzone_active_store');
     setCurrentView('landing');
   };
 
@@ -373,7 +400,7 @@ const MainAppContent: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-black text-white text-sm sm:text-base tracking-tight">
-                  {activeStore?.name || 'Moustafa Tech'}
+                  {activeStore?.name || 'المتجر الإلكتروني'}
                 </span>
                 <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -476,9 +503,17 @@ const MainAppContent: React.FC = () => {
             {storefrontSubView === 'checkout' && <CheckoutPage />}
           </main>
 
+          {/* Customer AI Shopping Assistant */}
+          <StorefrontAiAssistant
+            tenantId={activeStore?.id}
+            storeName={activeStore?.name}
+            activeSubView={storefrontSubView}
+            onNavigateSubView={(view) => setStorefrontSubView(view)}
+          />
+
           {/* Customer Footer */}
           <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500">
-            <p>© 2026 {activeStore?.name || 'Moustafa Tech'}. جميع الحقوق محفوظة للعملاء والخدمة المعتمدة.</p>
+            <p>© 2026 {activeStore?.name || 'المتجر الإلكتروني'}. جميع الحقوق محفوظة للعملاء والخدمة المعتمدة.</p>
           </footer>
         </div>
       )}

@@ -2,13 +2,118 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from backend.db.database import get_db
 from backend.models import Tenant, StoreSettings, ThemeConfig, User
 from backend.services.logo_analyzer import analyze_logo_and_generate_theme
+from backend.agent.llm_client import get_llm, extract_llm_text
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 router = APIRouter(prefix="/stores", tags=["Store Configuration"])
+
+
+class OnboardingChatPayload(BaseModel):
+    message: str
+    step: int = 1
+    store_data: Dict[str, Any]
+    history: Optional[List[Dict[str, str]]] = None
+
+
+@router.post("/onboarding/chat")
+def onboarding_chat(payload: OnboardingChatPayload):
+    """
+    Intelligent LLM-powered store onboarding copilot.
+    Uses Gemini to comprehend full conversation history, extract entities, answer questions,
+    and guide the user through store setup concisely and flexibly.
+    """
+    import json
+    user_msg = payload.message.strip()
+    curr_step = payload.step
+    store_data = payload.store_data or {}
+    history = payload.history or []
+
+    llm = get_llm()
+    if not llm:
+        # Fallback if no LLM
+        return {
+            "reply": "تمام يا فندم، ماشي معاك خطوة بخطوة.",
+            "step": curr_step,
+            "updated_fields": {},
+            "quick_replies": [],
+            "show_preview": False
+        }
+
+    sys_prompt = f"""أنت "وكيل تيك زون الذكي لتأسيس المتاجر" (Store Builder Agent).
+مهمتك مساعدة التاجر في إنشاء وتخصيص متجره الإلكتروني المصري بطريقة حوارية ذكية ومرنة وبالمصري.
+
+الحالة الحالية لإعدادات المتجر:
+- اسم المتجر (storeName): "{store_data.get('storeName', '')}"
+- مجال المتجر (category): "{store_data.get('category', '')}"
+- نطاق الشحن (shippingScope): "{store_data.get('shippingScope', 'جميع محافظات مصر عبر بوسطة (Bosta)')}"
+- بوابات الدفع (paymentGateways): {store_data.get('paymentGateways', ['Paymob', 'InstaPay', 'فوري', 'الدفع عند الاستلام'])}
+- مظهر وهوية المتجر (themeMode): "{store_data.get('themeMode', 'dark')}"
+- الخطوة الحالية (currentStep): {curr_step} (1=الاسم والمجال, 2=الشحن والتوصيل, 3=بوابات الدفع, 4=المظهر والستايل, 5=المعاينة والإطلاق)
+
+القواعد الإلزامية:
+1. اقرأ سجل المحادثة كامل وافهم نية المستخدم بدقة:
+   - لو المستخدم طلب تغيير أو تعديل اسم المتجر (مثل: "عايز اغير الاسم" أو "سميه X" أو "خليه Y"):
+     * لو ذكر الاسم الجديد مباشرة (مثل: "خليه Adel Store"): حدّث storeName واشكره وأكد الاسم الجديد، وارجع اسأله عن خطوة الشحن أو الخطوة اللي كان واقف عندها.
+     * لو قال فقط "عايز اغير الاسم" دون ذكر اسم جديد: اسأله فوراً وبكل ود واختصار عن الاسم الجديد اللي يحب يسميه.
+   - لو جاوب على سؤال الشحن (مثل: "كل المحافظات" أو "القاهرة فقط"): سجّل shippingScope وانقله لخطوة الدفع (الخطوة 3).
+   - لو جاوب على بوابات الدفع (مثل: "فعل الكل" أو "فيزا وانستاباي"): سجّل paymentGateways وانقله لخطوة المظهر والوضع الليلي/النهاري (الخطوة 4).
+   - لو جاوب على المظهر (مثل: "ليلي" أو "دارك" أو "نهاري"): سجّل themeMode وانقله لخطوة المعاينة النهائية (الخطوة 5).
+2. اجعل ردك موجزاً، دقيقاً، ومباشراً (1 إلى 2 جملة بحد أقصى) وبلهجة مصرية احترافية ذكية.
+3. يجب أن ترد بكائن JSON صالح فقط بدون أي Markdown خارجي أو نصوص زائدة:
+{{
+  "reply": "الرد المصري الذكي والموجز هنا",
+  "next_step": 1 أو 2 أو 3 أو 4 أو 5,
+  "updated_fields": {{
+     // الحقول التي تم استخراجها أو تعديلها في هذا الدور فقط (storeName, category, shippingScope, paymentGateways, themeMode)
+  }},
+  "quick_replies": ["خيار 1", "خيار 2"], // اقتراحات سريعة مناسبة للخطوة القادمة
+  "show_preview": true/false // اجعلها true فقط عند الوصول للخطوة 5 (المعاينة)
+}}"""
+
+    messages = [SystemMessage(content=sys_prompt)]
+    for h in history[-8:]:
+        role = h.get("sender") or h.get("role")
+        content = h.get("text") or h.get("content", "")
+        if content:
+            if role == "user":
+                messages.append(HumanMessage(content=content))
+            else:
+                messages.append(AIMessage(content=content))
+
+    messages.append(HumanMessage(content=user_msg))
+
+    try:
+        res = llm.invoke(messages)
+        raw_text = extract_llm_text(res)
+        clean_json = raw_text.strip()
+        if clean_json.startswith("```"):
+            clean_json = clean_json.split("\n", 1)[1]
+            if clean_json.endswith("```"):
+                clean_json = clean_json.rsplit("```", 1)[0]
+        parsed = json.loads(clean_json.strip())
+        return {
+            "status": "success",
+            "reply": parsed.get("reply", "تمام يا فندم معك."),
+            "step": parsed.get("next_step", curr_step),
+            "updated_fields": parsed.get("updated_fields", {}),
+            "quick_replies": parsed.get("quick_replies", []),
+            "show_preview": parsed.get("show_preview", False)
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "reply": "معاك يا فندم! قول لي تحب تعدل إيه وأنا هنفذه فوراً.",
+            "step": curr_step,
+            "updated_fields": {},
+            "quick_replies": [],
+            "show_preview": False
+        }
+
 
 
 class StoreCreatePayload(BaseModel):
@@ -243,14 +348,31 @@ async def upload_logo_and_generate_theme(
     import os
     import uuid
 
+    # 1. Content-Type and extension validation
+    allowed_types = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp"}
+    content_type = file.content_type or ""
+    if content_type not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail="نوع الملف غير مدعوم. يرجى رفع صورة بصيغة PNG أو JPEG أو WebP فقط."
+        )
+
+    # 2. Maximum upload size check (5 MB)
+    MAX_FILE_SIZE = 5 * 1024 * 1024
     contents = await file.read()
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail="حجم الملف يتجاوز الحد الأقصى المسموح به (5 ميجابايت)."
+        )
+
     theme_data = analyze_logo_and_generate_theme(contents)
 
-    # Persist the logo image to disk
+    # Persist the logo image to disk with sanitized safe extension
     upload_dir = os.path.join(os.getcwd(), "backend", "static", "uploads", "logos")
     os.makedirs(upload_dir, exist_ok=True)
-    ext = os.path.splitext(file.filename or "logo.png")[1] or ".png"
-    safe_filename = f"{tenant_id}_{uuid.uuid4().hex[:8]}{ext}"
+    safe_ext = allowed_types[content_type]
+    safe_filename = f"{tenant_id}_{uuid.uuid4().hex[:8]}{safe_ext}"
     file_path = os.path.join(upload_dir, safe_filename)
     with open(file_path, "wb") as f:
         f.write(contents)

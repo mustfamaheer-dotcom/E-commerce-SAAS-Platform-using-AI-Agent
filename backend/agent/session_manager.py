@@ -1,7 +1,7 @@
 # backend/agent/session_manager.py
 import re
 from typing import List, Dict, Any, Optional
-from backend.agent.llm_client import get_llm
+from backend.agent.llm_client import get_llm, extract_llm_text
 from backend.db.database import SessionLocal
 from backend.models import AgentSession, AgentMessage
 
@@ -20,7 +20,7 @@ async def auto_title_session(session_id: str, first_message: str, tenant_id: str
                 "اكتب عنواناً مختصراً جداً من 2 إلى 4 كلمات فقط باللغة العربية يلخص موضوع المحادثة بدون علامات تنصيص."
             )
             res = await llm.ainvoke(prompt)
-            candidate = res.content.strip().replace('"', '').replace("'", "")
+            candidate = extract_llm_text(res).replace('"', '').replace("'", "")
             if len(candidate) > 2 and len(candidate) <= 40:
                 title = candidate
         except Exception:

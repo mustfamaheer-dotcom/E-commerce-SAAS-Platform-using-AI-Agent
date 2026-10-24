@@ -54,12 +54,12 @@ def extract_slots_node(state: OnboardingState) -> Dict[str, Any]:
 
     # Rule-based / NLP pattern extraction
     # Currency
-    if re.search(r"\b(egp|جنيه|مصر|le)\b", last_user_msg, re.IGNORECASE):
-        slots_dict["currency"] = "EGP"
-    elif re.search(r"\b(usd|dollar|دولار)\b", last_user_msg, re.IGNORECASE):
-        slots_dict["currency"] = "USD"
-    elif re.search(r"\b(sar|ريال|سعودي)\b", last_user_msg, re.IGNORECASE):
+    if re.search(r"(?:^|[^\w])(sar|ريال|سعودي|بالريال)", last_user_msg, re.IGNORECASE):
         slots_dict["currency"] = "SAR"
+    elif re.search(r"(?:^|[^\w])(usd|dollar|دولار|بالدولار)", last_user_msg, re.IGNORECASE):
+        slots_dict["currency"] = "USD"
+    elif re.search(r"(?:^|[^\w])(egp|جنيه|مصر|le|بالجنيه)", last_user_msg, re.IGNORECASE):
+        slots_dict["currency"] = "EGP"
 
     # Theme
     if re.search(r"(dark|داكن|اسود|black|ليلي|الوضع الليلي|الوضع الداكن)", last_user_msg, re.IGNORECASE):
@@ -67,16 +67,76 @@ def extract_slots_node(state: OnboardingState) -> Dict[str, Any]:
     elif re.search(r"(light|فاتح|ابيض|white|نهاري|الوضع الفاتح|الوضع النهاري)", last_user_msg, re.IGNORECASE):
         slots_dict["theme_mode"] = "light"
 
+    # Category / Niche detection
+    lower = last_user_msg.lower()
+    if any(k in lower for k in ['موبايل', 'لابتوب', 'هاتف', 'هواتف', 'تلفون', 'كمبيوتر', 'إلكترون', 'الكترون', 'أجهزة', 'اجهزة', 'سماعات', 'phone', 'laptop', 'electronics']):
+        slots_dict["product_category"] = "إلكترونيات وهواتف ذكية ولابتوبات"
+    elif any(k in lower for k in ['أزياء', 'ملابس', 'كاجوال', 'فاشون', 'أحذية', 'احذية', 'fashion', 'clothes']):
+        slots_dict["product_category"] = "أزياء وملابس كاجوال"
+    elif any(k in lower for k in ['عطور', 'تجميل', 'ميك اب', 'ميكاب', 'perfume', 'beauty']):
+        slots_dict["product_category"] = "عطور ومستحضرات تجميل"
+    elif any(k in lower for k in ['منزل', 'ديكور', 'أثاث', 'اثاث', 'مفروشات', 'home', 'decor']):
+        slots_dict["product_category"] = "مستلزمات منزل وديكور"
+    elif not slots_dict.get("product_category"):
+        niche_m = re.search(
+            r'(?:و\s*تكون\s*في\s*مجال|في\s*مجال|ومجال|مجال|و\s*هيكون\s*في\s*مجال|لبيع|و\s*بيع|بيع|متخصص\s*(?:في|بـ)|نشاطه|نشاط|بالمجال)\s*[:=]?\s*([^.,\u060c\(\)]+)',
+            last_user_msg,
+            re.IGNORECASE,
+        )
+        if niche_m:
+            slots_dict["product_category"] = niche_m.group(1).strip()
+
     # Store Name extraction
-    name_match = re.search(
-        r"(?:called|named|اسم المتجر|اسمه|متجر)\s+([A-Za-z0-9\u0600-\u06FF\s_-]{2,30})",
-        last_user_msg,
+    clean_text = last_user_msg.strip()
+    explicit_name_match = re.search(
+        r'(?:اسم\s+المتجر(?:\s+بتاعي)?|اسم\s+المحل(?:\s+بتاعي)?|اسمه|باسم|سميه|نسميه|called|named)\s*[:=]?\s*([A-Za-z0-9؀-ۿ\s_&-]+)',
+        clean_text,
         re.IGNORECASE,
     )
-    if name_match and not slots_dict.get("store_name"):
-        raw_name = name_match.group(1)
-        cleaned_name = re.split(r"\s+(?:in|في|بالوضع|مع|ب)\s+", raw_name)[0].strip()
-        slots_dict["store_name"] = cleaned_name
+    if explicit_name_match and not slots_dict.get("store_name"):
+        raw_captured = explicit_name_match.group(1).strip()
+        raw_cut = re.split(
+            r'\s+(?:و\s*تكون\s*في\s*مجال|و\s*المجال|والمجال|في\s*مجال|ومجال|مجال|المجال|لبيع|و\s*بيع|بيع|متخصص\s*(?:في|بـ)|نشاطه|نشاط|بالمجال|بالوضع|وستايل|ستايل|بالجنيه|وبالجنيه|بالريال|وبالريال|بالدولار|وبالدولار|و\s*تكون)(?:\s+|$)',
+            raw_captured,
+            flags=re.IGNORECASE,
+        )[0]
+        raw_cut = re.split(r'[()（）]', raw_cut)[0].strip()
+        if raw_cut:
+            slots_dict["store_name"] = raw_cut
+    elif not slots_dict.get("store_name"):
+        name_candidate = clean_text
+        sep_match = re.search(
+            r'\s+(?:و\s*تكون\s*في\s*مجال|و\s*المجال|والمجال|في\s*مجال|ومجال|مجال|المجال|لبيع|و\s*بيع|بيع|متخصص\s*(?:في|بـ)|نشاطه|نشاط|بالمجال|بالوضع|وستايل|ستايل|بالجنيه|وبالجنيه|بالريال|وبالريال|بالدولار|وبالدولار)(?:\s+|$)',
+            name_candidate,
+            re.IGNORECASE,
+        )
+        if sep_match:
+            name_candidate = name_candidate[:sep_match.start()]
+        name_candidate = re.split(r'[()（）]', name_candidate)[0]
+        if ' - ' in name_candidate:
+            name_candidate = name_candidate.split(' - ')[0]
+        elif ' – ' in name_candidate:
+            name_candidate = name_candidate.split(' – ')[0]
+
+        prefixes = [
+            r'^(?:عايز|عاوز|نفسي|حابب|أريد|اريد|ودّي|ودي)\s+(?:أعمل|اعمل|أنشئ|انشئ|أفتح|افتح|اخلي|أخلي|اسمي|أسمي|أسس|اسس)\s*',
+            r'^(?:أعمل|اعمل|أنشئ|انشئ|أفتح|افتح|أخلي|اخلي|أسمي|اسمي|سميه|نسميه|سمي|خليه|اجعله)\s*',
+            r'^(?:اسم\s+المتجر(?:\s+بتاعي)?|اسم\s+المحل(?:\s+بتاعي)?|اسم\s+البراند(?:\s+بتاعي)?|الاسم|اسمه|باسم|اسم)\s*[:=]?\s*',
+            r'^(?:متجر|براند|محل|شركة|ستور|store|brand)\s+',
+        ]
+        cleaned = name_candidate.strip()
+        changed = True
+        while changed:
+            changed = False
+            for pat in prefixes:
+                m = re.match(pat, cleaned, re.IGNORECASE)
+                if m:
+                    cleaned = cleaned[m.end():].strip()
+                    changed = True
+        cleaned = re.sub(r'\s+(?:بتاعي|لي)$', '', cleaned, flags=re.IGNORECASE).strip()
+        cleaned = cleaned.strip('"\' ')
+        if cleaned:
+            slots_dict["store_name"] = cleaned
 
     updated_slots = OnboardingSlots(**slots_dict)
     missing = [s for s in REQUIRED_SLOTS if not getattr(updated_slots, s)]

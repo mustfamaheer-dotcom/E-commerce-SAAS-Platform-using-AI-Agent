@@ -8,6 +8,24 @@ logger = logging.getLogger(__name__)
 _llm_instance = None
 _streaming_llm_instance = None
 
+def extract_llm_text(response: Any) -> str:
+    """Helper to cleanly extract text from either str, list, or AIMessage content across providers."""
+    if not response:
+        return ""
+    content = getattr(response, "content", response)
+    if isinstance(content, str):
+        return content.strip()
+    if isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict) and "text" in item:
+                parts.append(item["text"])
+        return "\n".join(parts).strip()
+    return str(content).strip()
+
+
 def get_llm(streaming: bool = False) -> Optional[Any]:
     """
     Returns an LLM client instance (Gemini or OpenAI).
@@ -24,14 +42,16 @@ def get_llm(streaming: bool = False) -> Optional[Any]:
     # 1. Try Google Gemini if key is provided
     if config.GEMINI_API_KEY and config.GEMINI_API_KEY != "gemini-demo-key":
         try:
+            import os
             from langchain_google_genai import ChatGoogleGenerativeAI
+            model_name = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest")
             llm = ChatGoogleGenerativeAI(
-                model="gemini-1.5-flash",
+                model=model_name,
                 temperature=0.3,
                 streaming=streaming,
                 google_api_key=config.GEMINI_API_KEY,
             )
-            logger.info("Initialized Google Gemini 1.5 Flash LLM client.")
+            logger.info(f"Initialized Google Gemini ({model_name}) LLM client.")
         except Exception as e:
             logger.warning(f"Failed to initialize Gemini LLM: {e}")
 

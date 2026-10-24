@@ -43,6 +43,146 @@ interface AiStoreBuilderPageProps {
   onBackToHub: () => void;
 }
 
+export interface ExtractedStoreDetails {
+  storeName: string;
+  category: string;
+  nicheDescription?: string;
+  themeMode?: 'dark' | 'light';
+}
+
+export function extractArabicStoreDetails(rawInput: string): ExtractedStoreDetails {
+  const cleanInput = rawInput.trim();
+
+  // 1. Niche & Category Extraction
+  let detectedCategory = 'إلكترونيات واكسسوارات';
+  let nicheDescription: string | undefined = undefined;
+
+  // Look for explicit niche phrases
+  const nicheRegex =
+    /(?:و\s*تكون\s*في\s*مجال|و\s*المجال|والمجال|في\s*مجال|ومجال|مجال|المجال|و\s*هيكون\s*في\s*مجال|لبيع|و\s*بيع|بيع|متخصص\s*(?:في|بـ)|نشاطه|نشاط|بالمجال)\s*[:=]?\s*([^.,،\n()]+)/i;
+  const nicheMatch = cleanInput.match(nicheRegex);
+
+  if (nicheMatch && nicheMatch[1]) {
+    let rawNiche = nicheMatch[1].trim();
+    // Strip trailing modifiers
+    rawNiche = rawNiche.split(
+      /\s+(?:بالوضع|وستايل|ستايل|بالجنيه|وبالجنيه|و\s*ستايل|شحن|بوسطة)\b/i
+    )[0].trim();
+    rawNiche = rawNiche.replace(/^(?:هو|هي|عبارة\s+عن|أنه|انه)\s+/i, '').trim();
+    if (rawNiche.length > 1) {
+      nicheDescription = rawNiche;
+    }
+  }
+
+  const lower = cleanInput.toLowerCase();
+  if (
+    /موبايل|لابتوب|هاتف|هواتف|تلفون|كمبيوتر|إلكترون|الكترون|أجهزة|اجهزة|سماعات|phone|laptop|electronics/.test(
+      lower
+    )
+  ) {
+    detectedCategory = 'إلكترونيات وهواتف ذكية ولابتوبات';
+  } else if (/أزياء|ملابس|كاجوال|فاشون|أحذية|احذية|fashion|clothes/.test(lower)) {
+    detectedCategory = 'أزياء وملابس كاجوال';
+  } else if (/عطور|تجميل|ميك اب|ميكاب|perfume|beauty|بخور/.test(lower)) {
+    detectedCategory = 'عطور ومستحضرات تجميل';
+  } else if (/منزل|ديكور|أثاث|اثاث|مفروشات|home|decor/.test(lower)) {
+    detectedCategory = 'مستلزمات منزل وديكور';
+  } else if (/أكل|طعام|مطعم|حلويات|سوبرماركت|أغذية|food/.test(lower)) {
+    detectedCategory = 'أغذية ومأكولات سريعة';
+  } else if (/رياضة|جيم|مكملات|fitness|gym/.test(lower)) {
+    detectedCategory = 'مستلزمات رياضية ولياقة';
+  } else if (nicheDescription) {
+    detectedCategory = nicheDescription;
+  }
+
+  // 2. Store Name Extraction
+  let nameCandidate = cleanInput;
+
+  // Check for explicit naming keywords first:
+  const explicitNameMatch = cleanInput.match(
+    /(?:اسم\s+المتجر(?:\s+بتاعي)?|اسم\s+المحل(?:\s+بتاعي)?|اسم\s+البراند(?:\s+بتاعي)?|الاسم|اسمه|باسم|سميه|نسميه|called|named)\s*[:=]?\s*([A-Za-z0-9\u0600-\u06FF\s_&-]+)/i
+  );
+
+  if (explicitNameMatch && explicitNameMatch[1]) {
+    let captured = explicitNameMatch[1].trim();
+    const cutMatch = captured.split(
+      /\s+(?:و\s*تكون\s*في\s*مجال|و\s*المجال|والمجال|في\s*مجال|ومجال|مجال|المجال|لبيع|و\s*بيع|بيع|متخصص\s*(?:في|بـ)|نشاطه|نشاط|بالمجال|بالوضع|وستايل|ستايل|بالجنيه|وبالجنيه|بالريال|وبالريال|بالدولار|وبالدولار|و\s*تكون)(?:\s+|$)/i
+    )[0];
+    const withoutParens = (cutMatch || captured).split(/[()（）]/)[0].trim();
+    if (withoutParens) {
+      nameCandidate = withoutParens;
+    }
+  } else {
+    // If no explicit naming phrase, split off any domain/niche suffix
+    const sepIndex = nameCandidate.search(
+      /\s+(?:و\s*تكون\s*في\s*مجال|و\s*المجال|والمجال|في\s*مجال|ومجال|مجال|المجال|لبيع|و\s*بيع|بيع|متخصص\s*(?:في|بـ)|نشاطه|نشاط|بالمجال|بالوضع|وستايل|ستايل|بالجنيه|وبالجنيه|بالريال|وبالريال|بالدولار|وبالدولار)(?:\s+|$)/i
+    );
+    if (sepIndex !== -1) {
+      nameCandidate = nameCandidate.substring(0, sepIndex);
+    }
+
+    nameCandidate = nameCandidate.split(/[()（）]/)[0];
+
+    if (nameCandidate.includes(' - ')) {
+      nameCandidate = nameCandidate.split(' - ')[0];
+    } else if (nameCandidate.includes(' – ')) {
+      nameCandidate = nameCandidate.split(' – ')[0];
+    }
+
+    const prefixes = [
+      /^(?:عايز|عاوز|نفسي|حابب|أريد|اريد|ودّي|ودي)\s+(?:أعمل|اعمل|أنشئ|انشئ|أفتح|افتح|اخلي|أخلي|اسمي|أسمي|أسس|اسس)\s*/i,
+      /^(?:أعمل|اعمل|أنشئ|انشئ|أفتح|افتح|أخلي|اخلي|أسمي|اسمي|سميه|نسميه|سمي|خليه|اجعله)\s*/i,
+      /^(?:اسم\s+المتجر(?:\s+بتاعي)?|اسم\s+المحل(?:\s+بتاعي)?|اسم\s+البراند(?:\s+بتاعي)?|الاسم|اسمه|باسم|اسم)\s*[:=]?\s*/i,
+      /^(?:متجر|براند|محل|شركة|ستور|store|brand)\s+/i,
+    ];
+
+    let cleaned = nameCandidate.trim();
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const pat of prefixes) {
+        if (pat.test(cleaned)) {
+          cleaned = cleaned.replace(pat, '').trim();
+          changed = true;
+        }
+      }
+    }
+    nameCandidate = cleaned;
+  }
+
+  // Strip trailing filler words
+  nameCandidate = nameCandidate.replace(/\s+(?:بتاعي|لي)$/i, '').trim();
+  // Strip quotes
+  nameCandidate = nameCandidate.replace(/^[«"''“”]+|[»"''“”]+$/g, '').trim();
+  // Strip emojis
+  nameCandidate = nameCandidate
+    .replace(
+      /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,
+      ''
+    )
+    .trim();
+
+  if (nameCandidate.startsWith('متجر ')) {
+    nameCandidate = nameCandidate.replace(/^متجر\s+/, '').trim();
+  }
+
+  const finalName = nameCandidate || 'متجر النخبة';
+
+  let themeMode: 'dark' | 'light' | undefined = undefined;
+  if (/dark|ليلي|داكن|الوضع الليلي/.test(lower)) {
+    themeMode = 'dark';
+  } else if (/light|نهاري|فاتح|الوضع النهاري/.test(lower)) {
+    themeMode = 'light';
+  }
+
+  return {
+    storeName: finalName,
+    category: detectedCategory,
+    nicheDescription,
+    themeMode,
+  };
+}
+
 export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
   user,
   onStoreCreated,
@@ -97,9 +237,9 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
     setMessages([initialGreeting]);
   }, [user]);
 
-  const handleSendMessage = (textToSend?: string) => {
+  const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputValue).trim();
-    if (!text) return;
+    if (!text || isTyping) return;
 
     const userMsg: Message = {
       id: `user_${Date.now()}`,
@@ -112,46 +252,106 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
     setInputValue('');
     setIsTyping(true);
 
+    try {
+      const res = await fetch(`${API_BASE_URL}/stores/onboarding/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          step,
+          store_data: storeData,
+          history: [...messages, userMsg].map((m) => ({
+            sender: m.sender,
+            text: m.text,
+          })),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.reply) {
+          // Merge updated fields from LLM extraction
+          if (data.updated_fields && Object.keys(data.updated_fields).length > 0) {
+            setStoreData((prev) => ({
+              ...prev,
+              ...data.updated_fields,
+            }));
+          }
+
+          if (data.step) {
+            setStep(data.step);
+          }
+
+          const agentReply: Message = {
+            id: `agent_${Date.now()}`,
+            sender: 'agent',
+            timestamp: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+            text: data.reply,
+            isQuickReplies: data.quick_replies && data.quick_replies.length > 0 ? data.quick_replies : undefined,
+            showPreviewCard: data.show_preview || data.step === 5,
+          };
+
+          setMessages((prev) => [...prev, agentReply]);
+          setIsTyping(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Live onboarding agent failed, using smart fallback:', err);
+    }
+
+    // Fallback to local rule engine if network/API unavailable
     setTimeout(() => {
       processAgentResponse(text, step);
-    }, 700);
+    }, 500);
   };
 
   const processAgentResponse = (userAnswer: string, currentStep: number) => {
     const nowTime = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
-    if (currentStep === 1) {
-      // Extract Store Name & Niche
-      let detectedName = userAnswer;
-      let detectedCategory = 'إلكترونيات واكسسوارات';
-
-      if (userAnswer.includes('أزياء') || userAnswer.includes('ملابس')) {
-        detectedCategory = 'أزياء وملابس كاجوال';
-      } else if (userAnswer.includes('عطور') || userAnswer.includes('تجميل')) {
-        detectedCategory = 'عطور ومستحضرات تجميل';
-      } else if (userAnswer.includes('منزل') || userAnswer.includes('ديكور')) {
-        detectedCategory = 'مستلزمات منزل وديكور';
+    // Allow merchants to adjust store name if they want at any point during onboarding
+    const renameMatch = userAnswer.match(
+      /^(?:غير|عدل|بدل|صلح|خليه|سميه|اسم\s+المتجر)\s+(?:الاسم|اسم\s+المتجر|اسمه)?\s*[:=]?\s*(.+)/i
+    );
+    if (renameMatch && renameMatch[1] && currentStep > 1 && currentStep < 5) {
+      const newName = renameMatch[1].replace(/["'«»“”]/g, '').trim();
+      if (newName) {
+        setStoreData((prev) => ({ ...prev, storeName: newName }));
+        const renameReply: Message = {
+          id: `agent_${Date.now()}`,
+          sender: 'agent',
+          timestamp: nowTime,
+          text: `تمام جداً يا فندم! 👍 تم تحديث اسم المتجر ليكون: **"${newName}"**.\n\nيلا بينا نكمل باقي خطوات التأسيس.`,
+        };
+        setMessages((prev) => [...prev, renameReply]);
+        setIsTyping(false);
+        return;
       }
+    }
 
-      // Clean store name
-      const cleanName = userAnswer
-        .replace(/متجر|براند|شركة|للـ/g, '')
-        .split('(')[0]
-        .replace(/[📱👕🧴🏠]/g, '')
-        .trim();
+    if (currentStep === 1) {
+      const extracted = extractArabicStoreDetails(userAnswer);
 
-      const finalName = cleanName || 'متجر النخبة';
+      const effectiveCategory = extracted.nicheDescription
+        ? `${extracted.nicheDescription} (${extracted.category})`
+        : extracted.category;
+
       setStoreData((prev) => ({
         ...prev,
-        storeName: finalName,
-        category: detectedCategory,
+        storeName: extracted.storeName,
+        category: effectiveCategory,
+        themeMode: extracted.themeMode || prev.themeMode,
       }));
+
+      const categorySnippet = extracted.nicheDescription
+        ? `في مجال **"${extracted.nicheDescription}"**`
+        : `(${extracted.category})`;
 
       const reply: Message = {
         id: `agent_${Date.now()}`,
         sender: 'agent',
         timestamp: nowTime,
-        text: `اسم ممتاز ومميز جداً: **"${finalName}"** (${detectedCategory})! 👏\n\nندخل على الخطوة التانية الخاصة بالتوصيل:\n**حابب تشحن وتوصل لفين؟ وهل نعتمد شحن بوسطة (Bosta) لجميع محافظات جمهورية مصر العربية مع التوصيل السريع خلال 24-48 ساعة؟**`,
+        text: `اسم ممتاز ومميز جداً: **"${extracted.storeName}"** ${categorySnippet}! 👏\n\nندخل على الخطوة التانية الخاصة بالشحن والتوصيل:\n**حابب تشحن وتوصل لفين؟ وهل نعتمد شحن بوسطة (Bosta) لجميع محافظات جمهورية مصر العربية مع التوصيل السريع خلال 24-48 ساعة؟**`,
         isQuickReplies: [
           'جميع محافظات مصر عبر بوسطة (24-48 ساعة) 🚚',
           'القاهرة والجيزة والإسكندرية فقط',
@@ -250,11 +450,15 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
     setIsProvisioning(true);
     setProvisionProgress(15);
 
-    const slug = (storeData.storeName || 'techzone-store')
+    const rawEnglish = (storeData.storeName || '')
       .toLowerCase()
       .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-') || 'store-online';
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/[\s_-]+/g, '-');
+    const slug =
+      rawEnglish && rawEnglish.length >= 2
+        ? rawEnglish
+        : `store-${Math.random().toString(36).substring(2, 8)}`;
 
     // Simulate multi-tier provisioning stages
     const timer1 = setTimeout(() => {

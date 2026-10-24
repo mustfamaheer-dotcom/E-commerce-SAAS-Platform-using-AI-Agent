@@ -22,19 +22,7 @@ const STORAGE_USERS_KEY = 'techzone_registered_users';
 const STORAGE_CURRENT_USER_KEY = 'techzone_user';
 const STORAGE_ACCESS_TOKEN_KEY = 'techzone_access_token';
 
-const INITIAL_ACCOUNTS: StoredAccount[] = [
-  {
-    id: 'user_moustafa',
-    name: 'مصطفى ماهر',
-    email: 'owner@moustafatech.eg',
-    phone: '+20 100 123 4567',
-    businessType: 'electronics',
-    storeName: 'Moustafa Tech',
-    tenantId: 'tenant-moustafa-tech',
-    role: 'owner',
-    createdAt: new Date().toISOString(),
-  },
-];
+const INITIAL_ACCOUNTS: StoredAccount[] = [];
 
 export const getAuthToken = (): string | null => {
   try {
@@ -57,13 +45,10 @@ export const setAuthToken = (token: string | null) => {
 export const getRegisteredUsers = (): StoredAccount[] => {
   try {
     const raw = localStorage.getItem(STORAGE_USERS_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(INITIAL_ACCOUNTS));
-      return INITIAL_ACCOUNTS;
-    }
+    if (!raw) return [];
     return JSON.parse(raw);
   } catch {
-    return INITIAL_ACCOUNTS;
+    return [];
   }
 };
 
@@ -157,8 +142,7 @@ export const registerUser = async (data: {
     } else {
       const errJson = await res.json().catch(() => ({}));
       if (errJson.detail && errJson.detail.includes('مسجل بالفعل')) {
-        // Fallback to login if already registered
-        return loginUser(cleanEmail, password);
+        throw new Error('البريد الإلكتروني مسجل بالفعل، يرجى تسجيل الدخول.');
       }
       throw new Error(errJson.detail || 'فشل إنشاء الحساب');
     }
@@ -218,21 +202,7 @@ export const loginUser = async (email: string, password?: string): Promise<UserA
       return user;
     } else {
       const errJson = await res.json().catch(() => ({}));
-      // If user doesn't exist on server yet, register automatically
-      if (res.status === 401 && !cleanEmail.includes('moustafa')) {
-        const prefix = cleanEmail.split('@')[0] || 'التاجر';
-        const prettyName =
-          prefix.charAt(0).toUpperCase() + prefix.slice(1).replace(/[._-]/g, ' ');
-        return registerUser({
-          email: cleanEmail,
-          password: pwd,
-          name: prettyName,
-          phone: '+20 100 000 0000',
-          businessType: 'electronics',
-          storeName: `متجر ${prettyName}`,
-        });
-      }
-      throw new Error(errJson.detail || 'فشل تسجيل الدخول');
+      throw new Error(errJson.detail || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
     }
   } catch (err: any) {
     console.warn('Backend login fallback:', err);

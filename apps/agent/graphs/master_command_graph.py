@@ -350,7 +350,29 @@ def _generate_contextual_dialogue(user_text: str, is_ar: bool) -> str:
     """
     Intelligent conversational reasoning engine for open-ended queries,
     explaining ERP insights, store building, and guiding the merchant.
+    Powered directly by Google Gemini LLM when available.
     """
+    from backend.agent.llm_client import get_llm, extract_llm_text
+    llm = get_llm()
+    if llm:
+        try:
+            from langchain_core.messages import SystemMessage, HumanMessage
+            sys_prompt = (
+                "أنت وكيل تيك زون الذكي (TechZone Autonomous Agent)، مساعد ذكاء اصطناعي متكامل للتاجر لإدارة التجارة الإلكترونية والـ ERP وبناء المتاجر.\n"
+                "المطلوب:\n"
+                "1. رد بشكل مباشر، ذكي، وموجز جداً (1-2 جملة) بلهجة مصرية مهذبة أو بالإنجليزية حسب لغة المستخدم.\n"
+                "2. وضح قدرتك ووجه التاجر للخطوة التالية بوضوح وبدون حشو أو ديباجات محفوظة."
+                if is_ar else
+                "You are TechZone Autonomous Agent, an AI copilot for e-commerce, ERP, and store building.\n"
+                "Be direct, smart, and concise (1-2 sentences), guiding the merchant with clear next steps."
+            )
+            resp = llm.invoke([SystemMessage(content=sys_prompt), HumanMessage(content=user_text)])
+            ans = extract_llm_text(resp).strip()
+            if ans and len(ans) > 10:
+                return ans
+        except Exception as ex:
+            pass
+
     lower = user_text.lower()
 
     if any(k in lower or k in user_text for k in ["من انت", "مين انت", "who are you", "what can you do", "وظيفتك", "بتعمل ايه"]):

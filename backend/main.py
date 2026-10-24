@@ -18,6 +18,7 @@ from backend.api.routes.inventory import router as inventory_router
 from backend.api.routes.analytics import router as analytics_router
 from backend.api.routes.agent import router as agent_router
 from backend.api.routes.auth import router as auth_router
+from backend.core.middleware import RequestTracingMiddleware, register_error_handlers
 from backend.db.database import init_db
 
 # Ensure all database tables exist on startup
@@ -28,6 +29,10 @@ app = FastAPI(
     description="Full ERP + Autonomous Egyptian AI Agent Multi-Tenant Platform",
     version="2.0.0",
 )
+
+# SaaS Observability & Standard Error Handlers
+app.add_middleware(RequestTracingMiddleware)
+register_error_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,

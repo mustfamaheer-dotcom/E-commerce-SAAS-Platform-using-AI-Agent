@@ -4,7 +4,7 @@ import random
 import logging
 from typing import Dict, Any, List, Optional
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from backend.agent.llm_client import get_llm
+from backend.agent.llm_client import get_llm, extract_llm_text
 
 logger = logging.getLogger(__name__)
 
@@ -91,11 +91,11 @@ def generate_dynamic_advisor_reply(
 
             messages.append(HumanMessage(content=clean_q))
             response = llm.invoke(messages)
-            content = getattr(response, "content", "").strip()
+            content = extract_llm_text(response)
             if content and len(content) > 20:
                 return {
                     "reply": content,
-                    "model": getattr(llm, "model_name", "LLM-AI"),
+                    "model": getattr(llm, "model_name", getattr(llm, "model", "Google Gemini")),
                     "is_llm": True,
                 }
         except Exception as e:

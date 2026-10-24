@@ -7,7 +7,7 @@ from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END, MessagesState
 
 from backend.agent.arabic_normalizer import normalize_arabic
-from backend.agent.llm_client import get_llm
+from backend.agent.llm_client import get_llm, extract_llm_text
 from backend.agent.system_prompt import get_system_prompt
 from backend.agent.generative_advisor import generate_dynamic_advisor_reply
 from backend.agent.tools.product_tool import (
@@ -525,7 +525,7 @@ def classify_intent_node(state: ErpAgentState) -> Dict[str, Any]:
                 "Respond ONLY with the intent string and nothing else."
             )
             res = llm.invoke([SystemMessage(content=sys_prompt), HumanMessage(content=raw_query)])
-            llm_text = getattr(res, "content", "").strip().lower()
+            llm_text = extract_llm_text(res).lower()
             valid_intents = [
                 "clarification_add_category", "add_category", "list_categories",
                 "clarification_add_product", "add_product", "list_products",

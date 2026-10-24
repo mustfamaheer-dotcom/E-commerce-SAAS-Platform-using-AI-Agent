@@ -68,3 +68,4 @@ def get_current_tenant_id(
             detail="Authenticated user is not associated with any store/tenant",
         )
     return current_user.tenant_id
+

@@ -10,6 +10,10 @@ import { StoreCreationPreviewCard, StorePreviewData } from '../gen-ui/StoreCreat
 import { CustomerSegmentsCard, CustomerSegmentsPayload } from '../gen-ui/CustomerSegmentsCard';
 import { PromotionApprovalCard, PromotionApprovalPayload } from '../gen-ui/PromotionApprovalCard';
 import { CategoryCard, CategoryCardPayload } from '../gen-ui/CategoryCard';
+import { ProductRecommendationCard, ProductRecommendationPayload } from '../gen-ui/ProductRecommendationCard';
+import { OrderTrackingCard, OrderTrackingPayload } from '../gen-ui/OrderTrackingCard';
+import { PolicyCard, PolicyCardPayload } from '../gen-ui/PolicyCard';
+import { HumanHandoffCard, HumanHandoffPayload } from '../gen-ui/HumanHandoffCard';
 
 export type GenUiCardType =
   | 'analytics_dashboard'
@@ -147,6 +151,25 @@ export const GenUiRegistry: React.FC<GenUiRegistryProps> = ({
         />
       );
 
+    case 'product_recommendation_card':
+    case 'products_list':
+    case 'product_search':
+      return <ProductRecommendationCard data={safePayload as ProductRecommendationPayload} />;
+
+    case 'order_tracking_card':
+    case 'order_status':
+      return <OrderTrackingCard data={safePayload as OrderTrackingPayload} />;
+
+    case 'policy_card':
+    case 'policy_info':
+    case 'shipping_policy':
+    case 'return_policy':
+      return <PolicyCard data={safePayload as PolicyCardPayload} />;
+
+    case 'human_handoff_card':
+    case 'support_escalation':
+      return <HumanHandoffCard data={safePayload as HumanHandoffPayload} />;
+
     default:
       return null;
   }
@@ -163,4 +186,8 @@ export const GEN_UI_COMPONENTS: Record<string, string> = {
   store_creation_preview: 'StoreCreationPreviewCard',
   customer_segments: 'CustomerSegmentsCard',
   promotion_approval: 'PromotionApprovalCard',
+  product_recommendation_card: 'ProductRecommendationCard',
+  order_tracking_card: 'OrderTrackingCard',
+  policy_card: 'PolicyCard',
+  human_handoff_card: 'HumanHandoffCard',
 };

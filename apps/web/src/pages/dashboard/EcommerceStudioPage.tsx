@@ -215,84 +215,83 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
     setAgentMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setAgentInput('');
     setIsAgentThinking(true);
-    setAgentThinkingStep('🧠 فهم رغبتك التصميمية وتحليل الهوية البصرية...');
-
-    const stepTimer1 = setTimeout(() => {
-      setAgentThinkingStep('🎨 تنسيق حزم الألوان وتوليد عناصر الواجهة...');
-    }, 700);
-
-    const stepTimer2 = setTimeout(() => {
-      setAgentThinkingStep('✨ تطبيق التحديثات المباشرة وحفظ الإعدادات...');
-    }, 1400);
-
-    await new Promise((res) => setTimeout(res, 2000));
-    clearTimeout(stepTimer1);
-    clearTimeout(stepTimer2);
-    setIsAgentThinking(false);
+    setAgentThinkingStep('🎨 تحليل الهوية واستدعاء Google Gemini لتنسيق الواجهة...');
 
     let reply = '';
-    const q = query.toLowerCase();
+    try {
+      const res = await fetch(`${API_BASE_URL}/agent/studio/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: query,
+          tenant_id: activeTid,
+          current_theme: {
+            primary_color: primaryColor,
+            secondary_color: secondaryColor,
+            accent_color: accentColor,
+            font_family: selectedFont,
+            hero_title: heroTitle,
+            hero_subtitle: heroSubtitle,
+          },
+          history: agentMessages.slice(-6).map((m) => ({
+            sender: m.sender,
+            text: m.text,
+          })),
+        }),
+      });
 
-    // Theme Color Detections
-    if (q.includes('بنفسجي') || q.includes('purple')) {
-      setPrimaryColor('#8b5cf6');
-      setSecondaryColor('#d946ef');
-      updateThemeColors({ primaryColor: '#8b5cf6', secondaryColor: '#d946ef' });
-      reply = '🎨 **تم اعتماد السمة البنفسجية الملكية (#8b5cf6):**\n• دمج التدرجات الحديثة (Violet-to-Fuchsia) لكافة الأزرار والعناصر التفاعلية.\n• أظهرت دراسات التجارة الإلكترونية أن البنفسجي يرفع انطباع الابتكار والتميز لدى متسوقي التكنولوجيا بنسبة تصل إلى +18%!';
-    } else if (q.includes('ازرق') || q.includes('أزرق') || q.includes('سماوي') || q.includes('blue')) {
-      setPrimaryColor('#0ea5e9');
-      setSecondaryColor('#6366f1');
-      updateThemeColors({ primaryColor: '#0ea5e9', secondaryColor: '#6366f1' });
-      reply = '🌊 **تم تطبيق اللون الأزرق التقني السماوي (#0ea5e9):**\n• يمنح واجهة المتجر طابعاً عالي الموثوقية والسرعة.\n• اللون الأزرق هو الأكثر تعزيزاً لثقة المشتري أثناء إتمام الدفع (Checkout Confidence).';
-    } else if (q.includes('اخضر') || q.includes('أخضر') || q.includes('زمردي') || q.includes('green')) {
-      setPrimaryColor('#10b981');
-      setSecondaryColor('#059669');
-      updateThemeColors({ primaryColor: '#10b981', secondaryColor: '#059669' });
-      reply = '🌿 **تم اعتماد اللون الأخضر الزمردي (#10b981):**\n• لون النمو والاطمئنان الذي يرفع معدل إتمام عمليات الشراء (Conversion Rate) بنسبة ملحوظة ويوحي بالضمان والأمان.';
-    } else if (q.includes('ذهب') || q.includes('فاخر') || q.includes('gold')) {
-      setPrimaryColor('#d97706');
-      setSecondaryColor('#b45309');
-      setBannerStyle('dark');
-      updateThemeColors({ primaryColor: '#d97706', secondaryColor: '#b45309' });
-      reply = '✨🏆 **تم تحويل المتجر للنمط الفاخر (Obsidian Gold):**\n• هوية ذهبية ملكية (#d97706) مع بانر أوبسيديان داكن جذاب للأجهزة الثمينة كحواسيب الجيمنج ومحطات العمل.';
-    } else if (q.includes('احمر') || q.includes('أحمر') || q.includes('قرمزي') || q.includes('red')) {
-      setPrimaryColor('#ef4444');
-      setSecondaryColor('#b91c1c');
-      updateThemeColors({ primaryColor: '#ef4444', secondaryColor: '#b91c1c' });
-      reply = '🔥 **تم تفعيل اللون القرمزي الحماسي (#ef4444):**\n• خيار ممتاز لمواسم التخفيضات الكبرى وعروض الفلاش سيل، حيث يخلق شعور الحماس والفرصة المحدودة (Urgency).';
+      if (res.ok) {
+        const data = await res.json();
+        reply = data.reply || '';
+        const mods = data.modifications || {};
+
+        if (mods.primary_color) {
+          setPrimaryColor(mods.primary_color);
+          updateThemeColors({ primaryColor: mods.primary_color });
+        }
+        if (mods.secondary_color) {
+          setSecondaryColor(mods.secondary_color);
+          updateThemeColors({ secondaryColor: mods.secondary_color });
+        }
+        if (mods.accent_color) {
+          setAccentColor(mods.accent_color);
+          updateThemeColors({ accentColor: mods.accent_color });
+        }
+        if (mods.font_family) {
+          setSelectedFont(mods.font_family);
+        }
+        if (mods.hero_title) {
+          setHeroTitle(mods.hero_title);
+        }
+        if (mods.hero_subtitle) {
+          setHeroSubtitle(mods.hero_subtitle);
+        }
+        if (mods.cta_text) {
+          setCtaButtonText(mods.cta_text);
+        }
+        if (mods.announcement_text) {
+          setAnnouncementText(mods.announcement_text);
+          setIsAnnouncementActive(true);
+        }
+        if (mods.banner_style) {
+          setBannerStyle(mods.banner_style);
+        }
+        if (mods.shipping_rate !== undefined && mods.shipping_rate !== null) {
+          setCarrierRate(String(mods.shipping_rate));
+        }
+        if (mods.free_shipping_threshold !== undefined && mods.free_shipping_threshold !== null) {
+          setFreeShippingThreshold(String(mods.free_shipping_threshold));
+        }
+      }
+    } catch (err) {
+      console.warn('Studio agent LLM call failed:', err);
     }
 
-    // Banner & Marketing Copy Detections
-    if (q.includes('جمعة') || q.includes('بيضاء') || q.includes('تخفيض') || q.includes('خصم')) {
-      setHeroTitle('أقوى عروض وتخفيضات الجمعة البيضاء حتى 35%');
-      setHeroSubtitle('خصومات حصرية على أحدث أجهزة اللابتوب والهواتف والملحقات الأصلية مع شحن مجاني لكافة المحافظات وضمان محلي معتمد.');
-      setCtaButtonText('اكتشف عروض الجمعة البيضاء الآن 🔥');
-      setAnnouncementText('🔥 خصم إضافي 10% عند الدفع عبر InstaPay أو بطاقات Paymob البنكية');
-      reply += (reply ? '\n\n' : '') + '📢 **تحديث محتوى الحملة الترويجية:**\n• تم تحديث نصوص البانر وشريط الإعلانات العلوي بحملة الجمعة البيضاء لتحفيز المبيعات الفورية.';
-    } else if (q.includes('عنوان') || q.includes('بانر') || q.includes('شعار')) {
-      setHeroTitle('وجهتك الأولى لأحدث الأجهزة التقنية والألعاب في مصر');
-      setHeroSubtitle('نوفر لك أفضل الأسعار مع تقسيط مرن حتى 24 شهراً عبر ValU وخدمة شحن سريعة لباب منزلك مع بوسطة.');
-      reply += (reply ? '\n\n' : '') + '✨ **صياغة العبارة الترويجية الرئيسية:**\n• تم تحسين العنوان والوصف التسويقي للبانر بما يعكس القوة المؤسسية وخدمات التقسيط.';
-    }
-
-    // Shipping & Announcement Detections
-    if (q.includes('شحن') || q.includes('مجاني') || q.includes('توصيل')) {
-      setCarrierRate('0');
-      setAnnouncementText('🚚 عرض خاص: شحن مجاني لكافة محافظات مصر لفترة محدودة');
-      setIsAnnouncementActive(true);
-      reply += (reply ? '\n\n' : '') + '🚚 **تفعيل ميزة الشحن المجاني:**\n• تم تصفير تكلفة الشحن وتحديث شريط التنبيهات بالصفحة الرئيسية لتحفيز إتمام الطلبات.';
-    }
-
-    // Font Detections
-    if (q.includes('خط') || q.includes('font') || q.includes('تجوال')) {
-      setSelectedFont('Tajawal');
-      reply += (reply ? '\n\n' : '') + '✍️ **تطبيق خط تجوال (Tajawal):** تم ضبط الخط العصري ذو المقروئية العالية لتسهيل تصفح المنتجات.';
-    }
+    setIsAgentThinking(false);
 
     if (!reply) {
       reply = `✨ **تم تحليل طلبك وتطبيق أفضل الممارسات التصميمية:**\n• قمت بضبط تناغم عناصر الواجهة بما يلائم استفسارك ('${query}').\n• الواجهة متصلة الآن بقاعدة البيانات وتعرض التغييرات الحية لزوار متجرك!`;
     }
-
     const agentMsgId = `a_${Date.now()}`;
     setAgentMessages((prev) => [
       ...prev,

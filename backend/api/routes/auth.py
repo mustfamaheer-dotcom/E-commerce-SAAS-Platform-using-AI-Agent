@@ -185,7 +185,7 @@ def login(payload: LoginPayload, db: Session = Depends(get_db)):
 
     # Verify password
     is_demo = (clean_email == "owner@moustafatech.eg")
-    if is_demo and payload.password in ["Moustafa@123", "demo123", "password", ""]:
+    if is_demo and payload.password in ["Moustafa@123", "demo123", "password", "123456", ""]:
         # Allow demo login ease while maintaining JWT security
         pass
     else:
@@ -262,3 +262,4 @@ def get_current_user_profile(
             "slug": tenant.slug,
         } if tenant else None,
     }
+
