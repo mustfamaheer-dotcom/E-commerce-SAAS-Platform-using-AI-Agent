@@ -22,7 +22,7 @@ const DEFAULT_THEME: ThemeConfig = {
   secondaryColor: '#6366f1',
   accentColor: '#10b981',
   logoUrl: null,
-  fontFamily: 'Cairo, sans-serif',
+  fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif, Cairo',
 };
 
 const ThemeContext = createContext<ThemeContextType>({
@@ -57,7 +57,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     document.documentElement.style.setProperty('--brand-accent', theme.accentColor);
 
     // Apply typography dynamically across all elements
-    const font = theme.fontFamily || 'Cairo, sans-serif';
+    const font = theme.fontFamily || DEFAULT_THEME.fontFamily;
     document.documentElement.style.setProperty('--brand-font', font);
     document.documentElement.style.fontFamily = font;
     if (document.body) {

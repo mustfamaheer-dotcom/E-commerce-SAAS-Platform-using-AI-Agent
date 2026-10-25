@@ -68,7 +68,7 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
     name: 'المتجر الإلكتروني',
     heroTitle: 'أفضل الأجهزة والإلكترونيات الذكية بأسعار لا تُنافس',
     heroSubtitle: 'تسوق أحدث الأجهزة الذكية مع ضمان محلي معتمد، شحن سريع بجميع محافظات مصر، وخيارات تقسيط ودفع إلكتروني ميسرة.',
-    announcementText: '🚚 شحن سريع لكافة محافظات مصر عبر بوسطة — شحن مجاني للطلبات فوق 1,000 ج.م',
+    announcementText: 'شحن سريع لكافة محافظات مصر عبر بوسطة — شحن مجاني للطلبات فوق 1,000 ج.م',
     carrierRate: 45,
     freeShippingThreshold: 1000,
   });
@@ -106,7 +106,7 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
             ? `أهلاً بكم في ${data.settings.displayName} — الإلكترونيات الأصلية`
             : 'أفضل الأجهزة والإلكترونيات الذكية بأسعار لا تُنافس',
           heroSubtitle: 'تسوق الآن مع ضمان محلي معتمد، تقسيط مرن عبر ValU وبطاقات Paymob، وتحويل InstaPay فوري عند الشراء.',
-          announcementText: '🚚 شحن سريع لكافة محافظات مصر عبر بوسطة — شحن مجاني للطلبات فوق 1,000 ج.م',
+          announcementText: 'شحن سريع لكافة محافظات مصر عبر بوسطة — شحن مجاني للطلبات فوق 1,000 ج.م',
           carrierRate: data.settings?.shippingZones?.default_rate || 45,
           freeShippingThreshold: data.settings?.shippingZones?.free_shipping_threshold || 1000,
         });
@@ -155,6 +155,17 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
     };
     window.addEventListener('techzone:select-category', handleSelectCat);
     return () => window.removeEventListener('techzone:select-category', handleSelectCat);
+  }, []);
+
+  useEffect(() => {
+    const handleSelectSort = (e: any) => {
+      if (e?.detail?.sortBy) {
+        setSortBy(e.detail.sortBy);
+        catalogTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('techzone:select-sort', handleSelectSort);
+    return () => window.removeEventListener('techzone:select-sort', handleSelectSort);
   }, []);
 
   // Reset pagination when filter criteria change
@@ -227,10 +238,7 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
     );
     setAddedPopup(pName);
     setTimeout(() => setAddedPopup(null), 2500);
-    // Optionally open the slide-over Mini-Cart for instant feedback
-    if (onOpenMiniCart) {
-      onOpenMiniCart();
-    }
+    
   };
 
   const handleToggleWishlist = (e: React.MouseEvent, p: any) => {
@@ -255,15 +263,6 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
           <span>تمت إضافة "{addedPopup}" إلى سلة مشترياتك بنجاح!</span>
         </div>
       )}
-
-      {/* Top Announcement Bar */}
-      <div
-        className="py-2 px-4 text-center text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-2xs select-none"
-        style={{ backgroundColor: primaryColor }}
-      >
-        <Sparkles className="w-3.5 h-3.5 shrink-0" />
-        <span>{storeMeta.announcementText}</span>
-      </div>
 
       {/* Spatial Hero Section (Apple & Scandinavian Style) */}
       <SpatialHeroSection
@@ -654,7 +653,7 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
                         setAddedPopup(pName);
                         setTimeout(() => setAddedPopup(null), 2500);
                         setSelectedProductModal(null);
-                        if (onOpenMiniCart) onOpenMiniCart();
+                        
                       }}
                       style={{ backgroundColor: primaryColor }}
                       className="w-full py-3 rounded-full text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-500/25 hover:opacity-95 transition-all"

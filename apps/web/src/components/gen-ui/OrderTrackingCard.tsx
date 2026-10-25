@@ -1,6 +1,6 @@
 // apps/web/src/components/gen-ui/OrderTrackingCard.tsx
 import React from 'react';
-import { Package, Truck, CheckCircle2, Clock, MapPin, CreditCard, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Package, Truck, CheckCircle2, Clock, MapPin, CreditCard, ExternalLink, ShieldCheck, Check } from 'lucide-react';
 
 export interface OrderTrackingPayload {
   order_id: string;
@@ -78,13 +78,15 @@ export const OrderTrackingCard: React.FC<{ data: OrderTrackingPayload }> = ({ da
               : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
           }`}
         >
-          {isCancelled
-            ? 'ملغي / مسترجع'
-            : normStatus === 'DELIVERED'
-            ? 'تم التسليم ✓'
-            : normStatus === 'SHIPPED'
-            ? 'جاري التوصيل 🚚'
-            : 'قيد التجهيز ⏳'}
+          {isCancelled ? (
+            'ملغي / مسترجع'
+          ) : normStatus === 'DELIVERED' ? (
+            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /><span>تم التسليم</span></span>
+          ) : normStatus === 'SHIPPED' ? (
+            <span className="flex items-center gap-1"><Truck className="w-3 h-3 text-sky-500" /><span>جاري التوصيل</span></span>
+          ) : (
+            <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-amber-500" /><span>قيد التجهيز</span></span>
+          )}
         </span>
       </div>
 

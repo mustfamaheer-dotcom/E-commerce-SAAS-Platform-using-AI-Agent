@@ -57,11 +57,11 @@ def fallback_rule_based_onboarding(user_msg: str, curr_step: int, store_data: Di
 
         return {
             "status": "success",
-            "reply": f"اسم رائع ومميز جداً: **'{final_name}'** في مجال **{niche}**! 🚀\n\nيلا ندخل على خطوة الشحن والتوصيل: **حابب نشحن لكافة محافظات مصر عبر بوسطة (Bosta Express) مع توصيل سريع خلال 24-48 ساعة؟**",
+            "reply": f"اسم رائع ومميز جداً: **'{final_name}'** في مجال **{niche}**! \n\nيلا ندخل على خطوة الشحن والتوصيل: **حابب نشحن لكافة محافظات مصر عبر بوسطة (Bosta Express) مع توصيل سريع خلال 24-48 ساعة؟**",
             "step": 2,
             "updated_fields": updated_fields,
             "quick_replies": [
-                "جميع محافظات مصر عبر بوسطة (24-48 ساعة) 🚚",
+                "جميع محافظات مصر عبر بوسطة (24-48 ساعة) ",
                 "القاهرة والجيزة والإسكندرية فقط",
                 "شحن فوري داخل القاهرة الكبرى ⚡"
             ],
@@ -72,12 +72,12 @@ def fallback_rule_based_onboarding(user_msg: str, curr_step: int, store_data: Di
         updated_fields["shippingScope"] = user_msg
         return {
             "status": "success",
-            "reply": "تمام يا فندم، تم اعتماد نطاق وتكلفة الشحن بنجاح! 📦\n\nنيجي بقى لبوابات الدفع: **تحب نفعل إيه في متجرك؟** (عندنا دعم مباشر لـ Paymob فيزا/ميزة، تحويل InstaPay فوري، كود فوري، والدفع عند الاستلام COD).",
+            "reply": "تمام يا فندم، تم اعتماد نطاق وتكلفة الشحن بنجاح! \n\nنيجي بقى لبوابات الدفع: **تحب نفعل إيه في متجرك؟** (عندنا دعم مباشر لـ Paymob فيزا/ميزة، تحويل InstaPay فوري، كود فوري، والدفع عند الاستلام COD).",
             "step": 3,
             "updated_fields": updated_fields,
             "quick_replies": [
-                "فعل جميع الطرق (Paymob + InstaPay + فوري + COD) 💳",
-                "الدفع عند الاستلام (COD) فقط 💵",
+                "فعل جميع الطرق (Paymob + InstaPay + فوري + COD) ",
+                "الدفع عند الاستلام (COD) فقط ",
                 "Paymob كروت بنكية و InstaPay اللحظي فقط"
             ],
             "show_preview": False
@@ -93,13 +93,13 @@ def fallback_rule_based_onboarding(user_msg: str, curr_step: int, store_data: Di
         updated_fields["paymentGateways"] = gateways
         return {
             "status": "success",
-            "reply": "ممتاز جداً! 💳 تم ضبط بوابات الدفع وفقاً لاختيارك.\n\nآخر خطوة سريعة لمظهر متجرك: **تحب الواجهة تكون بالوضع الليلي الفخم (Dark Mode) ولا الوضع النهاري الهادي (Light Mode)؟ ولونك المفضل إيه؟**",
+            "reply": "ممتاز جداً!  تم ضبط بوابات الدفع وفقاً لاختيارك.\n\nآخر خطوة سريعة لمظهر متجرك: **تحب الواجهة تكون بالوضع الليلي الفخم (Dark Mode) ولا الوضع النهاري الهادي (Light Mode)؟ ولونك المفضل إيه؟**",
             "step": 4,
             "updated_fields": updated_fields,
             "quick_replies": [
-                "وضع ليلي فخم (Dark Mode) مع أزرق تقني 🌙",
+                "وضع ليلي فخم (Dark Mode) مع أزرق تقني ",
                 "وضع نهاري هادي (Light Mode) مع بنفسجي عصري ☀️",
-                "وضع ليلي (Dark Mode) مع أخضر زمردي 🟢"
+                "وضع ليلي (Dark Mode) مع أخضر زمردي "
             ],
             "show_preview": False
         }
@@ -111,7 +111,7 @@ def fallback_rule_based_onboarding(user_msg: str, curr_step: int, store_data: Di
         updated_fields["primaryColor"] = color
         return {
             "status": "success",
-            "reply": "تسلم يا غالي! 🎨 جهزتلك هوية متجرك بالكامل وقاعدة البيانات جاهزة للربط.\n\nراجع بطاقة المتجر أدناه، ودوس على **'إنشاء وإطلاق المتجر الآن'** للبدء فوراً!",
+            "reply": "تسلم يا غالي!  جهزتلك هوية متجرك بالكامل وقاعدة البيانات جاهزة للربط.\n\nراجع بطاقة المتجر أدناه، ودوس على **'إنشاء وإطلاق المتجر الآن'** للبدء فوراً!",
             "step": 5,
             "updated_fields": updated_fields,
             "quick_replies": [],
@@ -232,6 +232,8 @@ class StoreUpdatePayload(BaseModel):
     governorate: Optional[str] = None
     shipping_zones: Optional[Dict[str, Any]] = None
     payment_gateways: Optional[Dict[str, Any]] = None
+    social_links: Optional[Dict[str, Any]] = None
+    socialLinks: Optional[Dict[str, Any]] = None
 
 
 class ThemeUpdatePayload(BaseModel):
@@ -420,6 +422,7 @@ def get_current_store(
             "governorate": getattr(settings, "governorate", None) or (settings.shipping_zones.get("governorate") if settings and settings.shipping_zones else "القاهرة"),
             "shippingZones": settings.shipping_zones if settings else {"default_rate": 45, "governorate": "القاهرة"},
             "paymentGateways": settings.payment_gateways if (settings and settings.payment_gateways) else default_payment_gateways,
+            "socialLinks": getattr(settings, "social_links", None) or {},
         },
         "theme": {
             "mode": theme.mode if theme else "dark",
@@ -472,6 +475,9 @@ def update_current_store(
         settings.shipping_zones = current_zones
     if payload.payment_gateways:
         settings.payment_gateways = payload.payment_gateways
+    socials_data = payload.social_links if payload.social_links is not None else payload.socialLinks
+    if socials_data is not None:
+        settings.social_links = socials_data
 
     db.commit()
     return {

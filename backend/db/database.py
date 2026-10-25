@@ -1,7 +1,7 @@
 # backend/db/database.py
 import os
 from pathlib import Path
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 from dotenv import load_dotenv
 
@@ -49,3 +49,17 @@ def init_db():
         agent_session,
     )
     Base.metadata.create_all(bind=engine)
+
+    # Resilient auto-migration for existing database schemas
+    try:
+        with engine.connect() as conn:
+            if engine.dialect.name == "postgresql":
+                conn.execute(text("ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS governorate VARCHAR(100) DEFAULT 'القاهرة';"))
+                conn.execute(text("ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS social_links JSON DEFAULT '{}';"))
+                conn.commit()
+            elif engine.dialect.name == "sqlite":
+                conn.execute(text("ALTER TABLE store_settings ADD COLUMN governorate VARCHAR(100) DEFAULT 'القاهرة';"))
+                conn.execute(text("ALTER TABLE store_settings ADD COLUMN social_links JSON DEFAULT '{}';"))
+                conn.commit()
+    except Exception:
+        pass

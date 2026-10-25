@@ -28,6 +28,7 @@ class StoreSettings(Base):
     governorate = Column(String(100), default="القاهرة", nullable=True)
     shipping_zones = Column(JSON, default=dict)
     payment_gateways = Column(JSON, default=dict)
+    social_links = Column(JSON, default=dict)
     bosta_api_key = Column(String(255), nullable=True)
     paymob_api_key = Column(String(255), nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -1,7 +1,7 @@
 // apps/web/src/components/gen-ui/StoreCreationPreviewCard.tsx
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, ShieldCheck, Sparkles, CreditCard, Truck, Palette, Store } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Sparkles, CreditCard, Truck, Palette, Store, Banknote, Zap, Loader2 } from 'lucide-react';
 
 export interface StorePreviewData {
   store_name?: string;
@@ -129,7 +129,13 @@ export const StoreCreationPreviewCard: React.FC<StoreCreationPreviewCardProps> =
                     : 'bg-slate-50 border-slate-200 text-slate-700'
                 }`}
               >
-                {method === 'cod' ? '💵 Cash on Delivery' : method === 'card' ? '💳 Paymob / Cards' : '⚡ InstaPay'}
+                {method === 'cod' ? (
+                  <span className="inline-flex items-center gap-1"><Banknote className="w-3.5 h-3.5 text-emerald-500" /><span>Cash on Delivery</span></span>
+                ) : method === 'card' ? (
+                  <span className="inline-flex items-center gap-1"><CreditCard className="w-3.5 h-3.5 text-indigo-500" /><span>Paymob / Cards</span></span>
+                ) : (
+                  <span className="inline-flex items-center gap-1"><Zap className="w-3.5 h-3.5 text-amber-500" /><span>InstaPay</span></span>
+                )}
               </span>
             ))}
           </div>
@@ -171,7 +177,7 @@ export const StoreCreationPreviewCard: React.FC<StoreCreationPreviewCardProps> =
           style={{ backgroundColor: primaryColor }}
         >
           {submitted || isLoading ? (
-            <span className="inline-block animate-spin mr-1">⌛</span>
+            <Loader2 className="w-4 h-4 animate-spin text-white inline-block mr-1" />
           ) : (
             <CheckCircle2 className="w-4 h-4" />
           )}

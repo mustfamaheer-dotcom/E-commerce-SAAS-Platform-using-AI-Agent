@@ -1,5 +1,6 @@
 // apps/web/src/pages/dashboard/CustomersPage.tsx
 import React, { useState, useEffect } from 'react';
+import { Crown } from 'lucide-react';
 import { Users, UserX } from 'lucide-react';
 import { API_BASE_URL } from '../../services/api';
 
@@ -96,7 +97,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ tenantId }) => {
                               : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                           }`}
                         >
-                          {isVip ? '👑 عميل ذهبي VIP' : 'عميل نشط'}
+                          {isVip ? <span className="flex items-center gap-1"><Crown className="w-3.5 h-3.5 text-amber-500" /><span>عميل ذهبي VIP</span></span> : 'عميل نشط'}
                         </span>
                       </td>
                     </tr>

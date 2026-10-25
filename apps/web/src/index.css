@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&family=Almarai:wght@300;400;700;800&family=Amiri:wght@400;700&family=Readex+Pro:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cairo:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,27 +8,35 @@
   --brand-primary: #0ea5e9;
   --brand-secondary: #6366f1;
   --brand-accent: #10b981;
-  --brand-font: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+  --brand-font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Cairo';
 }
 
 html, body, #root {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: var(--brand-font, 'Cairo', 'Inter', system-ui, -apple-system, sans-serif);
+  font-family: var(--brand-font, 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
   scroll-behavior: smooth;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+.dark html, .dark body, .dark #root {
+  background-color: #020617;
+  color: #f8fafc;
 }
 
 body * {
   font-family: inherit;
 }
 
-/* Glassmorphism utility classes */
+/* Glassmorphism utility classes - Soft warm comfortable in light mode */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
 }
 
 .dark .glass-panel {
@@ -36,9 +44,10 @@ body * {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(30, 41, 59, 0.8);
+  box-shadow: none;
 }
 
-/* Custom scrollbars */
+/* Custom scrollbars - Softer and comfortable */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -49,15 +58,19 @@ body * {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(203, 213, 225, 0.7);
   border-radius: 9999px;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.4);
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
 }
 
-::-webkit-scrollbar-thumb:hover {
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.6);
 }
 
@@ -77,7 +90,29 @@ body * {
   animation: fadeInSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Brand Button Glow */
+/* Cart bounce / pop animation when item is added */
+@keyframes cartPop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.25); }
+  65% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+.animate-cart-pop {
+  animation: cartPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes buttonCartPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.93); }
+  100% { transform: scale(1); }
+}
+
+.animate-button-pulse {
+  animation: buttonCartPulse 0.3s ease-in-out;
+}
+
+/* Brand Button Glow - Balanced and comfortable */
 .btn-brand {
   background-color: var(--brand-primary);
   color: #ffffff;
@@ -85,6 +120,6 @@ body * {
 }
 
 .btn-brand:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 4px 14px 0 rgba(14, 165, 233, 0.39);
+  filter: brightness(1.08);
+  box-shadow: 0 4px 14px 0 rgba(14, 165, 233, 0.28);
 }

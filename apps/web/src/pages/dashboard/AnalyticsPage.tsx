@@ -76,25 +76,17 @@ const renderVisualChatMessage = (content: string, isAssistant: boolean) => {
         }
 
         const isHeader =
-          trimmed.startsWith('🏆') ||
-          trimmed.startsWith('🎯') ||
-          trimmed.startsWith('🛡️') ||
-          trimmed.startsWith('⚡') ||
-          trimmed.startsWith('📊') ||
-          trimmed.startsWith('📈') ||
-          trimmed.startsWith('⏰') ||
-          trimmed.startsWith('👥');
+          trimmed.startsWith('#') ||
+          trimmed.startsWith('【') ||
+          /^\[(?:مؤشر|تقرير|هدف|تحليل|إحصائية)\]/.test(trimmed);
 
         const isCallout =
-          trimmed.startsWith('💡') ||
-          trimmed.startsWith('✅') ||
-          trimmed.startsWith('⚠️') ||
-          trimmed.startsWith('💰');
+          /^\[(?:ملاحظة|تنبيه|توصية|فائدة)\]/.test(trimmed) ||
+          trimmed.startsWith('>');
 
         const isRank =
-          trimmed.startsWith('🥇') ||
-          trimmed.startsWith('🥈') ||
-          trimmed.startsWith('🥉');
+          /^(?:المركز|المرتبة)\s*(?:الأول|الثاني|الثالث|\d+)/.test(trimmed) ||
+          /^[1-3]\./.test(trimmed);
 
         const isBullet =
           trimmed.startsWith('•') ||
@@ -217,7 +209,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ tenantId }) => {
       id: 'm-welcome',
       role: 'assistant',
       content:
-        'مرحباً بك يا فندم! 🌟 أنا مستشارك الذكي لتحليلات متجرك. راقبت كل حركة المبيعات وتدفق الطلبات، وجاهز للإجابة عن أي استفسار أو تلخيص الأداء أو تقديم اقتراحات لزيادة أرباحك.',
+        'مرحباً بك يا فندم! أنا مستشارك الذكي لتحليلات متجرك. راقبت كل حركة المبيعات وتدفق الطلبات، وجاهز للإجابة عن أي استفسار أو تلخيص الأداء أو تقديم اقتراحات لزيادة أرباحك.',
       timestamp: 'الآن',
     },
   ]);
@@ -282,14 +274,14 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ tenantId }) => {
     setChatMessages((prev) => [...prev, userMsg]);
     setInputQuery('');
     setIsChatThinking(true);
-    setThinkingStep('🧠 تحليل استفسارك وفهم المؤشرات المطلوبة...');
+    setThinkingStep('تحليل استفسارك وفهم المؤشرات المطلوبة...');
 
     const stepTimer1 = setTimeout(() => {
-      setThinkingStep('📊 فحص 2,833 طلباً وسجلات الإيرادات الحية (103.5M ج.م)...');
+      setThinkingStep('فحص 2,833 طلباً وسجلات الإيرادات الحية (103.5M ج.م)...');
     }, 700);
 
     const stepTimer2 = setTimeout(() => {
-      setThinkingStep('⚡ استخراج الرؤى وحساب التوصيات الاستراتيجية...');
+      setThinkingStep('استخراج الرؤى وحساب التوصيات الاستراتيجية...');
     }, 1400);
 
     const thinkingDelay = new Promise((res) => setTimeout(res, 2000));
@@ -888,10 +880,10 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ tenantId }) => {
             {/* Quick Question Chips */}
             <div className="shrink-0 bg-purple-50/60 dark:bg-slate-800/50 p-2.5 border-b border-purple-100 dark:border-slate-800 flex items-center gap-1.5 overflow-x-auto text-[11px]">
               {[
-                '💡 لخص لي الأداء في سطرين',
-                '📈 أكثر قسم يحقق أرباحاً؟',
-                '🎯 كيف أرفع الـ AOV 15%؟',
-                '⚠️ هل في خطر على المخزون؟',
+                'لخص لي الأداء في سطرين',
+                'أكثر قسم يحقق أرباحاً؟',
+                'كيف أرفع الـ AOV 15%؟',
+                'هل في خطر على المخزون؟',
               ].map((chip, idx) => (
                 <button
                   key={idx}

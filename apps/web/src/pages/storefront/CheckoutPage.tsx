@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { clearCart } from '../../store/cartSlice';
-import { CheckCircle2, CreditCard, Truck, ShieldCheck, Tag, ArrowRight, ExternalLink } from 'lucide-react';
+import { CheckCircle2, CreditCard, Truck, ShieldCheck, Tag, ArrowRight, ExternalLink, PartyPopper } from 'lucide-react';
 import { API_BASE_URL } from '../../services/api';
 
 const EGYPTIAN_CITIES = ['Cairo', 'Giza', 'Alexandria', 'Mansoura', 'Tanta', 'Assiut', 'Suez', 'Ismailia'];
@@ -176,7 +176,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ tenantId }) => {
 
         <div className="space-y-2">
           <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            تم تسجيل طلبك بنجاح! 🎉
+            تم تسجيل طلبك بنجاح!
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400">
             شكراً لثقتك بنا. تم إرسال رسالة تأكيد بتفاصيل الشحنة عبر البريد والواتساب.

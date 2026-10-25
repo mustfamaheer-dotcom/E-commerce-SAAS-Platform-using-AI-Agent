@@ -78,7 +78,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
   );
   const [ctaButtonText, setCtaButtonText] = useState('تسوق الآن واستفد من العروض');
   const [announcementText, setAnnouncementText] = useState(
-    'أحدث العروض الحصرية مع شحن سريع بوسطة لجميع المحافظات 🇪🇬'
+    'أحدث العروض الحصرية مع شحن سريع بوسطة لجميع المحافظات '
   );
   const [isAnnouncementActive, setIsAnnouncementActive] = useState(true);
   const [carrierRate, setCarrierRate] = useState('45');
@@ -100,7 +100,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
     {
       id: 'agent_init',
       sender: 'agent',
-      text: 'أهلاً بك يا فندم في استوديو تخصيص المتجر الذكي! 🎨✨\nأنا وكيلك لتصميم واجهة المتجر بهوية فائقة الاحترافية. تقدر تطلب مني:\n• "غير الألوان إلى ألوان فاخرة ذهبية وأسود"\n• "اكتب بانر ترويجي للجمعة البيضاء مع خصم 30%"\n• "خلّي الشحن مجاني فوق 500 جنيه"\n• "غير الخط لخط تجوال العصري"\nوسأقوم بتطبيق التعديل على المعاينة وقاعدة بيانات المتجر فوراً!',
+      text: 'أهلاً بك يا فندم في استوديو تخصيص المتجر الذكي!\nأنا وكيلك لتصميم واجهة المتجر بهوية فائقة الاحترافية. تقدر تطلب مني:\n• "غير الألوان إلى ألوان فاخرة ذهبية وأسود"\n• "اكتب بانر ترويجي للجمعة البيضاء مع خصم 30%"\n• "خلّي الشحن مجاني فوق 500 جنيه"\n• "غير الخط لخط تجوال العصري"\nوسأقوم بتطبيق التعديل على المعاينة وقاعدة بيانات المتجر فوراً!',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -215,7 +215,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
     setAgentMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setAgentInput('');
     setIsAgentThinking(true);
-    setAgentThinkingStep('🎨 تحليل الهوية واستدعاء Google Gemini لتنسيق الواجهة...');
+    setAgentThinkingStep('تحليل الهوية واستدعاء Google Gemini لتنسيق الواجهة...');
 
     let reply = '';
     try {
@@ -291,7 +291,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
     setIsAgentThinking(false);
 
     if (!reply) {
-      reply = `✨ **تم تحليل طلبك وتطبيق أفضل الممارسات التصميمية:**\n• قمت بضبط تناغم عناصر الواجهة بما يلائم استفسارك ('${query}').\n• الواجهة متصلة الآن بقاعدة البيانات وتعرض التغييرات الحية لزوار متجرك!`;
+      reply = `**تم تحليل طلبك وتطبيق أفضل الممارسات التصميمية:**\n• قمت بضبط تناغم عناصر الواجهة بما يلائم استفسارك ('${query}').\n• الواجهة متصلة الآن بقاعدة البيانات وتعرض التغييرات الحية لزوار متجرك!`;
     }
     const agentMsgId = `a_${Date.now()}`;
     setAgentMessages((prev) => [
@@ -546,7 +546,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
                   onClick={() => handleSendAgentCommand('غير ألوان المتجر إلى النمط الفاخر الذهبي والأسود الملكي')}
                   className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-950 text-slate-700 dark:text-slate-300 hover:text-amber-600 shrink-0 border border-slate-200 dark:border-slate-700 transition-colors"
                 >
-                  ✨ هوية ذهبية فاخرة
+                  هوية ذهبية فاخرة
                 </button>
 
                 <button
@@ -554,7 +554,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
                   onClick={() => handleSendAgentCommand('اكتب بانر عروض الجمعة البيضاء مع خصم 30% وشحن مجاني')}
                   className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950 text-slate-700 dark:text-slate-300 hover:text-sky-600 shrink-0 border border-slate-200 dark:border-slate-700 transition-colors"
                 >
-                  🔥 حملة الجمعة البيضاء
+                  حملة الجمعة البيضاء
                 </button>
 
                 <button
@@ -562,7 +562,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
                   onClick={() => handleSendAgentCommand('غير لون المتجر الرئيسي إلى الأخضر الزمردي')}
                   className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-700 dark:text-slate-300 hover:text-emerald-600 shrink-0 border border-slate-200 dark:border-slate-700 transition-colors"
                 >
-                  🌿 أخضر زمردي موثوق
+                  أخضر زمردي موثوق
                 </button>
 
                 <button
@@ -570,7 +570,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
                   onClick={() => handleSendAgentCommand('فعل إعلان شحن مجاني لكافة محافظات مصر')}
                   className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950 text-slate-700 dark:text-slate-300 hover:text-sky-600 shrink-0 border border-slate-200 dark:border-slate-700 transition-colors"
                 >
-                  🚚 شحن مجاني
+                  شحن مجاني
                 </button>
               </div>
 
@@ -900,13 +900,13 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
                 <span className="font-bold text-slate-800 dark:text-slate-200 block">بوابات الدفع الإلكتروني المفعلة بالمتجر:</span>
                 <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
                   <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold text-emerald-600 dark:text-emerald-400">
-                    💳 بطاقات Paymob
+                    بطاقات Paymob
                   </div>
                   <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold text-indigo-600 dark:text-indigo-400">
-                    ⚡ تحويل InstaPay
+                    تحويل InstaPay
                   </div>
                   <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold text-slate-700 dark:text-slate-300">
-                    💵 الدفع عند الاستلام
+                    الدفع عند الاستلام
                   </div>
                 </div>
               </div>

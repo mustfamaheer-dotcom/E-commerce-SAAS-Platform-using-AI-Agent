@@ -195,7 +195,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ tenantId }) => {
                               onClick={() => handleUpdateStatus(o.id, 'SHIPPED')}
                               className="px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 font-semibold text-[11px] border border-indigo-200 dark:border-indigo-800"
                             >
-                              تسليم لبوسطة 🚚
+                              تسليم لبوسطة
                             </button>
                           )}
                           {o.status === 'SHIPPED' && (

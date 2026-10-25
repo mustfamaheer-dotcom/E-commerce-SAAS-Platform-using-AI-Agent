@@ -1,5 +1,6 @@
 // apps/web/src/components/chat/GenUiRegistry.tsx
 import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { AnalyticsDashboardCard, AnalyticsDashboardPayload } from '../gen-ui/AnalyticsDashboardCard';
 import { ClarificationCard, ClarificationPayload } from '../gen-ui/ClarificationCard';
 import { BulkPricePreviewCard, BulkPricePreviewPayload } from '../gen-ui/BulkPricePreviewCard';
@@ -87,7 +88,8 @@ class GenUiErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBounda
     if (this.state.hasError) {
       return (
         <div className="p-3 my-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
-          <span>⚠️ تعذر تحميل بطاقة البيانات التفاعلية ({this.props.cardType}). تفاصيل الرد متاحة في الرسالة أعلاه.</span>
+          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+          <span>تعذر تحميل بطاقة البيانات التفاعلية ({this.props.cardType}). تفاصيل الرد متاحة في الرسالة أعلاه.</span>
         </div>
       );
     }

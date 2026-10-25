@@ -1,6 +1,6 @@
 // apps/web/src/components/auth/AuthModal.tsx
 import React, { useState } from 'react';
-import { X, Sparkles, ShieldCheck, Mail, Lock, User, Phone, Briefcase, ArrowLeft } from 'lucide-react';
+import { X, Sparkles, ShieldCheck, Mail, Lock, User, Phone, Briefcase, ArrowLeft, Loader2 } from 'lucide-react';
 
 export interface UserAccount {
   name: string;
@@ -214,7 +214,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             className="w-full py-2.5 px-4 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 mt-2"
           >
             {isSubmitting ? (
-              <span className="inline-block animate-spin">⏳</span>
+              <Loader2 className="w-4 h-4 animate-spin text-white inline-block" />
             ) : (
               <ArrowLeft className="w-4 h-4" />
             )}

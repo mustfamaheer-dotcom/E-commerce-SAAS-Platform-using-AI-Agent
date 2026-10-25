@@ -49,7 +49,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                 TechZone AI
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-                  Egypt 🇪🇬
+                  Egypt 
                 </span>
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 block -mt-0.5">
@@ -169,7 +169,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <Store className="w-6 h-6" />
                   </div>
                   <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                    موصى به للمشاريع الجديدة 🚀
+                    موصى به للمشاريع الجديدة
                   </span>
                 </div>
 
@@ -214,7 +214,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <Layers className="w-6 h-6" />
                   </div>
                   <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
-                    للمتاجر القائمة 🔌
+                    للمتاجر القائمة
                   </span>
                 </div>
 
@@ -311,7 +311,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="w-6 h-6 rounded bg-sky-600 text-white flex items-center justify-center text-xs font-bold">
               T
             </div>
-            <span>منصة TechZone للتجارة الذكية والـ ERP © 2026 — مصممة للسوق المصري</span>
+            <span>منصة TechZone للتجارة الذكية والـ ERP 2026 — مصممة للسوق المصري</span>
           </div>
           <div className="flex items-center gap-4 text-xs font-medium">
             <span>Paymob معتمد</span>

@@ -226,12 +226,12 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
       id: 'msg_init',
       sender: 'agent',
       timestamp: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-      text: `يا أهلاً وسهلاً بيك يا باشا (${user.name})! 🇪🇬\n\nأنا وكيلك الذكي لتأسيس المتاجر في تيك زون. خطوة بخطوة وبالمصري كده هبني لك متجرك الإلكتروني المتكامل في دقايق معدودة، وهجهز لك الهوية، بوابات الدفع المصرية، وشحن بوسطة.\n\nيلا بينا نبدأ.. **عايز تسمي متجرك إيه؟ وإيه المجال أو نوع المنتجات اللي هتركز عليها؟**`,
+      text: `يا أهلاً وسهلاً بيك يا باشا (${user.name})! \n\nأنا وكيلك الذكي لتأسيس المتاجر في تيك زون. خطوة بخطوة وبالمصري كده هبني لك متجرك الإلكتروني المتكامل في دقايق معدودة، وهجهز لك الهوية، بوابات الدفع المصرية، وشحن بوسطة.\n\nيلا بينا نبدأ.. **عايز تسمي متجرك إيه؟ وإيه المجال أو نوع المنتجات اللي هتركز عليها؟**`,
       isQuickReplies: [
-        'متجر تك زون إلكترونيكس (أجهزة واكسسوارات) 📱',
-        'براند أزياء وملابس شبابية كاجوال 👕',
-        'متجر عطور ومستحضرات تجميل أصلية 🧴',
-        'مستلزمات منزل وديكور عصري 🏠',
+        'متجر تك زون إلكترونيكس (أجهزة واكسسوارات)',
+        'براند أزياء وملابس شبابية كاجوال',
+        'متجر عطور ومستحضرات تجميل أصلية',
+        'مستلزمات منزل وديكور عصري',
       ],
     };
     setMessages([initialGreeting]);
@@ -321,7 +321,7 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
           id: `agent_${Date.now()}`,
           sender: 'agent',
           timestamp: nowTime,
-          text: `تمام جداً يا فندم! 👍 تم تحديث اسم المتجر ليكون: **"${newName}"**.\n\nيلا بينا نكمل باقي خطوات التأسيس.`,
+          text: `تمام جداً يا فندم! تم تحديث اسم المتجر ليكون: **"${newName}"**.\n\nيلا بينا نكمل باقي خطوات التأسيس.`,
         };
         setMessages((prev) => [...prev, renameReply]);
         setIsTyping(false);
@@ -351,11 +351,11 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
         id: `agent_${Date.now()}`,
         sender: 'agent',
         timestamp: nowTime,
-        text: `اسم ممتاز ومميز جداً: **"${extracted.storeName}"** ${categorySnippet}! 👏\n\nندخل على الخطوة التانية الخاصة بالشحن والتوصيل:\n**حابب تشحن وتوصل لفين؟ وهل نعتمد شحن بوسطة (Bosta) لجميع محافظات جمهورية مصر العربية مع التوصيل السريع خلال 24-48 ساعة؟**`,
+        text: `اسم ممتاز ومميز جداً: **"${extracted.storeName}"** ${categorySnippet}!\n\nندخل على الخطوة التانية الخاصة بالشحن والتوصيل:\n**حابب تشحن وتوصل لفين؟ وهل نعتمد شحن بوسطة (Bosta) لجميع محافظات جمهورية مصر العربية مع التوصيل السريع خلال 24-48 ساعة؟**`,
         isQuickReplies: [
-          'جميع محافظات مصر عبر بوسطة (24-48 ساعة) 🚚',
+          'جميع محافظات مصر عبر بوسطة (24-48 ساعة)',
           'القاهرة والجيزة والإسكندرية فقط',
-          'تسليم فوري داخل القاهرة الكبرى ⚡',
+          'تسليم فوري داخل القاهرة الكبرى',
         ],
       };
 
@@ -372,9 +372,9 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
         id: `agent_${Date.now()}`,
         sender: 'agent',
         timestamp: nowTime,
-        text: `تمام يا سيدي، تم تسجيل سياسة الشحن اللوجستي بنجاح! 📦\n\nنيجي بقى لأهم خطوة: **طرق الدفع اللي زباينك هيشتروا بيها.**\nإيه بوابات الدفع اللي حابب نفعلها في متجرك؟\n(عندنا دعم كامل ومباشر لـ Paymob كروت وميزة، تحويل InstaPay فوري، كود فوري Fawry، والدفع عند الاستلام COD).`,
+        text: `تمام يا سيدي، تم تسجيل سياسة الشحن اللوجستي بنجاح!\n\nنيجي بقى لأهم خطوة: **طرق الدفع اللي زباينك هيشتروا بيها.**\nإيه بوابات الدفع اللي حابب نفعلها في متجرك؟\n(عندنا دعم كامل ومباشر لـ Paymob كروت وميزة، تحويل InstaPay فوري، كود فوري Fawry، والدفع عند الاستلام COD).`,
         isQuickReplies: [
-          'فعل جميع الطرق (Paymob + InstaPay + فوري + دفع عند الاستلام) 💳',
+          'فعل جميع الطرق (Paymob + InstaPay + فوري + دفع عند الاستلام)',
           'Paymob (فيزا وميزة) و InstaPay اللحظي فقط',
           'الدفع عند الاستلام (COD) و InstaPay',
         ],
@@ -399,11 +399,11 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
         id: `agent_${Date.now()}`,
         sender: 'agent',
         timestamp: nowTime,
-        text: `عظيم جداً! 💳 كده بوابات الدفع جاهزة ومربوطة.\n\nآخر تفصيلة سريعة خاصة بمظهر وهوية المتجر:\n**تحب متجرك يكون بالوضع الليلي الفخم (Dark Mode) ولا الوضع النهاري الهادي (Light Mode)؟ ولونك المفضل للواجهة إيه؟**`,
+        text: `عظيم جداً! كده بوابات الدفع جاهزة ومربوطة.\n\nآخر تفصيلة سريعة خاصة بمظهر وهوية المتجر:\n**تحب متجرك يكون بالوضع الليلي الفخم (Dark Mode) ولا الوضع النهاري الهادي (Light Mode)؟ ولونك المفضل للواجهة إيه؟**`,
         isQuickReplies: [
-          'وضع ليلي (Dark Mode) مع أزرق سماوي فخم 🌙',
-          'وضع نهاري (Light Mode) مع لون بنفسجي عصري ☀️',
-          'وضع ليلي (Dark Mode) مع لون زمردي أخضر 🟢',
+          'وضع ليلي (Dark Mode) مع أزرق سماوي فخم',
+          'وضع نهاري (Light Mode) مع لون بنفسجي عصري',
+          'وضع ليلي (Dark Mode) مع لون زمردي أخضر',
         ],
       };
 
@@ -425,7 +425,7 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
         id: `agent_${Date.now()}`,
         sender: 'agent',
         timestamp: nowTime,
-        text: `تسلم يا غالي! 🎨 جمعت منك كل البيانات المطلوبة وبنيت لك مواصفات المتجر بدقة.\n\nراجع تفاصيل متجرك في البطاقة أدناه، ودوس على **"إنشاء وإطلاق المتجر الآن"** عشان أبدأ فوراً في توليد قاعدة البيانات وبوابات الدفع والشحن وأسلمك الرابطين:`,
+        text: `تسلم يا غالي! جمعت منك كل البيانات المطلوبة وبنيت لك مواصفات المتجر بدقة.\n\nراجع تفاصيل متجرك في البطاقة أدناه، ودوس على **"إنشاء وإطلاق المتجر الآن"** عشان أبدأ فوراً في توليد قاعدة البيانات وبوابات الدفع والشحن وأسلمك الرابطين:`,
         showPreviewCard: true,
       };
 
@@ -522,7 +522,7 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
         id: 'agent_complete_' + Date.now(),
         sender: 'agent',
         timestamp: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-        text: `ألف ألف مبروك يا فندم! 🎉 متجرك الإلكتروني (${createdStoreObj.name}) تم إنشاؤه وتفعيله بنجاح بنسبة 100% في قاعدة البيانات وعزل كامل للبيانات.\n\nزي ما وعدتك.. دي الروابط الخاصة بمتجرك: الأول لإدارة المتجر والـ ERP (لوحة تحكم فارغة جاهزة لإضافة منتجاتك)، والتاني المتجر الحي اللي زباينك هيشتروا منه:`,
+        text: `ألف ألف مبروك يا فندم! متجرك الإلكتروني (${createdStoreObj.name}) تم إنشاؤه وتفعيله بنجاح بنسبة 100% في قاعدة البيانات وعزل كامل للبيانات.\n\nزي ما وعدتك.. دي الروابط الخاصة بمتجرك: الأول لإدارة المتجر والـ ERP (لوحة تحكم فارغة جاهزة لإضافة منتجاتك)، والتاني المتجر الحي اللي زباينك هيشتروا منه:`,
         provisionedStore: createdStoreObj,
       };
 
@@ -566,7 +566,7 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
               <h1 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                 <span>وكيل تيك زون لتأسيس المتاجر (Store Builder Agent)</span>
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300">
-                  بالمصري 🇪🇬
+                  بالمصري 
                 </span>
               </h1>
               <p className="text-[10px] text-slate-500 dark:text-slate-400">
@@ -682,7 +682,7 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
                       ) : (
                         <>
                           <CheckCircle2 className="w-4 h-4" />
-                          <span>إنشاء وإطلاق المتجر الآن (توليد الرابطين) 🚀</span>
+                          <span className="flex items-center justify-center gap-2"><Sparkles className="w-4 h-4" /><span>إنشاء وإطلاق المتجر الآن (توليد الرابطين)</span></span>
                         </>
                       )}
                     </button>
