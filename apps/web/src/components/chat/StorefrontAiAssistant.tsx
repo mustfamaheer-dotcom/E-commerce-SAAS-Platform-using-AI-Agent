@@ -238,7 +238,7 @@ export const StorefrontAiAssistant: React.FC<StorefrontAiAssistantProps> = ({
   };
 
   return (
-    <div dir="rtl" className="fixed bottom-5 left-5 z-50 font-sans select-none">
+    <div dir="rtl" className="fixed bottom-3 left-3 sm:bottom-5 sm:left-5 z-50 font-sans select-none max-w-[calc(100vw-1.5rem)]">
       {/* 1. Floating Trigger Button */}
       {!isOpen && (
         <button
@@ -264,7 +264,7 @@ export const StorefrontAiAssistant: React.FC<StorefrontAiAssistantProps> = ({
         <div
           role="dialog"
           aria-labelledby="chat-assistant-title"
-          className="w-[92vw] sm:w-[420px] h-[580px] max-h-[85vh] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
+          className="w-[calc(100vw-1.5rem)] sm:w-[420px] h-[540px] sm:h-[580px] max-h-[85vh] sm:max-h-[80vh] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
         >
           {/* Header */}
           <div className="px-5 py-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 text-slate-900 dark:text-slate-100 flex items-center justify-between shrink-0">

@@ -122,42 +122,78 @@ class IntentRouter:
     def route(cls, query: str, role: str = "customer") -> str:
         q = query.lower().strip()
 
-        # 1. Customer Order Tracking (high priority for customer inquiries)
+        # 1. Customer Support Escalation / Human Handoff (High Priority)
         if any(k in q or k in query for k in [
-            "فين طلبي", "اوردر رقم", "أوردر رقم", "طلب رقم", "تتبع", "شحنتي",
+            "خدمة عملاء", "أكلم موظف", "اكلم موظف", "اكلم حد", "مندوب", "مشكلة في الطلب", "مشكلة في المنتج", "شكوى", "تالف",
+            "human support", "representative", "complaint", "talk to human", "damaged"
+        ]):
+            return "support_escalation"
+
+        # 2. Customer Order Tracking
+        if any(k in q or k in query for k in [
+            "فين طلبي", "اوردر رقم", "أوردر رقم", "طلب رقم", "تتبع", "شحنتي", "وصل لحد فين",
             "track order", "order status", "where is my order", "order #"
         ]) or re.search(r"\bord_[a-zA-Z0-9_-]+\b", query):
             return "track_order"
 
-        # 2. Store Shipping Policy & Rates
-        if any(k in q or k in query for k in [
-            "شحن", "توصيل", "سعر الشحن", "مصاريف الشحن", "مدة الشحن", "كام الشحن", "بوسطة",
-            "shipping", "delivery", "shipping cost", "delivery time", "carrier"
-        ]) and not any(k in q or k in query for k in ["توقع", "forecast"]):
+        # 3. Store Shipping Policy & Rates
+        is_shipping_inquiry = (
+            ("شحن" in q or "توصيل" in q or "بوسطة" in q or "shipping" in q or "delivery" in q)
+            and any(k in q for k in ["سعر", "مصاريف", "تكلفة", "كام", "مدة", "وقت", "ايام", "أيام", "يوم", "محافظ", "قاهرة", "قاهره", "cost", "time", "rate"])
+            and not any(k in q for k in ["توقع", "forecast"])
+        )
+        if is_shipping_inquiry:
             return "shipping_policy"
+
+        # 4. Conversational greetings, introductions, and how-to guides
+        greeting_terms = [
+            "صباح الخير", "مساء الخير", "صباح النور", "صباح الفل", "صباح الورد", "مساء النور", "مساء الورد",
+            "اهلا", "أهلا", "مرحبا", "مرحباً", "سلام عليكم", "السلام عليكم", "ازيك", "ازيكوا", "ازيك يا",
+            "عامل ايه", "اخبارك", "مين انت", "من انت", "مين معايا", "بتعمل ايه", "وظيفتك ايه", "معلومات عن المتجر",
+            "محتاج مساعدة", "عايز مساعدة", "ساعدني", "ازاي اشتري", "طريقة الشراء", "ازاي اطلب",
+            "طريقة الطلب", "كيفية الطلب", "كيف اطلب", "خطوات الطلب", "طرق الدفع", "شكرا", "شكراً", "تسلم",
+            "تسلملي", "تمام", "اوك", "اوكي", "hello", "hi", "hey", "who are you", "help me", "how to buy"
+        ]
+        has_specific_product_term = any(k in q for k in [
+            "سماعة", "سماعات", "ايربودز", "شاحن", "شواحن", "ماوس", "كيبورد", "لابتوب", "شاشة", "موبايل",
+            "ايفون", "ساعة", "كابل", "جراب", "بكام", "سعره كام", "سعرها كام", "سعر ال"
+        ])
+        if any(gt in q for gt in greeting_terms) and not has_specific_product_term:
+            return "general_dialogue"
 
         # 3. Store Return & Warranty Policy
         if any(k in q or k in query for k in [
-            "استرجاع", "استبدال", "ترجيع", "ارجع", "أرجع", "ضمان", "صيانة", "عيب صناعة",
+            "استرجاع", "استبدال", "ترجيع", "ارجع", "أرجع", "ضمان", "صيانة", "عيب صناعة", "قانون 181",
             "return", "refund", "exchange", "warranty", "defect"
         ]):
             return "return_policy"
 
         # 4. Coupon Validation / Promotional Inquiries
         if any(k in q or k in query for k in [
-            "كود خصم", "كوبون", "تخفيض", "بروموكود", "خصم خاص", " وفر ", "وفرلي", "توفير",
+            "كود خصم", "كوبون", "تخفيض", "بروموكود", "خصم خاص", " وفر ", "وفرلي", "توفير", "عروض اليوم",
             "coupon", "promo code", "voucher", "discount code"
         ]) and role == "customer":
             return "customer_coupon"
 
-        # 5. Customer Support Escalation / Human Handoff
-        if any(k in q or k in query for k in [
-            "خدمة عملاء", "أكلم موظف", "اكلم حد", "مندوب", "مشكلة في الطلب", "شكوى", "تالف",
-            "human support", "representative", "complaint", "talk to human", "damaged"
-        ]):
-            return "support_escalation"
+# support_escalation handled in primary section
 
         # 6. Merchant / Admin Operational & BI Queries
+        # Add category
+        if any(k in q for k in ["ضيف قسم", "اضف قسم", "أضف قسم", "اضافة قسم", "إضافة قسم", "انشئ قسم", "أنشئ قسم", "قسم جديد", "تصنيف جديد", "فئة جديدة", "add category"]):
+            return "add_category"
+
+        # List categories
+        if any(k in q for k in ["عرض الاقسام", "وريني الاقسام", "كل الاقسام", "التصنيفات", "قائمة الاقسام", "list categories", "show categories"]):
+            return "list_categories"
+
+        # Add product
+        if any(k in q for k in ["ضيف منتج", "اضف منتج", "أضف منتج", "اضافة منتج", "إضافة منتج", "سجل منتج", "منتج جديد", "add product"]):
+            return "add_product"
+
+        # List products (admin)
+        if role in ["merchant", "admin"] and any(k in q for k in ["عرض المنتجات", "الكتالوج", "قائمة المنتجات", "كل المنتجات"]):
+            return "list_products"
+
         if any(k in q or k in query for k in [
             "نواقص", "معرضة للنفاد", "مخزون معرض للنفاد", "تنبيهات المخزون", "stockout", "low stock", "stock alerts"
         ]):
@@ -191,24 +227,17 @@ class IntentRouter:
         if any(k in q or k in query for k in ["انشئ كوبون", "اعمل كود خصم", "create promo"]):
             return "create_coupon"
 
-        # 7. Customer Product Search & Inventory Inquiries (Default e-commerce browsing)
+        # 7. Customer Product Search & Inventory Inquiries
         if any(k in q or k in query for k in [
             "عندك", "عاوز", "عايز", "في منتج", "متوفر", "متوفرة", "موجود", "موجودة", "متاح", "متاحة",
-            "سماعات", "سماعة", "شاحن", "كابل", "جراب", "ايفون", "سعر", "بكام",
+            "سماعات", "سماعة", "شاحن", "شواحن", "كابل", "جراب", "ايفون", "سعر", "بكام",
             "كيبورد", "لوحة مفاتيح", "ماوس", "فأرة", "لابتوب", "شاشة", "كمبيوتر", "موبايل", "هاتف", "ايباد",
             "keyboard", "mouse", "laptop", "monitor", "phone", "iphone", "samsung", "ipad", "airpods",
             "search", "looking for", "buy", "product", "price", "earbuds", "case", "charger",
-            "بيتباع", "أكثر مبيعاً", "اكتر مبيعا", "اهم منتج", "أفضل منتج", "افضل منتج", "رقم واحد", "bestseller", "popular"
+            "بيتباع", "أكثر مبيعاً", "اكتر مبيعا", "اهم منتج", "أفضل منتج", "افضل منتج", "رقم واحد", "bestseller", "popular",
+            "منتجات", "المنتجات", "كتالوج", "قائمة"
         ]) or re.search(r"\bprd-[a-zA-Z0-9]+\b", q):
             return "search_products"
-
-        # If role is customer and the query isn't conversational greeting or other intents,
-        # default to searching the store catalog so customer queries find products naturally.
-        if role == "customer":
-            greeting_words = ["اهلا", "أهلا", "مرحبا", "سلام", "ازيك", "ازيكوا", "صباح", "مساء", "مين انت", "من انت", "hello", "hi", "hey"]
-            is_pure_greeting = any(g in q for g in greeting_words) and len(q.split()) <= 3
-            if not is_pure_greeting and len(q.strip()) >= 2:
-                return "search_products"
 
         return "general_dialogue"
 
@@ -289,27 +318,72 @@ class AIOrchestrationService:
                 "بيتباع", "أكثر مبيعاً", "اكتر مبيعا", "اهم منتج", "أفضل منتج", "افضل منتج", "رقم واحد", "bestseller", "popular", "مميز"
             ])
 
+            ELEC_SYNONYMS = {
+                'ماوس': ['mouse', 'ماوس', 'optical'],
+                'فارة': ['mouse', 'ماوس'],
+                'فأرة': ['mouse', 'ماوس'],
+                'شاحن': ['charger', 'شاحن', 'gan', 'powercore', 'nexode', '100w', '65w'],
+                'شواحن': ['charger', 'شاحن', 'gan', 'powercore', 'nexode'],
+                'سماعة': ['earbuds', 'headphone', 'airpods', 'سماعة', 'سماعه', 'soundcore', 'wave', 'tune', 'wh-1000xm5', 'wf-1000xm5'],
+                'سماعات': ['earbuds', 'headphone', 'airpods', 'سماعات', 'soundcore', 'wave', 'tune', 'wh-1000xm5', 'wf-1000xm5'],
+                'ايربودز': ['earbuds', 'airpods', 'ايربودز', 'wf-1000xm5', 'wave'],
+                'كيبورد': ['keyboard', 'كيبورد', 'لوحة مفاتيح', 'keys', 'mechanical'],
+                'كيبوردات': ['keyboard', 'كيبورد', 'keys'],
+                'لوحة مفاتيح': ['keyboard', 'كيبورد', 'keys'],
+                'لابتوب': ['laptop', 'لابتوب', 'notebook', 'tuf', 'legion', 'zenbook', 'thinkpad', 'macbook', 'xps', 'g15'],
+                'لاب توب': ['laptop', 'لابتوب', 'notebook', 'tuf', 'legion', 'zenbook', 'thinkpad', 'macbook', 'xps', 'g15'],
+                'شاشة': ['monitor', 'screen', 'شاشة', 'شاشه', 'ultrasharp', 'swift', 'oled'],
+                'شاشات': ['monitor', 'screen', 'شاشة', 'شاشه', 'ultrasharp', 'swift', 'oled'],
+                'موبايل': ['phone', 'iphone', 'galaxy', 'redmi', 'poco', 's24', 'موبايل', 'هاتف'],
+                'هاتف': ['phone', 'iphone', 'galaxy', 'redmi', 'poco', 's24', 'موبايل', 'هاتف'],
+                'تليفون': ['phone', 'iphone', 'galaxy', 'redmi', 'poco', 's24', 'موبايل', 'هاتف'],
+                'ساعة': ['watch', 'band', 'ساعة', 'ساعه', 'ultra'],
+                'ساعات': ['watch', 'band', 'ساعة', 'ساعه', 'ultra'],
+                'كابل': ['cable', 'كابل', 'usb-c', 'ethernet'],
+                'سلك': ['cable', 'كابل', 'usb-c', 'ethernet'],
+                'جراب': ['case', 'cover', 'جراب', 'mount'],
+                'كاميرا': ['camera', 'webcam', 'c920'],
+                'ويب كام': ['camera', 'webcam', 'c920'],
+                'بلايستيشن': ['playstation', 'ps5', 'controller', 'dualsense'],
+                'دراع': ['controller', 'dualsense'],
+                'رام': ['ram', 'fury', 'ddr5', 'memory'],
+            }
+
+            is_exact_match = True
             if is_bestseller_query or not clean_search:
                 matched_prods = q.order_by(Product.price.desc(), Product.stock_qty.desc()).limit(4).all()
             else:
-                # Tokenize keywords for robust multi-word matching
-                tokens = [t.strip() for t in clean_search.split() if len(t.strip()) >= 2 and t.strip() not in ["قولي", "عايز", "عاوز", "اهم", "اكتر", "منتج"]]
-                if tokens:
+                raw_words = [t.strip() for t in clean_search.split() if len(t.strip()) >= 2 and t.strip() not in ["قولي", "عايز", "عاوز", "اهم", "اكتر", "منتج", "ممكن"]]
+                expanded_search = set()
+                for w in raw_words:
+                    clean_w = w
+                    if clean_w.startswith("ال") and len(clean_w) > 3:
+                        clean_w = clean_w[2:]
+                    expanded_search.add(w)
+                    expanded_search.add(clean_w)
+                    if clean_w in ELEC_SYNONYMS:
+                        expanded_search.update(ELEC_SYNONYMS[clean_w])
+                    if w in ELEC_SYNONYMS:
+                        expanded_search.update(ELEC_SYNONYMS[w])
+
+                if expanded_search:
                     from sqlalchemy import or_
                     conditions = []
-                    for tok in tokens:
-                        term = f"%{tok}%"
-                        conditions.append(Product.name_ar.ilike(term))
-                        conditions.append(Product.name_en.ilike(term))
-                        conditions.append(Product.sku.ilike(term))
-                    q = q.filter(or_(*conditions))
+                    for term in expanded_search:
+                        if len(term) >= 2:
+                            conditions.append(Product.name_ar.ilike(f"%{term}%"))
+                            conditions.append(Product.name_en.ilike(f"%{term}%"))
+                            conditions.append(Product.sku.ilike(f"%{term}%"))
+                    q_matched = q.filter(or_(*conditions))
+                    if max_price:
+                        q_matched = q_matched.filter(Product.price <= max_price)
+                    matched_prods = q_matched.order_by(Product.stock_qty.desc(), Product.price.asc()).limit(6).all()
+                else:
+                    matched_prods = []
 
-                if max_price:
-                    q = q.filter(Product.price <= max_price)
-
-                matched_prods = q.order_by(Product.stock_qty.desc(), Product.price.asc()).limit(6).all()
                 if not matched_prods:
-                    # Fallback to store top products if search term had no exact substring
+                    is_exact_match = False
+                    # Fallback to store featured/top products for user browsing
                     matched_prods = self.db.query(Product).filter(Product.tenant_id == tenant_id, Product.is_active == True).order_by(Product.price.desc()).limit(3).all()
             
             tool_calls.append(AIToolCallDTO(
@@ -349,14 +423,23 @@ class AIOrchestrationService:
                         from backend.agent.training_dataset import format_few_shot_prompt
                         few_shots = format_few_shot_prompt(role="customer", limit=2)
                         catalog_summary = "\n".join([f"- {p.name_ar} (السعر: {p.price:,.2f} ج.م، المخزون: {p.stock_qty})" for p in products[:4]])
-                        prompt = (
-                            f"أنت المساعد الذكي للتسوق لمتجر '{store_name}'.\n"
-                            f"استفسار العميل: '{request.message}'\n\n"
-                            f"المنتجات المتاحة حالياً من قاعدة بيانات المتجر:\n{catalog_summary}\n\n"
-                            f"{few_shots}\n"
-                            f"المطلوب:\n"
-                            f"أجب العميل بلهجة مصرية مهذبة، ذكية ومختصرة جداً (1 إلى 2 جملة)، مع ذكر المنتج الأبرز وسعره بوضوح وعرض إضافته للسلة مباشرة."
-                        )
+                        if is_exact_match:
+                            prompt = (
+                                f"أنت المساعد الذكي للتسوق لمتجر '{store_name}' بالذكاء الاصطناعي من Google Gemini.\n"
+                                f"استفسار العميل: '{request.message}'\n\n"
+                                f"المنتجات المطابقة المتوفرة حالياً في المتجر:\n{catalog_summary}\n\n"
+                                f"{few_shots}\n"
+                                f"المطلوب:\n"
+                                f"أجب العميل بلهجة مصرية مهذبة، ذكية ومختصرة جداً (1 إلى 2 جملة)، مع ذكر المنتج المطابق وسعره بوضوح وعرض إضافته للسلة مباشرة."
+                            )
+                        else:
+                            prompt = (
+                                f"أنت المساعد الذكي للتسوق لمتجر '{store_name}' بالذكاء الاصطناعي من Google Gemini.\n"
+                                f"استفسار العميل: '{request.message}'\n\n"
+                                f"ملاحظة: المنتج المطلوب تحديداً غير متوفر حالياً في المخزن، لكن إليك أبرز المنتجات البديلة المتاحة:\n{catalog_summary}\n\n"
+                                f"المطلوب:\n"
+                                f"أخبر العميل بلطف واختصار أن هذا المنتج غير متوفر حالياً، واقترح عليه بديلاً من المنتجات المتاحة أو تصفح باقي الأقسام بلهجة مصرية دافئة (1-2 جملة)."
+                            )
                         llm_res = llm.invoke([SystemMessage(content=prompt), HumanMessage(content=request.message)])
                         gen_reply = extract_llm_text(llm_res)
                         if gen_reply and len(gen_reply) > 10:

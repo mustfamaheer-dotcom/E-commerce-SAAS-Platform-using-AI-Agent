@@ -75,3 +75,6 @@ mlartifacts/
 backend/techzone.db
 *.db
 *.sqlite3
+
+# Uploaded assets
+backend/static/uploads/
