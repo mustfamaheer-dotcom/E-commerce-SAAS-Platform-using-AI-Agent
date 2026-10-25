@@ -259,6 +259,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
         }
         if (mods.font_family) {
           setSelectedFont(mods.font_family);
+          updateThemeColors({ fontFamily: mods.font_family });
         }
         if (mods.hero_title) {
           setHeroTitle(mods.hero_title);
@@ -487,13 +488,19 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
                     </div>
 
                     <div
-                      className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed shadow-2xs whitespace-pre-line ${
+                      className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed shadow-2xs whitespace-pre-wrap ${
                         m.sender === 'user'
                           ? 'bg-sky-600 text-white rounded-br-xs'
                           : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-xs'
                       }`}
                     >
-                      {m.text}
+                      <div className="break-words space-y-1">
+                        {m.text.split('\n').map((line, idx) => (
+                          <React.Fragment key={idx}>
+                            {line ? <div>{line}</div> : <div className="h-1.5" />}
+                          </React.Fragment>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -816,7 +823,10 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
                     <button
                       key={f.id}
                       type="button"
-                      onClick={() => setSelectedFont(f.id)}
+                      onClick={() => {
+                        setSelectedFont(f.id);
+                        updateThemeColors({ fontFamily: f.id });
+                      }}
                       className={`p-3 rounded-2xl border text-right transition-all flex items-center justify-between ${
                         selectedFont === f.id
                           ? 'border-sky-500 bg-sky-50/80 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 font-bold'
@@ -833,11 +843,17 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
               {/* Logo AI Extraction */}
               <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
                 <LogoUploader
+                  tenantId={activeTid}
                   onThemeGenerated={(t) => {
-                    if (t.primaryColor) {
-                      setPrimaryColor(t.primaryColor);
-                      updateThemeColors({ primaryColor: t.primaryColor });
-                    }
+                    if (t.primaryColor) setPrimaryColor(t.primaryColor);
+                    if (t.secondaryColor) setSecondaryColor(t.secondaryColor);
+                    if (t.accentColor) setAccentColor(t.accentColor);
+                    updateThemeColors({
+                      primaryColor: t.primaryColor,
+                      secondaryColor: t.secondaryColor,
+                      accentColor: t.accentColor,
+                      logoUrl: t.logoUrl,
+                    });
                   }}
                 />
               </div>

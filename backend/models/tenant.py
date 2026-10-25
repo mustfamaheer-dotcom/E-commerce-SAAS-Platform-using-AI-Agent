@@ -25,6 +25,7 @@ class StoreSettings(Base):
     business_sector = Column(String(100), default="electronics")
     contact_email = Column(String(255), nullable=True)
     contact_phone = Column(String(50), nullable=True)
+    governorate = Column(String(100), default="القاهرة", nullable=True)
     shipping_zones = Column(JSON, default=dict)
     payment_gateways = Column(JSON, default=dict)
     bosta_api_key = Column(String(255), nullable=True)

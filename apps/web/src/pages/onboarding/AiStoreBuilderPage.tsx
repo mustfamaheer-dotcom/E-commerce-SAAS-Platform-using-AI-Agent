@@ -620,7 +620,13 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
                     : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-xs'
                 }`}
               >
-                <div className="whitespace-pre-line font-medium">{msg.text}</div>
+                <div className="whitespace-pre-wrap font-medium break-words space-y-1">
+                  {msg.text.split('\n').map((line, idx) => (
+                    <React.Fragment key={idx}>
+                      {line ? <div>{line}</div> : <div className="h-1.5" />}
+                    </React.Fragment>
+                  ))}
+                </div>
 
                 {/* HITL Store Preview Card if requested */}
                 {msg.showPreviewCard && (

@@ -17,11 +17,13 @@ def extract_product_slots_with_gemini(raw_query: str) -> Optional[Dict[str, Any]
             "{\n"
             '  "name": "اسم المنتج الصافي والصحيح بدون كلمات مثل السعر أو الكمية أو الاسم",\n'
             '  "price": (السعر كرقم عشري أو صحيح),\n'
-            '  "stock": (الكمية بالمخزن كرقم صحيح أو 20 إن لم تذكر)\n'
+            '  "stock": (الكمية بالمخزن كرقم صحيح أو 20 إن لم تذكر),\n'
+            '  "category": "اسم القسم أو null",\n'
+            '  "image_url": "رابط الصورة أو null"\n'
             "}\n\n"
             "أمثلة:\n"
-            "- 'السعر 300 الاسم ماوس الكميه 400' -> {\"name\": \"ماوس\", \"price\": 300, \"stock\": 400}\n"
-            "- 'سجللي كيبورد وايرلس ميكانيكال بـ 1200 جنيه وفيه منه 30 حبة' -> {\"name\": \"كيبورد وايرلس ميكانيكال\", \"price\": 1200, \"stock\": 30}"
+            "- 'السعر 300 الاسم ماوس الكميه 400 في قسم إكسسوارات' -> {\"name\": \"ماوس\", \"price\": 300, \"stock\": 400, \"category\": \"إكسسوارات\", \"image_url\": null}\n"
+            "- 'سجللي كيبورد وايرلس بـ 1200 جنيه وفيه منه 30 حبة' -> {\"name\": \"كيبورد وايرلس\", \"price\": 1200, \"stock\": 30, \"category\": null, \"image_url\": null}"
         )
         resp = llm.invoke([SystemMessage(content=sys_prompt), HumanMessage(content=raw_query)])
         raw_text = extract_llm_text(resp).strip()
@@ -35,6 +37,8 @@ def extract_product_slots_with_gemini(raw_query: str) -> Optional[Dict[str, Any]
                 "name": str(data["name"]).strip(),
                 "price": float(data["price"]),
                 "stock": int(data.get("stock", 20)),
+                "category": str(data["category"]).strip() if data.get("category") else None,
+                "image_url": str(data["image_url"]).strip() if data.get("image_url") else None,
             }
     except Exception as ex:
         pass

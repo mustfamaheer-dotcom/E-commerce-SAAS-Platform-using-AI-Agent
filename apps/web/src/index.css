@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&family=Almarai:wght@300;400;700;800&family=Amiri:wght@400;700&family=Readex+Pro:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,14 +8,19 @@
   --brand-primary: #0ea5e9;
   --brand-secondary: #6366f1;
   --brand-accent: #10b981;
+  --brand-font: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-html, body {
+html, body, #root {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--brand-font, 'Cairo', 'Inter', system-ui, -apple-system, sans-serif);
   scroll-behavior: smooth;
+}
+
+body * {
+  font-family: inherit;
 }
 
 /* Glassmorphism utility classes */

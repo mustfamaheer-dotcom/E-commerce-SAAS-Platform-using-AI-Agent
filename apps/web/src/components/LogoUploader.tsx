@@ -1,18 +1,21 @@
 // apps/web/src/components/LogoUploader.tsx
 import React, { useState } from 'react';
 import { UploadCloud, CheckCircle2, Sparkles, Palette } from 'lucide-react';
-import { useTheme } from '../hooks/useTheme';
+import { useAppTheme } from '../contexts/ThemeContext';
 import { API_BASE_URL } from '../services/api';
 
 interface LogoUploaderProps {
+  tenantId?: string;
   onThemeGenerated?: (colors: any) => void;
 }
 
-export const LogoUploader: React.FC<LogoUploaderProps> = ({ onThemeGenerated }) => {
-  const { updateThemeColors } = useTheme();
+export const LogoUploader: React.FC<LogoUploaderProps> = ({ tenantId, onThemeGenerated }) => {
+  const { updateThemeColors } = useAppTheme();
   const [isUploading, setIsUploading] = useState(false);
   const [extractedPalette, setExtractedPalette] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || 'tenant-moustafa-tech';
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -28,28 +31,41 @@ export const LogoUploader: React.FC<LogoUploaderProps> = ({ onThemeGenerated }) 
     formData.append('file', file);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/stores/me/logo`, {
+      const res = await fetch(`${API_BASE_URL}/stores/me/logo?tenant_id=${activeTid}`, {
         method: 'POST',
+        headers: {
+          'X-Tenant-ID': activeTid,
+        },
         body: formData,
       });
 
       if (!res.ok) throw new Error('فشل رفع الشعار');
       const data = await res.json();
       const theme = data.theme;
+      const logoUrl = data.logo_url || theme?.logoUrl;
 
       if (theme) {
         updateThemeColors({
           primaryColor: theme.primaryColor,
           secondaryColor: theme.secondaryColor,
           accentColor: theme.accentColor,
+          logoUrl: logoUrl,
         });
 
         if (theme.dominantPalette) {
           setExtractedPalette(theme.dominantPalette);
         }
 
-        setSuccessMessage('تم تحليل الشعار بنجاح واستخراج لوحة ألوان الهوية وتطبيقها فوراً!');
-        if (onThemeGenerated) onThemeGenerated(theme);
+        setSuccessMessage('تم تحليل الشعار بنجاح واستخراج لوحة ألوان الهوية وتطبيقها على المتجر فوراً!');
+        if (onThemeGenerated) {
+          onThemeGenerated({ ...theme, logoUrl });
+        }
+
+        window.dispatchEvent(
+          new CustomEvent('techzone:theme-updated', {
+            detail: { theme, logoUrl },
+          })
+        );
       }
     } catch (err: any) {
       console.error(err);
@@ -72,7 +88,7 @@ export const LogoUploader: React.FC<LogoUploaderProps> = ({ onThemeGenerated }) 
       <label className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-sky-500 dark:hover:border-sky-400 rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-slate-50/50 dark:bg-slate-950/40">
         <UploadCloud className="w-6 h-6 text-sky-500" />
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-          {isUploading ? 'جاري تحليل الشعار بالذكاء الاصطناعي...' : 'اضغط لاختيار الشعار أو اسحبه هنا'}
+          {isUploading ? 'جاري تحليل الشعار واستخراج الألوان بالذكاء الاصطناعي...' : 'اضغط لاختيار الشعار أو اسحبه هنا'}
         </span>
         <input
           type="file"
@@ -101,7 +117,7 @@ export const LogoUploader: React.FC<LogoUploaderProps> = ({ onThemeGenerated }) 
                 key={idx}
                 className="w-8 h-8 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-center text-[9px] font-mono font-bold text-white uppercase cursor-pointer hover:scale-105 transition-transform"
                 style={{ backgroundColor: col }}
-                title={`اللون: ${col}`}
+                title={`تطبيق اللون: ${col}`}
                 onClick={() => updateThemeColors({ primaryColor: col })}
               >
                 ✓

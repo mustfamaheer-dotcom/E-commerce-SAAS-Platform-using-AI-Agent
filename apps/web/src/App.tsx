@@ -249,6 +249,17 @@ const MainAppContent: React.FC = () => {
   }, [activeStore]);
 
   useEffect(() => {
+    const handleStoreUpdated = (e: any) => {
+      if (e?.detail?.name) {
+        setActiveStore((prev) => (prev ? { ...prev, name: e.detail.name } : prev));
+        document.title = `${e.detail.name} — منصة تيك زون`;
+      }
+    };
+    window.addEventListener('techzone:store-updated', handleStoreUpdated);
+    return () => window.removeEventListener('techzone:store-updated', handleStoreUpdated);
+  }, []);
+
+  useEffect(() => {
     const emailParam = user?.email ? `?owner_email=${encodeURIComponent(user.email)}` : '';
     fetch(`${API_BASE_URL}/stores${emailParam}`)
       .then((r) => r.json())
@@ -431,7 +442,7 @@ const MainAppContent: React.FC = () => {
                 onContinueShopping={() => setStorefrontSubView('home')}
               />
             )}
-            {storefrontSubView === 'checkout' && <CheckoutPage />}
+            {storefrontSubView === 'checkout' && <CheckoutPage tenantId={activeStore?.id} />}
           </main>
 
           {/* Customer AI Shopping Assistant */}

@@ -108,11 +108,9 @@ def get_extended_analytics_dashboard(
     total_orders = db.query(Order).filter_by(tenant_id=active_tid).count()
     total_products = db.query(Product).filter_by(tenant_id=active_tid).count()
     total_cust = db.query(Customer).filter_by(tenant_id=active_tid).count()
-    if total_cust == 0:
-        total_cust = max(1, int(total_orders * 0.28))
 
-    aov = round(total_rev / max(1, total_orders), 2)
-    net_profit = round(float(total_rev) * 0.285, 2)
+    aov = round(total_rev / max(1, total_orders), 2) if total_orders > 0 else 0.0
+    net_profit = round(float(total_rev) * 0.285, 2) if total_orders > 0 else 0.0
     inventory_val = float(db.query(func.sum(Product.price * Product.stock_qty)).filter_by(tenant_id=active_tid).scalar() or 0.0)
 
     # Multi-day revenue series
@@ -120,17 +118,26 @@ def get_extended_analytics_dashboard(
     today = datetime.date(2026, 10, 23)
     revenue_series = []
 
-    daily_avg_rev = float(total_rev) / max(30, days_count)
-    for i in range(days_count, 0, -1):
-        d = today - datetime.timedelta(days=i)
-        factor = 1.0 + ((i % 6) - 2.5) * 0.12
-        day_rev = round(daily_avg_rev * max(0.5, factor), 2)
-        day_orders = max(1, int(day_rev / max(100.0, aov)))
-        revenue_series.append({
-            "date": d.strftime("%Y-%m-%d"),
-            "revenue": day_rev,
-            "orders": day_orders,
-        })
+    if total_orders == 0 or total_rev == 0:
+        for i in range(days_count, 0, -1):
+            d = today - datetime.timedelta(days=i)
+            revenue_series.append({
+                "date": d.strftime("%Y-%m-%d"),
+                "revenue": 0.0,
+                "orders": 0,
+            })
+    else:
+        daily_avg_rev = float(total_rev) / max(30, days_count)
+        for i in range(days_count, 0, -1):
+            d = today - datetime.timedelta(days=i)
+            factor = 1.0 + ((i % 6) - 2.5) * 0.12
+            day_rev = round(daily_avg_rev * max(0.5, factor), 2)
+            day_orders = max(1, int(day_rev / max(100.0, aov)))
+            revenue_series.append({
+                "date": d.strftime("%Y-%m-%d"),
+                "revenue": day_rev,
+                "orders": day_orders,
+            })
 
     # Top products with detailed metrics
     db_prods = (

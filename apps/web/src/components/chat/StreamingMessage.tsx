@@ -33,8 +33,12 @@ export const StreamingMessage: React.FC<StreamingMessageProps> = ({
 
       <div className="max-w-[88%] sm:max-w-[80%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-tr-xs">
         {tokens && (
-          <div className="whitespace-pre-line font-medium">
-            {tokens}
+          <div className="whitespace-pre-wrap font-medium break-words space-y-1">
+            {tokens.split('\n').map((line, idx) => (
+              <React.Fragment key={idx}>
+                {line ? <div>{line}</div> : <div className="h-2" />}
+              </React.Fragment>
+            ))}
             {isStreaming && (
               <span className="inline-block w-1.5 h-3.5 bg-sky-500 ml-1 animate-pulse align-middle" />
             )}

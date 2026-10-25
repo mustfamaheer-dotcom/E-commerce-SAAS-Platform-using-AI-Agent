@@ -51,7 +51,15 @@ def list_products(
     if tenant_id and tenant_id != "all":
         query = query.filter_by(tenant_id=tenant_id)
     if category_id and category_id not in ("ALL", "all"):
-        query = query.filter_by(category_id=category_id)
+        cat_match = db.query(Category).filter(
+            (Category.id == category_id) | (Category.slug == category_id) | (Category.name_ar == category_id) | (Category.name_en == category_id)
+        ).first()
+        if cat_match:
+            query = query.filter(
+                (Product.category_id == cat_match.id) | (Product.category_id == cat_match.slug) | (Product.category_id == category_id)
+            )
+        else:
+            query = query.filter(Product.category_id == category_id)
     if featured is not None:
         query = query.filter_by(featured=featured)
     if search:

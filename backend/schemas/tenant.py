@@ -20,6 +20,7 @@ class StoreSettingsDTO(BaseModel):
     business_sector: str = Field("electronics", description="Store sector / niche")
     contact_email: Optional[EmailStr] = None
     contact_phone: Optional[str] = None
+    governorate: Optional[str] = "القاهرة"
     shipping_zones: Dict[str, Any] = Field(default_factory=dict)
     payment_gateways: Dict[str, Any] = Field(default_factory=dict)
 
@@ -43,6 +44,7 @@ class TenantCreateDTO(BaseModel):
     owner_name: Optional[str] = None
     password: Optional[str] = Field(None, min_length=6)
     phone: Optional[str] = None
+    governorate: Optional[str] = "القاهرة"
     category: Optional[str] = "تجارة عامة وإلكترونيات"
     currency: str = Field("EGP", max_length=10)
     theme_mode: str = Field("dark", pattern="^(dark|light)$")
@@ -52,3 +54,5 @@ class TenantUpdateDTO(BaseModel):
     name: Optional[str] = None
     currency: Optional[str] = None
     category: Optional[str] = None
+    governorate: Optional[str] = None
+    phone: Optional[str] = None

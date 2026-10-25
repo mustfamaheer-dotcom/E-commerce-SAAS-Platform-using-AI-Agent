@@ -345,7 +345,13 @@ export const StorefrontAiAssistant: React.FC<StorefrontAiAssistantProps> = ({
                       }`}
                     >
                       {/* Formatted Text Message */}
-                      <div className="whitespace-pre-wrap">{m.content}</div>
+                      <div className="whitespace-pre-wrap break-words space-y-1">
+                        {m.content.split('\n').map((line, idx) => (
+                          <React.Fragment key={idx}>
+                            {line ? <div>{line}</div> : <div className="h-1.5" />}
+                          </React.Fragment>
+                        ))}
+                      </div>
 
                       {/* Warnings if any */}
                       {m.warnings && m.warnings.length > 0 && (

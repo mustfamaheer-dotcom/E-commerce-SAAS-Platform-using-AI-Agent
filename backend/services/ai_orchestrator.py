@@ -5,7 +5,7 @@ Supports:
   1. Storefront Customers: Semantic product search, live stock checks, order tracking,
      shipping policy (Egypt/Bosta), return policy (Law 181/2018), coupon validation, and support escalation.
   2. Merchant Admins: Inventory stockout risk, BI sales analytics, bulk discount previews with HITL,
-     and customer RFM segmentation.
+     store builder onboarding state machine, categories, products, and customer RFM segmentation.
 Enforces:
   - Strict tenant isolation
   - Zero-hallucination price and stock grounding against real database
@@ -35,6 +35,7 @@ from backend.models.product import Product
 from backend.models.order import Order
 from backend.models.coupon import Coupon
 from backend.models.customer import Customer
+from backend.models.category import Category
 from backend.models.agent_session import AgentSession, AgentMessage, AgentAction
 from backend.services.product_service import ProductService
 from backend.services.inventory_service import InventoryService
@@ -73,34 +74,24 @@ class GuardrailService:
     @staticmethod
     def mask_pii(text: str) -> str:
         """Masks payment card numbers, passwords, and Egyptian National IDs."""
-        # Mask 16-digit card numbers
         text = re.sub(r"\b(?:\d{4}[ -]?){3}\d{4}\b", "****-****-****-****", text)
-        # Mask 14-digit Egyptian National ID numbers
         text = re.sub(r"\b[23]\d{13}\b", "**************", text)
-        # Mask potential cleartext password mentions
         text = re.sub(r"(?i)(password|كلمة\s+المرور|الباسورد)\s*[:=]\s*\S+", r"\1: ********", text)
         return text
 
     @staticmethod
     def verify_price_grounding(reply_text: str, referenced_products: List[AIProductSummaryDTO]) -> List[str]:
-        """
-        Validates that any numeric prices mentioned in the AI response match the verified product catalog.
-        Returns a list of price discrepancy warnings if detected.
-        """
         warnings = []
         if not referenced_products:
             return warnings
 
-        # Extract numeric values followed or preceded by currency indicators
         mentioned_prices = re.findall(r"(\d+(?:\.\d{1,2})?)\s*(?:ج\.م|EGP|جنيه)", reply_text)
         if mentioned_prices:
             catalog_prices = {round(p.price, 2) for p in referenced_products}
             for p_str in mentioned_prices:
                 try:
                     val = round(float(p_str), 2)
-                    # Allow small formatting tolerances (shipping costs like 45, 65 are standard)
                     if val not in catalog_prices and val not in {45.0, 65.0, 0.0}:
-                        # Check if it matches any discount/compare price
                         compare_prices = {round(p.compare_price or 0, 2) for p in referenced_products}
                         if val not in compare_prices:
                             warnings.append(
@@ -161,23 +152,20 @@ class IntentRouter:
         if any(gt in q for gt in greeting_terms) and not has_specific_product_term:
             return "general_dialogue"
 
-        # 3. Store Return & Warranty Policy
+        # Store Return & Warranty Policy
         if any(k in q or k in query for k in [
             "استرجاع", "استبدال", "ترجيع", "ارجع", "أرجع", "ضمان", "صيانة", "عيب صناعة", "قانون 181",
             "return", "refund", "exchange", "warranty", "defect"
         ]):
             return "return_policy"
 
-        # 4. Coupon Validation / Promotional Inquiries
+        # Coupon Validation / Promotional Inquiries
         if any(k in q or k in query for k in [
             "كود خصم", "كوبون", "تخفيض", "بروموكود", "خصم خاص", " وفر ", "وفرلي", "توفير", "عروض اليوم",
             "coupon", "promo code", "voucher", "discount code"
         ]) and role == "customer":
             return "customer_coupon"
 
-# support_escalation handled in primary section
-
-        # 6. Merchant / Admin Operational & BI Queries
         # Add category
         if any(k in q for k in ["ضيف قسم", "اضف قسم", "أضف قسم", "اضافة قسم", "إضافة قسم", "انشئ قسم", "أنشئ قسم", "قسم جديد", "تصنيف جديد", "فئة جديدة", "add category"]):
             return "add_category"
@@ -205,7 +193,8 @@ class IntentRouter:
             return "analytics"
 
         if any(k in q or k in query for k in [
-            "انشئ متجر", "أنشئ متجر", "متجر جديد", "تأسيس متجر", "create store", "build store"
+            "انشئ متجر", "أنشئ متجر", "متجر جديد", "تأسيس متجر", "create store", "build store",
+            "اسم المتجر", "اسمي المتجر", "سميه", "نسميه", "مجال المتجر", "في مجال", "عايز اعمل متجر", "عاوز اعمل متجر"
         ]):
             return "store_builder"
 
@@ -227,7 +216,7 @@ class IntentRouter:
         if any(k in q or k in query for k in ["انشئ كوبون", "اعمل كود خصم", "create promo"]):
             return "create_coupon"
 
-        # 7. Customer Product Search & Inventory Inquiries
+        # Customer Product Search & Inventory Inquiries
         if any(k in q or k in query for k in [
             "عندك", "عاوز", "عايز", "في منتج", "متوفر", "متوفرة", "موجود", "موجودة", "متاح", "متاحة",
             "سماعات", "سماعة", "شاحن", "شواحن", "كابل", "جراب", "ايفون", "سعر", "بكام",
@@ -277,7 +266,6 @@ class AIOrchestrationService:
         gen_ui_payload: Optional[Dict[str, Any]] = None
         reply_text = ""
 
-        # Fetch Tenant Brand Information
         tenant = self.db.query(Tenant).filter_by(id=tenant_id).first()
         store_name = tenant.name if tenant else "تيك زون"
         settings = self.db.query(StoreSettings).filter_by(tenant_id=tenant_id).first()
@@ -292,8 +280,7 @@ class AIOrchestrationService:
                 " ",
                 request.message
             ).strip()
-            
-            # Check for budget range (e.g. بين 300 و 700 أو في حدود 500 أو أقل من 1000)
+
             min_price = None
             max_price = None
             range_match = re.search(r"(?:بين|من)\s*(\d+)\s*(?:و|إلى|الي|to)\s*(\d+)", clean_search)
@@ -312,8 +299,7 @@ class AIOrchestrationService:
                 q = q.filter(Product.price >= min_price)
             if max_price:
                 q = q.filter(Product.price <= max_price)
-            
-            # If asking about popular/bestseller/important products or empty search, query top catalog items
+
             is_bestseller_query = any(k in request.message.lower() for k in [
                 "بيتباع", "أكثر مبيعاً", "اكتر مبيعا", "اهم منتج", "أفضل منتج", "افضل منتج", "رقم واحد", "bestseller", "popular", "مميز"
             ])
@@ -383,9 +369,8 @@ class AIOrchestrationService:
 
                 if not matched_prods:
                     is_exact_match = False
-                    # Fallback to store featured/top products for user browsing
                     matched_prods = self.db.query(Product).filter(Product.tenant_id == tenant_id, Product.is_active == True).order_by(Product.price.desc()).limit(3).all()
-            
+
             tool_calls.append(AIToolCallDTO(
                 tool_name="search_products",
                 arguments={"tenant_id": tenant_id, "query": clean_search, "max_price": max_price},
@@ -415,8 +400,6 @@ class AIOrchestrationService:
 
             if products:
                 first_p = products[0]
-                
-                # Use Gemini LLM to synthesize natural, polite, and concise shopping response
                 llm = get_llm()
                 if llm:
                     try:
@@ -478,13 +461,13 @@ class AIOrchestrationService:
                 found_id = order_id_match.group(1)
                 order = self.db.query(Order).filter(Order.tenant_id == tenant_id, Order.id == found_id).first()
             elif request.customer_phone:
-                order = (
+                orders_list = (
                     self.db.query(Order)
                     .filter(Order.tenant_id == tenant_id)
                     .order_by(Order.created_at.desc())
                     .all()
                 )
-                order = next((o for o in order if (o.shipping_address or {}).get("phone") == request.customer_phone), None)
+                order = next((o for o in orders_list if (o.shipping_address or {}).get("phone") == request.customer_phone), None)
 
             tool_calls.append(AIToolCallDTO(
                 tool_name="track_order",
@@ -786,24 +769,187 @@ class AIOrchestrationService:
             follow_up_suggestions = ["عرض النواقص في المخزن", "تقسيم العملاء حسب الشراء", "توقع مبيعات بكرة"]
 
         # =========================================================================
-        # INTENT 9: STORE BUILDER PREVIEW
+        # INTENT 9: STORE BUILDER / ONBOARDING STATE MACHINE
         # =========================================================================
         elif intent == "store_builder":
-            card_type = "store_creation_preview"
+            msg_clean = request.message
+            history_text = " ".join([h.get("content", "") or h.get("text", "") for h in (request.history or [])])
+            full_context = f"{history_text} {msg_clean}"
+
+            # 1. Extract store name candidate
+            extracted_name = None
+            name_m = re.search(r'(?:اسم\s+المتجر|اسمه|سميه|نسميه|اسم)\s*[:=]?\s*([A-Za-z0-9\u0600-\u06FF\s_&-]+)', full_context)
+            if name_m:
+                extracted_name = name_m.group(1).split(" في مجال")[0].split(" والمجال")[0].strip()
+            if not extracted_name:
+                prefixes = [
+                    r"^(?:عايز|عاوز|حابب|اريد|أريد|نفسي)\s+(?:اعمل|أعمل|انشئ|أنشئ|افتح|أفتح)\s*(?:متجر|ستور)?\s*",
+                    r"^(?:متجر|ستور|براند)\s*"
+                ]
+                clean_cand = msg_clean
+                for p in prefixes:
+                    clean_cand = re.sub(p, "", clean_cand, flags=re.IGNORECASE).strip()
+                cand_cut = clean_cand.split(" في مجال")[0].split(" والمجال")[0].strip()
+                if len(cand_cut) >= 2 and cand_cut not in ["جديد", "لي", "متجر", "ستور"]:
+                    extracted_name = cand_cut
+
+            final_store_name = extracted_name or (tenant.name if tenant else "تيك شوب")
+
+            # 2. Extract niche / category
+            niche = "إلكترونيات واكسسوارات"
+            lower_ctx = full_context.lower()
+            if any(k in lower_ctx for k in ["موبايل", "هواتف", "لابتوب", "كمبيوتر", "إلكترون", "سماعات", "شواحن"]):
+                niche = "إلكترونيات وهواتف ذكية ولابتوبات"
+            elif any(k in lower_ctx for k in ["ملابس", "أزياء", "فاشون", "كاجوال", "أحذية"]):
+                niche = "أزياء وملابس كاجوال"
+            elif any(k in lower_ctx for k in ["عطور", "تجميل", "ميك اب", "بخور"]):
+                niche = "عطور ومستحضرات تجميل"
+            elif any(k in lower_ctx for k in ["منزل", "ديكور", "أثاث", "مفروشات"]):
+                niche = "مستلزمات منزل وديكور"
+            else:
+                niche_m = re.search(r'(?:في\s+مجال|ومجال|مجال|لبيع|بيع)\s*[:=]?\s*([^.,\n]+)', full_context)
+                if niche_m:
+                    niche = niche_m.group(1).strip()
+
+            has_categories_discussed = any(k in lower_ctx for k in ["أقسام", "اقسام", "تصنيف", "قسم", "فئات", "منتجات"])
+
+            if not has_categories_discussed and (extracted_name or "مجال" in msg_clean):
+                card_type = "clarification"
+                gen_ui_payload = {
+                    "question": f"إعداد كتالوج وأقسام متجر '{final_store_name}' ({niche}):",
+                    "formType": "category",
+                    "submitLabel": "تأكيد وإضافة القسم للكتالوج",
+                    "slots": [
+                        {
+                            "field": "name",
+                            "label": "اسم القسم أو التصنيف الأساسي الأول",
+                            "type": "text",
+                            "required": True,
+                            "placeholder": "مثال: هواتف ذكية، اكسسوارات، لابتوبات..."
+                        }
+                    ]
+                }
+                reply_text = (
+                    f"اسم ممتاز ومميز جداً: **'{final_store_name}'** في مجال **{niche}**! 👏\n\n"
+                    f"يلا بينا نجهز الهيكل الأساسي لكتالوج المتجر. **إيه أول قسم أو نوعية منتجات حابب نبدأ بإضافتها لمتجرك؟**"
+                )
+                follow_up_suggestions = ["إلكترونيات وهواتف ذكية", "أكسسوارات وسماعات", "أحدث المنتجات"]
+            else:
+                card_type = "store_creation_preview"
+                gen_ui_payload = {
+                    "store_name": final_store_name,
+                    "currency": "EGP",
+                    "theme_mode": "dark",
+                    "product_category": niche,
+                    "payment_methods": ["card", "instapay", "fawry", "cod"],
+                    "shipping_policy": "شحن وتوصيل لجميع المحافظات عبر بوسطة خلال 48 ساعة.",
+                }
+                reply_text = f"تم استخراج وتجهيز مواصفات متجرك الجديد **'{final_store_name}'** في مجال **{niche}**. يمكنك الآن المراجعة والاعتماد فوراً!"
+                actions.append(AIActionItemDTO(
+                    label="اعتماد وإنشاء المتجر",
+                    action="confirm_store_provision",
+                    params=gen_ui_payload
+                ))
+
+        # =========================================================================
+        # INTENT: ADD CATEGORY (MERCHANT / ADMIN)
+        # =========================================================================
+        elif intent == "add_category":
+            from backend.agent.tools.category_tool import add_category_tool
+            cat_name = re.sub(
+                r"(?:عايز|عاوز|اريد|ممكن|ياريت|ضيف|اضف|أضف|اضافة|إضافة|انشئ|أنشئ|قسم|تصنيف|فئة|فئه|جديد|جديدة|جديده|اسمه|اسم|باسم|كتالوج|المتجر)",
+                " ",
+                request.message,
+                flags=re.IGNORECASE,
+            ).strip()
+            cat_name = re.sub(r"[:=،,\-\.]+", " ", cat_name).strip()
+            cat_name = " ".join(cat_name.split())
+            if not cat_name or len(cat_name) < 2:
+                cat_name = "قسم جديد"
+            cat_res = add_category_tool(tenant_id=tenant_id, name_ar=cat_name)
+            card_type = "category_card"
             gen_ui_payload = {
-                "store_name": "TechZone Store",
-                "currency": "EGP",
-                "theme_mode": "dark",
-                "product_category": "إلكترونيات واكسسوارات",
-                "payment_methods": ["card", "instapay", "fawry", "cod"],
-                "shipping_policy": "شحن وتوصيل لجميع المحافظات عبر بوسطة خلال 48 ساعة.",
+                "category": cat_res.get("category", {"name": cat_name, "slug": f"cat-{cat_name}"}),
+                "name": cat_name,
             }
-            reply_text = "تم استخراج إعدادات متجرك الجديد وتجهيز هوية العرض. يمكنك المراجعة والاعتماد فوراً!"
+            reply_text = f"✅ تم إنشاء القسم الجديد **'{cat_name}'** بنجاح وإضافته لكتالوج متجر {store_name}! يمكنك الآن تصنيف المنتجات وربطها به."
             actions.append(AIActionItemDTO(
-                label="اعتماد وإنشاء المتجر",
-                action="confirm_store_provision",
-                params=gen_ui_payload
+                label=f"إضافة منتج لقسم {cat_name}",
+                action="add_product_to_category",
+                params={"category": cat_name}
             ))
+
+        # =========================================================================
+        # INTENT: LIST CATEGORIES (MERCHANT / ADMIN)
+        # =========================================================================
+        elif intent == "list_categories":
+            from backend.agent.tools.category_tool import list_categories_tool
+            cat_res = list_categories_tool(tenant_id=tenant_id)
+            card_type = "categories_list_card"
+            gen_ui_payload = cat_res
+            reply_text = f"📂 كتالوج متجر {store_name} يحتوي حالياً على **{len(cat_res.get('categories', []))} أقسام نشطة**."
+
+        # =========================================================================
+        # INTENT: ADD PRODUCT (MERCHANT / ADMIN)
+        # =========================================================================
+        elif intent == "add_product":
+            from backend.agent.tools.product_tool import add_product_tool
+            price_m = re.search(r"(\d+(?:\.\d+)?)\s*(?:جنيه|ج\.م|egp|سعر|بسعر)", request.message)
+            price_val = float(price_m.group(1)) if price_m else None
+            if not price_val:
+                nums = [float(n) for n in re.findall(r"\b\d+(?:\.\d+)?\b", request.message)]
+                if nums:
+                    price_val = nums[0]
+
+            clean_name = re.sub(
+                r"(?:عايز|عاوز|اريد|ممكن|ياريت|ضيف|اضف|أضف|اضافة|إضافة|انشئ|أنشئ|منتج|جديد|بسعر|سعر[ه]?|بـ|جنيه|ج\.م|egp|كمية|كميه|مخزون|عدد|\d+(?:\.\d+)?|قسم|في قسم|اسمه|اسم|المنتج)",
+                " ",
+                request.message,
+                flags=re.IGNORECASE,
+            ).strip()
+            clean_name = " ".join(clean_name.split())
+            if not clean_name or len(clean_name) < 2 or not price_val:
+                cats = self.db.query(Category).filter_by(tenant_id=tenant_id, is_active=True).all()
+                cat_options = [c.name_ar for c in cats] if cats else ["عام", "إلكترونيات", "أكسسوارات"]
+                card_type = "clarification"
+                gen_ui_payload = {
+                    "question": f"إضافة منتج جديد لكتالوج متجر {store_name}:",
+                    "formType": "product",
+                    "submitLabel": "تأكيد وإضافة المنتج للكتالوج",
+                    "slots": [
+                        {"field": "name", "label": "اسم المنتج", "type": "text", "required": True, "placeholder": "مثال: سماعة سبيكر JBL Flip 6"},
+                        {"field": "price", "label": "السعر (ج.م)", "type": "number", "required": True, "placeholder": "500"},
+                        {"field": "stock", "label": "الكمية بالمخزن", "type": "number", "default": 20},
+                        {"field": "category", "label": "القسم", "type": "select", "options": cat_options},
+                        {"field": "image_url", "label": "رابط صورة المنتج (اختياري)", "type": "text", "required": False, "placeholder": "https://... أو اتركه فارغاً"},
+                    ]
+                }
+                reply_text = f"عشان أضيفلك المنتج لكتالوج {store_name} بدقة، يرجى ملء بيانات المنتج في النموذج أدناه:"
+            else:
+                cat_m = re.search(r"(?:في\s+قسم|قسم|تصنيف)\s*[:=]?\s*([^.,،\n]+)", request.message)
+                cat_val = cat_m.group(1).strip() if cat_m else None
+                img_m = re.search(r"(?:صورة|صوره|لينك|رابط)\s*[:=]?\s*(https?://\S+)", request.message)
+                img_val = img_m.group(1).strip() if img_m else None
+                p_res = add_product_tool(
+                    tenant_id=tenant_id,
+                    name_ar=clean_name,
+                    price=price_val,
+                    category_slug=cat_val,
+                    image_url=img_val
+                )
+                card_type = "product_card"
+                gen_ui_payload = p_res
+                reply_text = f"✅ تمت إضافة المنتج **'{clean_name}'** بنجاح بسعر {price_val:,.2f} ج.م إلى كتالوج {store_name}!"
+
+        # =========================================================================
+        # INTENT: LIST PRODUCTS (MERCHANT / ADMIN)
+        # =========================================================================
+        elif intent == "list_products":
+            from backend.agent.tools.product_tool import list_products_tool
+            p_res = list_products_tool(tenant_id=tenant_id)
+            card_type = "products_list_card"
+            gen_ui_payload = p_res
+            reply_text = p_res.get("message", f"كتالوج المتجر يحتوي على {p_res.get('count', 0)} منتجات.")
 
         # =========================================================================
         # INTENT 10: GENERAL CONVERSATIONAL INTELLIGENCE
@@ -812,7 +958,6 @@ class AIOrchestrationService:
             llm = get_llm()
             if llm:
                 try:
-                    # Provide concise contextual catalog info to the model
                     sample_prods = (
                         self.db.query(Product)
                         .filter_by(tenant_id=tenant_id, is_active=True)
@@ -821,12 +966,12 @@ class AIOrchestrationService:
                         .all()
                     )
                     sample_text = ", ".join([f"{p.name_ar} ({p.price:,.0f} ج.م)" for p in sample_prods])
-                    
+
                     history_context = ""
                     if request.history:
                         for h in request.history[-4:]:
                             r = "العميل" if h.get("role") == "user" else "المساعد"
-                            history_context += f"{r}: {h.get('content')}\n"
+                            history_context += f"{r}: {h.get('content') or h.get('text', '')}\n"
 
                     role_desc = "تاجر ومالك المتجر" if request.role == "merchant" else "عميل متسوق في المتجر"
                     prompt = (
@@ -860,6 +1005,10 @@ class AIOrchestrationService:
                     )
                     follow_up_suggestions = ["أحدث العروض والخصومات", "سماعات وشواحن أصلية", "تتبع شحنتي", "مدة وتكلفة الشحن"]
 
+        # Ensure reply_text is never empty
+        if not reply_text:
+            reply_text = f"أهلاً بك في متجر **{store_name}**! أنا في خدمتك لتنفيذ أي طلب."
+
         # 3. Apply Post-Execution Guardrails: PII Masking & Anti-Hallucination Price Checks
         sanitized_reply = self.guardrail.mask_pii(reply_text)
         price_warnings = self.guardrail.verify_price_grounding(sanitized_reply, products)
@@ -873,10 +1022,10 @@ class AIOrchestrationService:
 
         return AIResponseDTO(
             reply_text=sanitized_reply,
-            response=sanitized_reply,  # backward compatibility alias
+            response=sanitized_reply,
             language=lang,
             intent=intent,
-            intent_route=intent,  # backward compatibility alias
+            intent_route=intent,
             confidence=0.96,
             session_id=session_id,
             tenant_id=tenant_id,

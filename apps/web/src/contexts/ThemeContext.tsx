@@ -56,6 +56,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     document.documentElement.style.setProperty('--brand-secondary', theme.secondaryColor);
     document.documentElement.style.setProperty('--brand-accent', theme.accentColor);
 
+    // Apply typography dynamically across all elements
+    const font = theme.fontFamily || 'Cairo, sans-serif';
+    document.documentElement.style.setProperty('--brand-font', font);
+    document.documentElement.style.fontFamily = font;
+    if (document.body) {
+      document.body.style.fontFamily = font;
+    }
+
     try {
       localStorage.setItem('techzone_theme', theme.mode);
       localStorage.setItem('techzone_theme_config', JSON.stringify(theme));
@@ -70,7 +78,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const updateThemeColors = (colors: Partial<ThemeConfig>) => {
-    setTheme((prev) => ({ ...prev, ...colors }));
+    setTheme((prev) => {
+      const updated = { ...prev, ...colors };
+      try {
+        localStorage.setItem('techzone_theme_config', JSON.stringify(updated));
+      } catch (_) {}
+      return updated;
+    });
   };
 
   return (

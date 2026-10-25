@@ -254,9 +254,16 @@ def process_agent_chat(payload: ChatMessagePayload, db: Session = Depends(get_db
     result = agent.invoke(state)
 
     messages = result.get("messages", [])
-    reply_text = messages[-1].content if messages else "تم تنفيذ طلبك بنجاح."
-    card_type = result.get("card_type", "text")
+    ai_messages = [
+        m for m in messages
+        if (isinstance(m, AIMessage) or getattr(m, "type", "") == "ai" or getattr(m, "role", "") == "assistant")
+    ]
     tool_output = result.get("tool_result") or {}
+    if ai_messages and ai_messages[-1].content and ai_messages[-1].content.strip() != effective_message.strip():
+        reply_text = ai_messages[-1].content
+    else:
+        reply_text = tool_output.get("message") or "تم تنفيذ طلبك بنجاح."
+    card_type = result.get("card_type", "text")
 
     # Save assistant message
     ai_msg_id = f"msg_{uuid.uuid4().hex[:8]}"
@@ -371,9 +378,16 @@ async def stream_agent_chat(payload: ChatMessagePayload):
 
             result = agent.invoke(state)
             messages = result.get("messages", [])
-            reply_text = messages[-1].content if messages else "تم تنفيذ طلبك بنجاح."
-            card_type = result.get("card_type", "text")
+            ai_messages = [
+                m for m in messages
+                if (isinstance(m, AIMessage) or getattr(m, "type", "") == "ai" or getattr(m, "role", "") == "assistant")
+            ]
             tool_output = result.get("tool_result") or {}
+            if ai_messages and ai_messages[-1].content and ai_messages[-1].content.strip() != stream_msg.strip():
+                reply_text = ai_messages[-1].content
+            else:
+                reply_text = tool_output.get("message") or "تم تنفيذ طلبك بنجاح."
+            card_type = result.get("card_type", "text")
 
             # 4. Emit rich card if any
             if card_type and card_type != "text":

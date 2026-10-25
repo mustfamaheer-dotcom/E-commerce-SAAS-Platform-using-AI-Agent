@@ -1,5 +1,5 @@
 // apps/web/src/components/gen-ui/CategoryCard.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FolderCheck, Folder, Sparkles, Plus, ArrowRight } from 'lucide-react';
 
 export interface CategoryData {
@@ -23,6 +23,14 @@ interface CategoryCardProps {
 export const CategoryCard: React.FC<CategoryCardProps> = ({ payload, onSendMessage }) => {
   const isList = Array.isArray(payload?.categories) && payload.categories.length > 0;
   const cat = payload?.category || (payload?.name ? { name: payload.name } : null);
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent('techzone:categories-updated', {
+        detail: payload,
+      })
+    );
+  }, [payload]);
 
   if (isList) {
     return (

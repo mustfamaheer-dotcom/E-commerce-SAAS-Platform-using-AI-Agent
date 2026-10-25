@@ -216,16 +216,30 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
         card_type = "categories_list_card"
 
     elif intent == "clarification_add_product":
+        cat_options = []
+        try:
+            with SessionLocal() as db_session:
+                from backend.models import Category
+                db_cats = db_session.query(Category).filter_by(tenant_id=tenant_id, is_active=True).all()
+                cat_options = [c.name_ar or c.name_en or c.slug for c in db_cats if (c.name_ar or c.name_en or c.slug)]
+        except Exception:
+            pass
+        if not cat_options:
+            cat_options = ["عام", "إلكترونيات", "موبايلات", "إكسسوارات"]
+
         tool_result = {
             "status": "need_details",
             "message": "يا أهلاً بك يا فندم! 🌟 عشان أضيفلك المنتج للكتالوج بدقة، يرجى ملء البيانات التالية أو كتابتها مباشرة:",
             "payload": {
                 "question": "عشان أضيفلك المنتج، محتاج بعض التفاصيل:",
+                "formType": "product",
+                "submitLabel": "تأكيد وإضافة المنتج للكتالوج",
                 "slots": [
                     {"field": "name", "label": "اسم المنتج", "type": "text", "required": True},
                     {"field": "price", "label": "السعر (ج.م)", "type": "number", "required": True},
                     {"field": "stock", "label": "الكمية بالمخزن", "type": "number", "default": 20},
-                    {"field": "category", "label": "القسم", "type": "select", "options": ["إلكترونيات", "موبايلات", "إكسسوارات"]},
+                    {"field": "category", "label": "القسم", "type": "select", "options": cat_options},
+                    {"field": "image_url", "label": "صورة المنتج (رابط أو رفع)", "type": "image", "required": False, "placeholder": "https://... أو يمكنك تخطي الخطوة"},
                 ]
             }
         }
@@ -234,10 +248,14 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
     elif intent == "add_product":
         # 1. Try intelligent LLM extraction first
         gemini_slots = extract_product_slots_with_gemini(raw_query)
+        cat_slug = None
+        img_url = None
         if gemini_slots and gemini_slots.get("name") and gemini_slots.get("price") is not None:
             clean_name = gemini_slots["name"]
             price_val = gemini_slots["price"]
             stock_qty = gemini_slots.get("stock", 20)
+            cat_slug = gemini_slots.get("category")
+            img_url = gemini_slots.get("image_url")
         else:
             price_val = None
             price_patterns = [
@@ -261,8 +279,16 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
                 elif len(numbers) == 1 and not stock_m:
                     price_val = numbers[0]
 
+            cat_m = re.search(r"(?:قسم|في قسم|تصنيف)\s*[:=]?\s*([^\s,،]+)", raw_query)
+            if cat_m:
+                cat_slug = cat_m.group(1).strip()
+
+            img_m = re.search(r"(https?://\S+\.(?:png|jpg|jpeg|webp|gif))", raw_query, re.IGNORECASE)
+            if img_m:
+                img_url = img_m.group(1).strip()
+
             clean_name = re.sub(
-                r"(?:عايز|عاوز|اريد|ممكن|ياريت|ضيف|اضف|أضف|اضافة|إضافة|انشئ|أنشئ|منتج|جديد|بسعر|سعر[ه]?|بـ|جنيه|ج\.م|egp|كمية|كميه|مخزون|عدد|قطع[هة]?|\d+(?:\.\d+)?|قسم|في قسم|اسمه|اسم|المنتج)",
+                r"(?:عايز|عاوز|اريد|ممكن|ياريت|ضيف|اضف|أضف|اضافة|إضافة|انشئ|أنشئ|منتج|جديد|بسعر|سعر[ه]?|بـ|جنيه|ج\.م|egp|كمية|كميه|مخزون|عدد|قطع[هة]?|\d+(?:\.\d+)?|قسم|في قسم|تصنيف|اسمه|اسم|المنتج)",
                 " ",
                 raw_query,
                 flags=re.IGNORECASE,
@@ -279,6 +305,8 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
             name_ar=clean_name,
             price=price_val,
             stock_qty=stock_qty,
+            category_slug=cat_slug,
+            image_url=img_url,
         )
         tool_result = res
         card_type = "product_card"

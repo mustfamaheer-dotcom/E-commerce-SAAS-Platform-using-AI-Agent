@@ -1,5 +1,5 @@
 # backend/api/routes/orders.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -16,6 +16,7 @@ class OrderCreatePayload(BaseModel):
     shipping_address: Dict[str, Any]
     payment_method: str = "CARD"
     promo_code: Optional[str] = None
+    tenant_id: Optional[str] = None
 
 
 class OrderStatusUpdatePayload(BaseModel):
@@ -25,14 +26,16 @@ class OrderStatusUpdatePayload(BaseModel):
 
 @router.get("")
 def list_orders(
-    tenant_id: Optional[str] = "tenant-moustafa-tech",
+    tenant_id: Optional[str] = Query(None),
+    x_tenant_id: Optional[str] = Header(None),
     status: Optional[str] = None,
     limit: Optional[int] = 300,
     db: Session = Depends(get_db),
 ):
+    effective_tid = tenant_id or x_tenant_id or "tenant-moustafa-tech"
     q = db.query(Order)
-    if tenant_id and tenant_id != "all":
-        q = q.filter_by(tenant_id=tenant_id)
+    if effective_tid and effective_tid != "all":
+        q = q.filter_by(tenant_id=effective_tid)
     if status and status != "ALL":
         q = q.filter_by(status=status.upper())
     q = q.order_by(Order.created_at.desc())
@@ -62,9 +65,12 @@ def list_orders(
 @router.post("")
 def place_order(
     payload: OrderCreatePayload,
-    tenant_id: str = "tenant-moustafa-tech",
+    tenant_id: Optional[str] = Query(None),
+    x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ):
+    effective_tid = payload.tenant_id or tenant_id or x_tenant_id or "tenant-moustafa-tech"
+
     subtotal = sum(float(item.get("price", 0)) * int(item.get("quantity", 1)) for item in payload.items)
     shipping_cost = 45.0 if payload.shipping_address.get("city") in ["Cairo", "Giza"] else 65.0
     discount = 0.0
@@ -80,7 +86,7 @@ def place_order(
 
     order = Order(
         id=order_id,
-        tenant_id=tenant_id,
+        tenant_id=effective_tid,
         status="CONFIRMED",
         items=payload.items,
         subtotal=subtotal,
@@ -105,19 +111,24 @@ def place_order(
     )
     db.add(log)
 
-    # Update or add Customer
-    name = payload.shipping_address.get("name")
+    # Update or add Customer record (Guest or registered)
+    name = payload.shipping_address.get("name") or "عميل زائر"
     phone = payload.shipping_address.get("phone")
     email = payload.shipping_address.get("email")
     if name:
-        cust = db.query(Customer).filter_by(tenant_id=tenant_id, phone=phone).first() if phone else None
+        cust = None
+        if phone:
+            cust = db.query(Customer).filter_by(tenant_id=effective_tid, phone=phone).first()
+        if not cust and email:
+            cust = db.query(Customer).filter_by(tenant_id=effective_tid, email=email).first()
+
         if not cust:
             cust = Customer(
                 id=f"cust_{uuid.uuid4().hex[:8]}",
-                tenant_id=tenant_id,
+                tenant_id=effective_tid,
                 name=name,
-                phone=phone,
-                email=email,
+                phone=phone or "+20 100 000 0000",
+                email=email or f"guest_{uuid.uuid4().hex[:6]}@store.eg",
                 governorate=payload.shipping_address.get("city", "Cairo"),
                 city=payload.shipping_address.get("city", "Cairo"),
                 address=payload.shipping_address.get("address", ""),
@@ -126,14 +137,14 @@ def place_order(
             )
             db.add(cust)
         else:
-            cust.total_orders += 1
-            cust.total_spent += total
+            cust.total_orders = (cust.total_orders or 0) + 1
+            cust.total_spent = float(cust.total_spent or 0.0) + total
 
     # Deduct stock
     for item in payload.items:
         pid = item.get("id") or item.get("productId")
         if pid:
-            prod = db.query(Product).filter_by(tenant_id=tenant_id, id=pid).first()
+            prod = db.query(Product).filter_by(tenant_id=effective_tid, id=pid).first()
             if prod:
                 prod.stock_qty = max(0, prod.stock_qty - int(item.get("quantity", 1)))
 
@@ -145,46 +156,32 @@ def place_order(
         "shippingAwb": bosta_awb,
         "paymentRef": payment_ref,
         "total": total,
+        "tenantId": effective_tid,
     }
 
 
-@router.get("/audit-logs")
-def list_audit_logs(
-    tenant_id: Optional[str] = "tenant-moustafa-tech",
-    limit: int = 50,
+@router.get("/{order_id}")
+def get_order(
+    order_id: str,
+    tenant_id: Optional[str] = Query(None),
+    x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ):
-    query = db.query(OrderStatusLog, Order).join(Order, OrderStatusLog.order_id == Order.id)
-    if tenant_id and tenant_id != "all":
-        query = query.filter(Order.tenant_id == tenant_id)
-    logs = query.order_by(OrderStatusLog.created_at.desc()).limit(limit).all()
-    return [
-        {
-            "id": log.OrderStatusLog.id,
-            "tenantId": log.Order.tenant_id,
-            "toolName": f"order_status_update ({log.OrderStatusLog.status})",
-            "params": {
-                "order_id": log.OrderStatusLog.order_id,
-                "status": log.OrderStatusLog.status,
-                "note": log.OrderStatusLog.note,
-                "created_by": log.OrderStatusLog.created_by,
-            },
-            "status": "EXECUTED",
-            "createdAt": log.OrderStatusLog.created_at.strftime("%Y-%m-%d %H:%M:%S") if log.OrderStatusLog.created_at else "",
-        }
-        for log in logs
-    ]
-
-
-@router.get("/{order_id}")
-def get_order(order_id: str, tenant_id: Optional[str] = "tenant-moustafa-tech", db: Session = Depends(get_db)):
-    q = db.query(Order).filter_by(id=order_id)
-    if tenant_id and tenant_id != "all":
-        q = q.filter_by(tenant_id=tenant_id)
-    order = q.first()
+    effective_tid = tenant_id or x_tenant_id or "tenant-moustafa-tech"
+    query = db.query(Order).filter_by(id=order_id)
+    if effective_tid and effective_tid != "all":
+        query = query.filter_by(tenant_id=effective_tid)
+    order = query.first()
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    logs = db.query(OrderStatusLog).filter_by(order_id=order_id).order_by(OrderStatusLog.created_at.asc()).all()
+        raise HTTPException(status_code=404, detail="الطلب غير موجود")
+
+    logs = (
+        db.query(OrderStatusLog)
+        .filter_by(order_id=order.id)
+        .order_by(OrderStatusLog.created_at.asc())
+        .all()
+    )
+
     return {
         "id": order.id,
         "status": order.status,
@@ -195,12 +192,16 @@ def get_order(order_id: str, tenant_id: Optional[str] = "tenant-moustafa-tech", 
         "total": order.total,
         "paymentMethod": order.payment_method,
         "paymentStatus": order.payment_status,
-        "paymentRef": order.payment_ref,
         "trackingNumber": order.bosta_tracking_number,
         "shippingAddress": order.shipping_address,
         "createdAt": order.created_at.isoformat() if order.created_at else None,
         "timeline": [
-            {"status": l.status, "note": l.note, "createdAt": l.created_at.isoformat() if l.created_at else None}
+            {
+                "id": l.id,
+                "status": l.status,
+                "note": l.note,
+                "createdAt": l.created_at.isoformat() if l.created_at else None,
+            }
             for l in logs
         ],
     }
@@ -210,24 +211,35 @@ def get_order(order_id: str, tenant_id: Optional[str] = "tenant-moustafa-tech", 
 def update_order_status(
     order_id: str,
     payload: OrderStatusUpdatePayload,
-    tenant_id: Optional[str] = "tenant-moustafa-tech",
+    tenant_id: Optional[str] = Query(None),
+    x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ):
-    q = db.query(Order).filter_by(id=order_id)
-    if tenant_id and tenant_id != "all":
-        q = q.filter_by(tenant_id=tenant_id)
-    order = q.first()
+    effective_tid = tenant_id or x_tenant_id or "tenant-moustafa-tech"
+    query = db.query(Order).filter_by(id=order_id)
+    if effective_tid and effective_tid != "all":
+        query = query.filter_by(tenant_id=effective_tid)
+    order = query.first()
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise HTTPException(status_code=404, detail="الطلب غير موجود")
 
-    order.status = payload.status.upper()
+    valid_statuses = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]
+    next_st = payload.status.upper()
+    if next_st not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"حالة الطلب غير صالحة. الحالات المقبولة: {valid_statuses}")
+
+    order.status = next_st
+    if next_st == "DELIVERED":
+        order.payment_status = "PAID"
+
     log = OrderStatusLog(
         id=f"log_{uuid.uuid4().hex[:8]}",
-        order_id=order_id,
-        status=payload.status.upper(),
-        note=payload.note or f"Order status changed to {payload.status.upper()}",
-        created_by="staff",
+        order_id=order.id,
+        status=next_st,
+        note=payload.note or f"Updated status to {next_st}",
+        created_by="merchant_admin",
     )
     db.add(log)
     db.commit()
-    return {"status": "success", "message": f"تم تحديث حالة الطلب إلى {payload.status.upper()}"}
+
+    return {"status": "success", "message": f"تم تحديث حالة الطلب إلى {next_st}", "orderId": order.id, "newStatus": next_st}

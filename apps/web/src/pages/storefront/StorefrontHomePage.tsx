@@ -132,6 +132,31 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
       .catch(() => { setCategories([]); });
   }, [activeTid]);
 
+  const isProductInCategory = (p: any, category: any) => {
+    if (!p || !category) return false;
+    const pCat = String(p.categoryId || p.category_id || '').trim();
+    if (!pCat) return false;
+    return (
+      pCat === category.id ||
+      pCat === category.slug ||
+      pCat === category.name ||
+      pCat === category.name_ar ||
+      pCat === category.nameEn ||
+      (category.slug && pCat.toLowerCase() === category.slug.toLowerCase())
+    );
+  };
+
+  useEffect(() => {
+    const handleSelectCat = (e: any) => {
+      if (e?.detail?.categoryId) {
+        setSelectedCategory(e.detail.categoryId);
+        catalogTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('techzone:select-category', handleSelectCat);
+    return () => window.removeEventListener('techzone:select-category', handleSelectCat);
+  }, []);
+
   // Reset pagination when filter criteria change
   useEffect(() => {
     setCurrentPage(1);
@@ -140,8 +165,16 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
   // Filtered and Sorted Products
   const filteredProducts = useMemo(() => {
     let result = products.filter((p) => {
-      const pCat = p.categoryId || p.category_id;
-      const matchesCat = selectedCategory === 'all' || pCat === selectedCategory;
+      let matchesCat = selectedCategory === 'all';
+      if (!matchesCat) {
+        const catObj = categories.find((c) => c.id === selectedCategory || c.slug === selectedCategory);
+        if (catObj) {
+          matchesCat = isProductInCategory(p, catObj);
+        } else {
+          const pCat = String(p.categoryId || p.category_id || '').trim();
+          matchesCat = pCat === selectedCategory;
+        }
+      }
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||
@@ -277,7 +310,7 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
             </button>
 
             {categories.map((c) => {
-              const catCount = products.filter((p) => (p.categoryId || p.category_id) === c.id).length;
+              const catCount = products.filter((p) => isProductInCategory(p, c)).length;
               const isSelected = selectedCategory === c.id;
               return (
                 <button

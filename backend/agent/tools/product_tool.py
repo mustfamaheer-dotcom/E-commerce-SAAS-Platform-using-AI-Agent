@@ -13,6 +13,7 @@ def add_product_tool(
     category_slug: Optional[str] = None,
     stock_qty: int = 20,
     description_ar: Optional[str] = None,
+    image_url: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Adds a new product to the catalog."""
     db = SessionLocal()
@@ -23,9 +24,28 @@ def add_product_tool(
 
         category_id = None
         if category_slug:
-            cat = db.query(Category).filter_by(tenant_id=tenant_id, slug=category_slug).first()
+            cat = (
+                db.query(Category)
+                .filter(
+                    Category.tenant_id == tenant_id,
+                    (Category.id == category_slug)
+                    | (Category.slug == category_slug)
+                    | (Category.name_ar == category_slug)
+                    | (Category.name_en == category_slug),
+                )
+                .first()
+            )
             if cat:
                 category_id = cat.id
+
+        if not category_id:
+            first_cat = db.query(Category).filter_by(tenant_id=tenant_id, is_active=True).first()
+            if first_cat:
+                category_id = first_cat.id
+
+        images = [image_url] if image_url else [
+            "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600&auto=format&fit=crop&q=80"
+        ]
 
         prod = Product(
             id=f"prod_{uuid.uuid4().hex[:10]}",
@@ -40,9 +60,7 @@ def add_product_tool(
             sku=sku,
             stock_qty=stock_qty,
             description_ar=description_ar or f"منتج {name_ar} أصلي ومضمون مع شحن سريع.",
-            images=[
-                "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600&auto=format&fit=crop&q=80"
-            ],
+            images=images,
             attributes={},
             is_active=True,
             featured=True,
@@ -59,6 +77,8 @@ def add_product_tool(
                 "price": prod.price,
                 "sku": prod.sku,
                 "stock": prod.stock_qty,
+                "categoryId": prod.category_id,
+                "images": prod.images,
             },
         }
     except Exception as e:
@@ -233,4 +253,3 @@ def search_products_tool(tenant_id: str, query: str) -> Dict[str, Any]:
         }
     finally:
         db.close()
-
