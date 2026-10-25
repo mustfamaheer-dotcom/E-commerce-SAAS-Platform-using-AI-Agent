@@ -1,3 +1,4 @@
+from backend.agent.erp_gemini_synthesis import extract_product_slots_with_gemini, synthesize_erp_action_with_gemini
 # backend/agent/erp_agent.py
 import re
 import uuid
@@ -221,38 +222,43 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
         card_type = "clarification"
 
     elif intent == "add_product":
-        price_val: Optional[float] = None
-        price_patterns = [
-            r"(?:سعر[ه]?|بسعر|بـ|ب|سعر)\s*[:=]?\s*(\d+(?:\.\d+)?)",
-            r"(\d+(?:\.\d+)?)\s*(?:جنيه|ج\.م|egp|pound)",
-        ]
-        for pat in price_patterns:
-            m = re.search(pat, raw_query, re.IGNORECASE)
-            if m:
-                price_val = float(m.group(1))
-                break
+        # 1. Try intelligent LLM extraction first
+        gemini_slots = extract_product_slots_with_gemini(raw_query)
+        if gemini_slots and gemini_slots.get("name") and gemini_slots.get("price") is not None:
+            clean_name = gemini_slots["name"]
+            price_val = gemini_slots["price"]
+            stock_qty = gemini_slots.get("stock", 20)
+        else:
+            price_val = None
+            price_patterns = [
+                r"(?:سعر[ه]?|بسعر|بـ|ب|سعر)\s*[:=]?\s*(\d+(?:\.\d+)?)",
+                r"(\d+(?:\.\d+)?)\s*(?:جنيه|ج\.م|egp|pound)",
+            ]
+            for pat in price_patterns:
+                m = re.search(pat, raw_query, re.IGNORECASE)
+                if m:
+                    price_val = float(m.group(1))
+                    break
 
-        numbers = [float(n) for n in re.findall(r"\b(\d+(?:\.\d+)?)\b", raw_query)]
-        stock_m = re.search(r"(?:كمية|كميه|مخزون|عدد|قطع[هة]?)\s*[:=]?\s*(\d+)", raw_query, re.IGNORECASE)
-        stock_qty = int(stock_m.group(1)) if stock_m else 20
+            numbers = [float(n) for n in re.findall(r"\b(\d+(?:\.\d+)?)\b", raw_query)]
+            stock_m = re.search(r"(?:كمية|كميه|مخزون|عدد|قطع[هة]?)\s*[:=]?\s*(\d+)", raw_query, re.IGNORECASE)
+            stock_qty = int(stock_m.group(1)) if stock_m else 20
 
-        if price_val is None and numbers:
-            rem = [n for n in numbers if n != stock_qty]
-            if rem:
-                price_val = rem[0]
-            elif len(numbers) == 1 and not stock_m:
-                price_val = numbers[0]
+            if price_val is None and numbers:
+                rem = [n for n in numbers if n != stock_qty]
+                if rem:
+                    price_val = rem[0]
+                elif len(numbers) == 1 and not stock_m:
+                    price_val = numbers[0]
 
-        clean_name = re.sub(
-            r"(?:عايز|عاوز|اريد|ممكن|ياريت|ضيف|اضف|أضف|اضافة|إضافة|انشئ|أنشئ|منتج|جديد|بسعر|سعر[ه]?|بـ|جنيه|ج\.م|egp|كمية|كميه|مخزون|عدد|قطع[هة]?|\d+(?:\.\d+)?|قسم|في قسم|اسمه|اسم|المنتج)",
-            " ",
-            raw_query,
-            flags=re.IGNORECASE,
-        ).strip()
-        clean_name = re.sub(r"[:=،,\-\.]+", " ", clean_name).strip()
-        clean_name = re.sub(r"\s+و\s*$", "", clean_name).strip()
-        clean_name = re.sub(r"^\s*و\s+", "", clean_name).strip()
-        clean_name = " ".join(clean_name.split())
+            clean_name = re.sub(
+                r"(?:عايز|عاوز|اريد|ممكن|ياريت|ضيف|اضف|أضف|اضافة|إضافة|انشئ|أنشئ|منتج|جديد|بسعر|سعر[ه]?|بـ|جنيه|ج\.م|egp|كمية|كميه|مخزون|عدد|قطع[هة]?|\d+(?:\.\d+)?|قسم|في قسم|اسمه|اسم|المنتج)",
+                " ",
+                raw_query,
+                flags=re.IGNORECASE,
+            ).strip()
+            clean_name = re.sub(r"[:=،,\-\.]+", " ", clean_name).strip()
+            clean_name = " ".join(clean_name.split())
 
         invalid_names = ["", "ا", "ان", "لي", "لنا", "جديد", "منتج", "واحد"]
         if price_val is None or clean_name in invalid_names or len(clean_name) < 2:
@@ -266,7 +272,6 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
         )
         tool_result = res
         card_type = "product_card"
-
     elif intent == "bulk_price":
         pct_match = re.search(r"([+-]?\d+(?:\.\d+)?)\s*%", raw_query)
         pct = float(pct_match.group(1)) if pct_match else 10.0
@@ -562,8 +567,21 @@ def execute_tools_node(state: ErpAgentState) -> Dict[str, Any]:
 
 def synthesize_response_node(state: ErpAgentState) -> Dict[str, Any]:
     tool_result = state.get("tool_result") or {}
-    msg = tool_result.get("message", "تم تنفيذ الأمر بنجاح.")
-    ai_reply = AIMessage(content=msg)
+    raw_msg = tool_result.get("message", "تم تنفيذ الأمر بنجاح.")
+    messages = state.get("messages", [])
+    raw_query = messages[-1].content if messages else ""
+    intent = state.get("intent", "general_chat")
+
+    if intent != "general_chat":
+        gemini_reply = synthesize_erp_action_with_gemini(
+            action_type=intent,
+            action_data=tool_result,
+            user_query=raw_query,
+        )
+        if gemini_reply:
+            raw_msg = gemini_reply
+
+    ai_reply = AIMessage(content=raw_msg)
     return {"messages": [ai_reply]}
 
 
