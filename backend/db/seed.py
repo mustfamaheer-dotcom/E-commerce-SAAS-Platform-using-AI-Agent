@@ -242,7 +242,49 @@ def seed_database():
             attributes={"length": "2M", "wattage": "100W", "material": "Nylon Braided"},
         )
 
-        db.add_all([p1, p2, p3, p4, p5])
+        p6 = Product(
+            id="prod_106",
+            tenant_id=tenant_id,
+            category_id="cat_chargers",
+            name_ar="كيبورد ميكانيكي انجليزي للألعاب بإضاءة RGB",
+            name_en="Mechanical Gaming English Keyboard RGB",
+            slug="mechanical-english-keyboard-rgb",
+            description_ar="لوحة مفاتيح ميكانيكية احترافية بالحروف الإنجليزية مع إضاءة RGB مخصصة واستجابة سريعة جداً للألعاب والبرمجة.",
+            price=1250.0,
+            cost_price=850.0,
+            compare_price=1600.0,
+            sku="PRD-913A85",
+            stock_qty=40,
+            low_stock_threshold=5,
+            featured=True,
+            images=[
+                "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&auto=format&fit=crop&q=80",
+            ],
+            attributes={"layout": "English", "switch": "Blue Mechanical", "rgb": True},
+        )
+
+        p7 = Product(
+            id="prod_107",
+            tenant_id=tenant_id,
+            category_id="cat_chargers",
+            name_ar="ماوس وايرلس دقيق مع بطارية قابلة لإعادة الشحن",
+            name_en="Precision Wireless Optical Mouse Rechargeable",
+            slug="precision-wireless-mouse",
+            description_ar="ماوس لاسلكي مريح لليد بحساسية عالية وبطارية تدوم طويلاً مع أزرار صامتة تماماً.",
+            price=450.0,
+            cost_price=280.0,
+            compare_price=600.0,
+            sku="PRD-74EFA9",
+            stock_qty=55,
+            low_stock_threshold=10,
+            featured=True,
+            images=[
+                "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=600&auto=format&fit=crop&q=80",
+            ],
+            attributes={"connectivity": "Wireless 2.4GHz + Bluetooth", "dpi": 1600},
+        )
+
+        db.add_all([p1, p2, p3, p4, p5, p6, p7])
 
         # 7. Seed Coupons
         c1 = Coupon(

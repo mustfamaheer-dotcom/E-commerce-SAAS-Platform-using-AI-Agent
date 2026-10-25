@@ -21,8 +21,13 @@ from backend.api.routes.auth import router as auth_router
 from backend.core.middleware import RequestTracingMiddleware, register_error_handlers
 from backend.db.database import init_db
 
-# Ensure all database tables exist on startup
+# Ensure all database tables exist on startup and default store data is seeded
 init_db()
+try:
+    from backend.db.seed import seed_database
+    seed_database()
+except Exception:
+    pass
 
 app = FastAPI(
     title="Intelligent ERP + AI Agent E-Commerce API",

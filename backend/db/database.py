@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 load_dotenv(BASE_DIR.parent / ".env")
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:admin@localhost:5432/techzone")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./techzone.db")
 
 # Engine options with connection health checks & resilient pooling
 engine_kwargs = {}
