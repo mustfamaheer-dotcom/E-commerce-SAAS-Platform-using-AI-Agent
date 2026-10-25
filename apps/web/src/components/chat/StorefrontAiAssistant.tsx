@@ -244,16 +244,18 @@ export const StorefrontAiAssistant: React.FC<StorefrontAiAssistantProps> = ({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2"
+          className="group relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-white/90 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 border border-slate-200/80 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:shadow-2xl hover:scale-105 backdrop-blur-2xl font-bold text-xs transition-all duration-300 active:scale-95 focus:outline-none"
           aria-label="فتح المساعد الذكي للتسوق"
           aria-expanded={isOpen}
         >
           <div className="relative">
-            <Bot className="w-5 h-5 text-white" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-sky-600 animate-pulse" />
+            <div className="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-xs">
+              <Bot className="w-3.5 h-3.5" />
+            </div>
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse" />
           </div>
-          <span className="hidden sm:inline-block tracking-wide">اسأل مساعد المتجر الذكي</span>
-          <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin-slow" />
+          <span className="hidden sm:inline-block tracking-wide font-extrabold">مساعد التسوق الذكي</span>
+          <Sparkles className="w-3.5 h-3.5 text-sky-500 animate-spin-slow" />
         </button>
       )}
 
@@ -262,21 +264,21 @@ export const StorefrontAiAssistant: React.FC<StorefrontAiAssistantProps> = ({
         <div
           role="dialog"
           aria-labelledby="chat-assistant-title"
-          className="w-[92vw] sm:w-[420px] h-[580px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
+          className="w-[92vw] sm:w-[420px] h-[580px] max-h-[85vh] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
         >
           {/* Header */}
-          <div className="px-4 py-3.5 bg-gradient-to-r from-sky-600 via-sky-700 to-indigo-700 text-white flex items-center justify-between shrink-0 shadow-xs">
+          <div className="px-5 py-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 text-slate-900 dark:text-slate-100 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-bold">
+              <div className="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold shadow-xs">
                 <Bot className="w-4 h-4" />
               </div>
               <div>
-                <h3 id="chat-assistant-title" className="font-bold text-xs leading-tight">
+                <h3 id="chat-assistant-title" className="font-black text-xs leading-tight">
                   مساعد {storeName} الذكي
                 </h3>
-                <span className="text-[10px] text-sky-200 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                  <span>متصل • مدعوم بالبيانات الرسمية</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1 font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                  <span>متصل • بالذكاء الاصطناعي الرسمي</span>
                 </span>
               </div>
             </div>
@@ -285,7 +287,7 @@ export const StorefrontAiAssistant: React.FC<StorefrontAiAssistantProps> = ({
               <button
                 type="button"
                 onClick={handleClearHistory}
-                className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
                 title="بدء محادثة جديدة"
                 aria-label="مسح المحادثة وبدء محادثة جديدة"
               >
@@ -294,7 +296,7 @@ export const StorefrontAiAssistant: React.FC<StorefrontAiAssistantProps> = ({
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
                 title="تصغير المحادثة"
                 aria-label="إغلاق المحادثة"
               >

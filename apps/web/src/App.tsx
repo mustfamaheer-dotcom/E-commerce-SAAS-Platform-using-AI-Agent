@@ -26,6 +26,8 @@ import { StorefrontHomePage } from './pages/storefront/StorefrontHomePage';
 import { CartPage } from './pages/storefront/CartPage';
 import { CheckoutPage } from './pages/storefront/CheckoutPage';
 import { StorefrontAiAssistant } from './components/chat/StorefrontAiAssistant';
+import { FloatingIslandNavbar } from './components/storefront/FloatingIslandNavbar';
+import { MiniCartDrawer } from './components/storefront/MiniCartDrawer';
 
 import {
   MessageSquare,
@@ -205,6 +207,9 @@ const MainAppContent: React.FC = () => {
     const savedSub = localStorage.getItem('techzone_storefront_subview') as StorefrontSubView | null;
     return savedSub || 'home';
   });
+
+  // Slide-over Mini-Cart Drawer State
+  const [isMiniCartOpen, setIsMiniCartOpen] = useState(false);
 
   // Authentication State - Defaults to null unless user explicitly logged in
   const [user, setUser] = useState<UserAccount | null>(() => getCurrentUser());
@@ -391,107 +396,33 @@ const MainAppContent: React.FC = () => {
       {/* STRICTLY ZERO ADMIN PRIVILEGES - NO ACCESS TO ERP OR BUILDER   */}
       {/* ============================================================== */}
       {currentView === 'storefront' && (
-        <div dir="rtl" className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans flex flex-col">
-          {/* Pure Customer Header - World-class E-Commerce Navigation */}
-          <header className="bg-slate-900/95 backdrop-blur-md text-slate-200 px-4 sm:px-8 py-3 text-xs flex items-center justify-between border-b border-slate-800 shrink-0 sticky top-0 z-40 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-xs">
-                <Store className="w-4 h-4" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-black text-white text-sm sm:text-base tracking-tight">
-                  {activeStore?.name || 'المتجر الإلكتروني'}
-                </span>
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  متجر رسمي معتمد
-                </span>
-              </div>
-            </div>
+        <div dir="rtl" className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 font-sans flex flex-col selection:bg-sky-500 selection:text-white">
+          {/* Spatial Minimalist Floating Island Navigation */}
+          <FloatingIslandNavbar
+            storeName={activeStore?.name || 'المتجر الإلكتروني'}
+            activeSubView={storefrontSubView}
+            onNavigateSubView={(view) => setStorefrontSubView(view)}
+            onOpenMiniCart={() => setIsMiniCartOpen(true)}
+            onBackToDashboard={user ? () => setCurrentView('dashboard') : undefined}
+          />
 
-            {/* Standard E-Commerce Customer Navigation */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Owner quick switch to Admin */}
-              {user && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCurrentView('dashboard');
-                    setActiveTab('ecommerce');
-                  }}
-                  className="px-2.5 py-1.5 rounded-xl border border-sky-500/30 bg-sky-950/40 hover:bg-sky-900/50 text-sky-400 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                  title="العودة كمدير للمتجر"
-                >
-                  <Store className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">العودة للوحة التحكم والـ ERP</span>
-                </button>
-              )}
+          {/* Slide-Over Frosted Glass Mini-Cart Drawer */}
+          <MiniCartDrawer
+            isOpen={isMiniCartOpen}
+            onClose={() => setIsMiniCartOpen(false)}
+            onProceedToCheckout={() => {
+              setIsMiniCartOpen(false);
+              setStorefrontSubView('checkout');
+            }}
+          />
 
-              <button
-                type="button"
-                onClick={() => setStorefrontSubView('home')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  storefrontSubView === 'home'
-                    ? 'bg-sky-600 text-white shadow-xs'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                تصفح المنتجات
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStorefrontSubView('cart')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all relative flex items-center gap-1.5 ${
-                  storefrontSubView === 'cart'
-                    ? 'bg-sky-600 text-white shadow-xs'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>السلة</span>
-                {totalCartCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white font-mono text-[9px] flex items-center justify-center font-bold">
-                    {totalCartCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStorefrontSubView('checkout')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  storefrontSubView === 'checkout'
-                    ? 'bg-sky-600 text-white shadow-xs'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                الدفع والشحن
-              </button>
-
-              <div className="h-4 w-[1px] bg-slate-800 mx-1" />
-
-              <button
-                type="button"
-                onClick={toggleMode}
-                className="p-1.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white transition-colors"
-                title={theme.mode === 'dark' ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
-              >
-                {theme.mode === 'dark' ? (
-                  <Sun className="w-3.5 h-3.5 text-amber-400" />
-                ) : (
-                  <Moon className="w-3.5 h-3.5 text-sky-400" />
-                )}
-              </button>
-            </div>
-          </header>
-
-          <main className="flex-1">
+          <main className="flex-1 pb-12">
             {storefrontSubView === 'home' && (
               <StorefrontHomePage
                 tenantId={activeStore?.id}
                 onOpenCart={() => setStorefrontSubView('cart')}
                 onOpenCheckout={() => setStorefrontSubView('checkout')}
+                onOpenMiniCart={() => setIsMiniCartOpen(true)}
               />
             )}
             {storefrontSubView === 'cart' && (
@@ -511,9 +442,18 @@ const MainAppContent: React.FC = () => {
             onNavigateSubView={(view) => setStorefrontSubView(view)}
           />
 
-          {/* Customer Footer */}
-          <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500">
-            <p>© 2026 {activeStore?.name || 'المتجر الإلكتروني'}. جميع الحقوق محفوظة للعملاء والخدمة المعتمدة.</p>
+          {/* Minimalist Customer Footer */}
+          <footer className="border-t border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md py-8 text-center text-xs text-slate-500">
+            <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p>© 2026 {activeStore?.name || 'المتجر الإلكتروني'}. جميع الحقوق محفوظة • تجربة تسوق إسكندنافية معتمدة.</p>
+              <div className="flex items-center gap-4 text-slate-400 text-[11px]">
+                <span>شحن سريع بوسطة</span>
+                <span>•</span>
+                <span>دفع Paymob آمن</span>
+                <span>•</span>
+                <span>ضمان استرجاع 14 يوم</span>
+              </div>
+            </div>
           </footer>
         </div>
       )}

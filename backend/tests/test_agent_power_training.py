@@ -77,10 +77,15 @@ def test_intent_router_product_and_sku_detection():
     assert router.route("تفاصيل prd-74efa9", role="customer") == "search_products"
 
 
-def test_orchestrator_budget_range_filtering(agent_test_store):
+@patch("backend.services.ai_orchestrator.get_llm")
+def test_orchestrator_budget_range_filtering(mock_get_llm, agent_test_store):
     """Customer searches with budget range (between 500 and 1000 EGP).
     Should match the Anker charger (850 EGP) and filter out AirPods (8500 EGP).
     """
+    mock_llm = MagicMock()
+    mock_get_llm.return_value = mock_llm
+    mock_llm.invoke.return_value = MagicMock(content="رشحتلك شاحن أنكر المناسب لميزانيتك يا فندم.")
+
     db, tenant_id, _, _, _ = agent_test_store
     service = AIOrchestrationService(db)
 
