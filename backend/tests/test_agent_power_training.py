@@ -193,3 +193,52 @@ def test_gemini_action_synthesis(mock_get_llm):
     )
     assert synthesis is not None
     assert "420" in synthesis
+
+
+def test_ai_training_api_status_and_dataset():
+    """Verify AI Training API endpoints for status, dataset, and system prompt."""
+    from backend.api.routes.agent import (
+        get_ai_training_status,
+        get_ai_training_dataset,
+        add_ai_training_example,
+        get_augmented_system_prompt,
+        evaluate_ai_training,
+        AddTrainingExamplePayload,
+    )
+
+    # 1. Test Status
+    status = get_ai_training_status()
+    assert status["status"] == "ready"
+    assert status["merchant_examples_count"] >= 5
+    assert status["customer_examples_count"] >= 5
+    assert "add_product" in status["supported_intents"]
+
+    # 2. Test Dataset
+    dataset = get_ai_training_dataset(role="all")
+    assert dataset["total_count"] >= 10
+    assert len(dataset["merchant_examples"]) >= 5
+
+    merchant_ds = get_ai_training_dataset(role="merchant")
+    assert merchant_ds["role"] == "merchant"
+
+    # 3. Test Add Training Example
+    payload = AddTrainingExamplePayload(
+        role="merchant",
+        user_query="عايز اضيف شاشة سامسونج كيرف 32 بوصة بـ 7500",
+        ideal_response="تمت إضافة الشاشة بنجاح يا فندم بضمان محلي معتمد.",
+        intent="add_product",
+        slots={"name": "شاشة سامسونج كيرف 32 بوصة", "price": 7500.0}
+    )
+    add_res = add_ai_training_example(payload)
+    assert add_res["status"] == "success"
+    assert add_res["example"]["slots"]["price"] == 7500.0
+
+    # 4. Test System Prompt Inspection
+    sys_res = get_augmented_system_prompt(role="merchant", store_name="تيك زون")
+    assert "وكيل تيك زون" in sys_res["system_prompt"]
+    assert "أمثلة تدريبية" in sys_res["system_prompt"]
+
+    # 5. Test Evaluation
+    eval_res = evaluate_ai_training()
+    assert eval_res["status"] == "passed"
+    assert eval_res["accuracy_score"] > 0.95

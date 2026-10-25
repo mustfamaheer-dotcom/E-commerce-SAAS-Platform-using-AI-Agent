@@ -138,3 +138,52 @@ def format_few_shot_prompt(role: str = "customer", limit: int = 3) -> str:
             f"- طريقة الرد المثالية: \"{ex['ideal_response']}\"\n"
         )
     return formatted
+
+def get_training_dataset(role: str = "all") -> Dict[str, Any]:
+    """Retrieves full training dataset and metadata."""
+    if role == "merchant":
+        return {"role": "merchant", "count": len(MERCHANT_TRAINING_EXAMPLES), "examples": MERCHANT_TRAINING_EXAMPLES}
+    elif role == "customer":
+        return {"role": "customer", "count": len(CUSTOMER_TRAINING_EXAMPLES), "examples": CUSTOMER_TRAINING_EXAMPLES}
+    return {
+        "role": "all",
+        "total_count": len(MERCHANT_TRAINING_EXAMPLES) + len(CUSTOMER_TRAINING_EXAMPLES),
+        "merchant_count": len(MERCHANT_TRAINING_EXAMPLES),
+        "customer_count": len(CUSTOMER_TRAINING_EXAMPLES),
+        "merchant_examples": MERCHANT_TRAINING_EXAMPLES,
+        "customer_examples": CUSTOMER_TRAINING_EXAMPLES,
+    }
+
+def add_training_example(role: str, user_query: str, ideal_response: str, intent: str = "general", slots: Dict[str, Any] = None) -> Dict[str, Any]:
+    """Adds a new in-context training example dynamically."""
+    new_ex = {
+        "user_query": user_query.strip(),
+        "intent": intent.strip(),
+        "slots": slots or {},
+        "ideal_response": ideal_response.strip(),
+        "suggested_actions": ["إجراء مقترح"],
+    }
+    if role == "customer":
+        CUSTOMER_TRAINING_EXAMPLES.insert(0, new_ex)
+    else:
+        MERCHANT_TRAINING_EXAMPLES.insert(0, new_ex)
+    return {"status": "success", "role": role, "example": new_ex}
+
+def get_training_stats() -> Dict[str, Any]:
+    """Returns metadata and statistics on active few-shot training."""
+    import os
+    return {
+        "active_model": os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest"),
+        "training_strategy": "In-Context Few-Shot Alignment & LLM Multi-Slot Extraction",
+        "dialect": "Egyptian Arabic (Cairene/Alexandrian commerce conventions) + English",
+        "merchant_examples_count": len(MERCHANT_TRAINING_EXAMPLES),
+        "customer_examples_count": len(CUSTOMER_TRAINING_EXAMPLES),
+        "total_active_examples": len(MERCHANT_TRAINING_EXAMPLES) + len(CUSTOMER_TRAINING_EXAMPLES),
+        "supported_intents": [
+            "add_product", "add_category", "update_price", "bulk_price",
+            "inventory_alerts", "create_coupon", "top_products",
+            "search_products", "track_order", "shipping_policy", "return_policy"
+        ],
+        "status": "ready",
+    }
+
