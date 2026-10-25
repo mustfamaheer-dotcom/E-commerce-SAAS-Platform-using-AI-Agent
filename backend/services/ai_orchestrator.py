@@ -193,11 +193,21 @@ class IntentRouter:
 
         # 7. Customer Product Search & Inventory Inquiries (Default e-commerce browsing)
         if any(k in q or k in query for k in [
-            "عندك", "عاوز", "عايز", "في منتج", "سماعات", "شاحن", "كابل", "جراب", "ايفون", "سعر", "بكام",
+            "عندك", "عاوز", "عايز", "في منتج", "سماعات", "سماعة", "شاحن", "كابل", "جراب", "ايفون", "سعر", "بكام",
+            "كيبورد", "لوحة مفاتيح", "ماوس", "فأرة", "لابتوب", "شاشة", "كمبيوتر", "موبايل", "هاتف", "ايباد",
+            "keyboard", "mouse", "laptop", "monitor", "phone", "iphone", "samsung", "ipad", "airpods",
             "search", "looking for", "buy", "product", "price", "earbuds", "case", "charger",
             "بيتباع", "أكثر مبيعاً", "اكتر مبيعا", "اهم منتج", "أفضل منتج", "افضل منتج", "رقم واحد", "bestseller", "popular"
-        ]):
+        ]) or re.search(r"\bprd-[a-zA-Z0-9]+\b", q):
             return "search_products"
+
+        # If role is customer and the query isn't conversational greeting or other intents,
+        # default to searching the store catalog so customer queries find products naturally.
+        if role == "customer":
+            greeting_words = ["اهلا", "أهلا", "مرحبا", "سلام", "ازيك", "ازيكوا", "صباح", "مساء", "مين انت", "من انت", "hello", "hi", "hey"]
+            is_pure_greeting = any(g in q for g in greeting_words) and len(q.split()) <= 3
+            if not is_pure_greeting and len(q.strip()) >= 2:
+                return "search_products"
 
         return "general_dialogue"
 
