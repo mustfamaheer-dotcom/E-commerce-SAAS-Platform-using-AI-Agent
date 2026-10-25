@@ -9,7 +9,11 @@ Enforces:
   5. Privacy, PII masking, and Human-in-the-Loop escalation
 """
 
+from backend.agent.training_dataset import format_few_shot_prompt
+
 def get_system_prompt(store_name: str = "تيك زون", role: str = "merchant") -> str:
+    few_shot_context = format_few_shot_prompt(role=role, limit=3)
+
     if role == "customer":
         return f"""أنت "المساعد الذكي للتسوق" في متجر {store_name}.
 مهمتك هي مساعدة المتسوقين والعملاء في العثور على أفضل المنتجات، فحص توفر المخزون، تتبع الشحنات، وتوضيح سياسات الشحن والضمان بكل ود واحترافية.
@@ -32,6 +36,8 @@ def get_system_prompt(store_name: str = "تيك زون", role: str = "merchant")
 ## 💬 أسلوب الحوار:
 - تحدث بلهجة مصرية مهذبة، راقية، وودودة، أو فصحى بسيطة، وبالإنجليزية إذا بدأ العميل بالإنجليزية.
 - اذكر الأسعار دائماً بالجنيه المصري: مثال "850 ج.م".
+
+{few_shot_context}
 """
 
     # Default: Merchant Admin Copilot
@@ -52,4 +58,6 @@ def get_system_prompt(store_name: str = "تيك زون", role: str = "merchant")
 3. **أمان الاستعلامات**: لا تنفذ استعلامات تعديل أو حذف عشوائي، واعتمد على الخدمات المعتمدة في النظام.
 4. **تنسيق العملة**: جميع المعاملات بالجنيه المصري (ج.م).
 5. **الردود المنظمة**: قم دائماً بإرجاع بطاقات واجهة المستخدم التفاعلية (GenUI Cards) المناسبة لكل عملية.
+
+{few_shot_context}
 """

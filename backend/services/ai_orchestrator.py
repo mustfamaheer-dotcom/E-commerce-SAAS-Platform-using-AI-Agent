@@ -145,7 +145,7 @@ class IntentRouter:
 
         # 4. Coupon Validation / Promotional Inquiries
         if any(k in q or k in query for k in [
-            "كود خصم", "كوبون", "تخفيض", "بروموكود", "خصم خاص", "وفر",
+            "كود خصم", "كوبون", "تخفيض", "بروموكود", "خصم خاص", " وفر ", "وفرلي", "توفير",
             "coupon", "promo code", "voucher", "discount code"
         ]) and role == "customer":
             return "customer_coupon"
@@ -193,7 +193,8 @@ class IntentRouter:
 
         # 7. Customer Product Search & Inventory Inquiries (Default e-commerce browsing)
         if any(k in q or k in query for k in [
-            "عندك", "عاوز", "عايز", "في منتج", "سماعات", "سماعة", "شاحن", "كابل", "جراب", "ايفون", "سعر", "بكام",
+            "عندك", "عاوز", "عايز", "في منتج", "متوفر", "متوفرة", "موجود", "موجودة", "متاح", "متاحة",
+            "سماعات", "سماعة", "شاحن", "كابل", "جراب", "ايفون", "سعر", "بكام",
             "كيبورد", "لوحة مفاتيح", "ماوس", "فأرة", "لابتوب", "شاشة", "كمبيوتر", "موبايل", "هاتف", "ايباد",
             "keyboard", "mouse", "laptop", "monitor", "phone", "iphone", "samsung", "ipad", "airpods",
             "search", "looking for", "buy", "product", "price", "earbuds", "case", "charger",
@@ -263,14 +264,25 @@ class AIOrchestrationService:
                 request.message
             ).strip()
             
-            # Check for budget filter (e.g. أقل من 1000 ج.م)
+            # Check for budget range (e.g. بين 300 و 700 أو في حدود 500 أو أقل من 1000)
+            min_price = None
             max_price = None
-            price_match = re.search(r"(?:أقل\s+من|اقل\s+من|under|less\s+than)\s*(\d+)", clean_search)
-            if price_match:
-                max_price = float(price_match.group(1))
-                clean_search = re.sub(r"(?:أقل\s+من|اقل\s+من|under|less\s+than)\s*\d+", "", clean_search).strip()
+            range_match = re.search(r"(?:بين|من)\s*(\d+)\s*(?:و|إلى|الي|to)\s*(\d+)", clean_search)
+            if range_match:
+                min_price = float(range_match.group(1))
+                max_price = float(range_match.group(2))
+                clean_search = re.sub(r"(?:بين|من)\s*\d+\s*(?:و|إلى|الي|to)\s*\d+", "", clean_search).strip()
+            else:
+                price_match = re.search(r"(?:أقل\s+من|اقل\s+من|under|less\s+than|في\s+حدود|بحدود|ميزانية|ميزانيه)\s*(\d+)", clean_search)
+                if price_match:
+                    max_price = float(price_match.group(1))
+                    clean_search = re.sub(r"(?:أقل\s+من|اقل\s+من|under|less\s+than|في\s+حدود|بحدود|ميزانية|ميزانيه)\s*\d+", "", clean_search).strip()
 
             q = self.db.query(Product).filter(Product.tenant_id == tenant_id, Product.is_active == True)
+            if min_price:
+                q = q.filter(Product.price >= min_price)
+            if max_price:
+                q = q.filter(Product.price <= max_price)
             
             # If asking about popular/bestseller/important products or empty search, query top catalog items
             is_bestseller_query = any(k in request.message.lower() for k in [
@@ -334,13 +346,16 @@ class AIOrchestrationService:
                 llm = get_llm()
                 if llm:
                     try:
-                        catalog_summary = "\n".join([f"- {p.name_ar} (السعر: {p.price:,.2f} ج.م، المخزون: {p.stock_qty})" for p in products[:3]])
+                        from backend.agent.training_dataset import format_few_shot_prompt
+                        few_shots = format_few_shot_prompt(role="customer", limit=2)
+                        catalog_summary = "\n".join([f"- {p.name_ar} (السعر: {p.price:,.2f} ج.م، المخزون: {p.stock_qty})" for p in products[:4]])
                         prompt = (
                             f"أنت المساعد الذكي للتسوق لمتجر '{store_name}'.\n"
                             f"استفسار العميل: '{request.message}'\n\n"
-                            f"المنتجات المتاحة حالياً من قاعدة البيانات:\n{catalog_summary}\n\n"
+                            f"المنتجات المتاحة حالياً من قاعدة بيانات المتجر:\n{catalog_summary}\n\n"
+                            f"{few_shots}\n"
                             f"المطلوب:\n"
-                            f"أجب العميل بلهجة مصرية مهذبة، ذكية ومختصرة جداً (1 إلى 2 جملة)، مع ذكر المنتج الأبرز وسعره بوضوح وعرض إضافته للسلة."
+                            f"أجب العميل بلهجة مصرية مهذبة، ذكية ومختصرة جداً (1 إلى 2 جملة)، مع ذكر المنتج الأبرز وسعره بوضوح وعرض إضافته للسلة مباشرة."
                         )
                         llm_res = llm.invoke([SystemMessage(content=prompt), HumanMessage(content=request.message)])
                         gen_reply = extract_llm_text(llm_res)

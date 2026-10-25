@@ -1,4 +1,10 @@
-from backend.agent.erp_gemini_synthesis import extract_product_slots_with_gemini, synthesize_erp_action_with_gemini
+from backend.agent.erp_gemini_synthesis import (
+    extract_product_slots_with_gemini,
+    extract_category_slots_with_gemini,
+    extract_price_update_slots_with_gemini,
+    extract_coupon_slots_with_gemini,
+    synthesize_erp_action_with_gemini,
+)
 # backend/agent/erp_agent.py
 import re
 import uuid
@@ -172,14 +178,18 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
         card_type = "clarification"
 
     elif intent == "add_category":
-        cat_name = re.sub(
-            r"(?:عايز|عاوز|اريد|ممكن|ياريت|ضيف|اضف|أضف|اضافة|إضافة|انشئ|أنشئ|قسم|تصنيف|فئة|فئه|جديد|جديدة|جديده|اسمه|اسم|باسم|كتالوج|المتجر)",
-            " ",
-            raw_query,
-            flags=re.IGNORECASE,
-        ).strip()
-        cat_name = re.sub(r"[:=،,\-\.]+", " ", cat_name).strip()
-        cat_name = " ".join(cat_name.split())
+        gemini_cat = extract_category_slots_with_gemini(raw_query)
+        if gemini_cat and gemini_cat.get("name"):
+            cat_name = gemini_cat["name"]
+        else:
+            cat_name = re.sub(
+                r"(?:عايز|عاوز|اريد|ممكن|ياريت|ضيف|اضف|أضف|اضافة|إضافة|انشئ|أنشئ|قسم|تصنيف|فئة|فئه|جديد|جديدة|جديده|اسمه|اسم|باسم|كتالوج|المتجر)",
+                " ",
+                raw_query,
+                flags=re.IGNORECASE,
+            ).strip()
+            cat_name = re.sub(r"[:=،,\-\.]+", " ", cat_name).strip()
+            cat_name = " ".join(cat_name.split())
         if not cat_name or len(cat_name) < 2 or cat_name in ["واحد", "لي", "لنا"]:
             return execute_action("clarification_add_category", raw_query, tenant_id, session_id, history)
 
@@ -282,9 +292,14 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
         card_type = "bulk_price_preview"
 
     elif intent == "update_price":
-        price_match = re.search(r"(\d+(?:\.\d+)?)", raw_query)
-        price = float(price_match.group(1)) if price_match else 500.0
-        sku_or_name = re.sub(r"(?:عدل|غير|سعر|منتج|الى|إلى|بـ|\d+|جنيه|ج\.م)", "", raw_query).strip() or "سماعة"
+        gemini_price = extract_price_update_slots_with_gemini(raw_query)
+        if gemini_price and gemini_price.get("price") is not None:
+            price = gemini_price["price"]
+            sku_or_name = gemini_price.get("name_or_sku") or "سماعة"
+        else:
+            price_match = re.search(r"(\d+(?:\.\d+)?)", raw_query)
+            price = float(price_match.group(1)) if price_match else 500.0
+            sku_or_name = re.sub(r"(?:عدل|غير|سعر|منتج|الى|إلى|بـ|\d+|جنيه|ج\.م)", "", raw_query).strip() or "سماعة"
         res = update_product_price_tool(tenant_id=tenant_id, sku_or_name=sku_or_name, new_price=price)
         tool_result = res
         card_type = "product_update_preview"
@@ -310,11 +325,20 @@ def execute_action(intent: str, raw_query: str, tenant_id: str, session_id: str,
         card_type = "inventory_alerts"
 
     elif intent == "create_coupon":
-        code_match = re.search(r"\b([A-Z0-9]{4,15})\b", raw_query.upper())
-        code = code_match.group(1) if code_match else "PROMO20"
-        val_match = re.search(r"(\d+)%", raw_query) or re.search(r"(\d+)", raw_query)
-        val = float(val_match.group(1)) if val_match else 20.0
-        res = create_coupon_tool(tenant_id=tenant_id, code=code, value=val)
+        gemini_coupon = extract_coupon_slots_with_gemini(raw_query)
+        if gemini_coupon and gemini_coupon.get("code") and gemini_coupon.get("value") is not None:
+            code = gemini_coupon["code"]
+            val = gemini_coupon["value"]
+            c_type = gemini_coupon.get("type", "percent")
+            min_order = gemini_coupon.get("min_order", 0.0)
+        else:
+            code_match = re.search(r"\b([A-Z0-9]{4,15})\b", raw_query.upper())
+            code = code_match.group(1) if code_match else "PROMO20"
+            val_match = re.search(r"(\d+)%", raw_query) or re.search(r"(\d+)", raw_query)
+            val = float(val_match.group(1)) if val_match else 20.0
+            c_type = "percent" if "%" in raw_query else "fixed"
+            min_order = 0.0
+        res = create_coupon_tool(tenant_id=tenant_id, code=code, value=val, type=c_type, min_order=min_order)
         tool_result = res
         card_type = "coupon_card"
 
