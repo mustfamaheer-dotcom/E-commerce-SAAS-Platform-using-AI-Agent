@@ -38,7 +38,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ tenantId }) => {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-right text-xs border-collapse">
-            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px]">
+            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-xs">
               <tr>
                 <th className="px-4 py-3 font-semibold">اسم العميل</th>
                 <th className="px-4 py-3 font-semibold">رقم الهاتف</th>
@@ -60,7 +60,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ tenantId }) => {
                       <p className="font-semibold text-xs text-slate-600 dark:text-slate-300">
                         لا يوجد عملاء مسجلين بعد في متجرك
                       </p>
-                      <p className="text-[11px]">
+                      <p className="text-xs">
                         عند قيام المشترين بإنشاء حسابات أو تسجيل طلبات شراء ستظهر بياناتهم هنا
                       </p>
                     </div>
@@ -91,7 +91,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ tenantId }) => {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
                             isVip
                               ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border-amber-200 dark:border-amber-800'
                               : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700'

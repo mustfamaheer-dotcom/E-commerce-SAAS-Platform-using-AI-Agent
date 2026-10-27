@@ -78,3 +78,7 @@ backend/techzone.db
 
 # Uploaded assets
 backend/static/uploads/
+
+# Local agent & skills tool caches
+.claude/
+agent/

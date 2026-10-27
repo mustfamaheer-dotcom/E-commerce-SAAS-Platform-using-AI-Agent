@@ -157,7 +157,7 @@ export const CouponsPage: React.FC<CouponsPageProps> = ({ tenantId }) => {
               <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                 لا توجد كوبونات خصم مسجلة في متجرك حالياً
               </p>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-xs text-slate-400">
                 أنشئ أول كود خصم لعملائك لزيادة معدل الشراء والتحويل في متجرك
               </p>
             </div>
@@ -173,7 +173,7 @@ export const CouponsPage: React.FC<CouponsPageProps> = ({ tenantId }) => {
                       <span className="font-mono font-extrabold text-sm text-slate-900 dark:text-slate-100">
                         {c.code}
                       </span>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
                         خصم {c.value} {c.type === 'percent' ? '%' : 'ج.م'} • الحد الأدنى: {c.minOrder?.toLocaleString()} ج.م • مرات الاستخدام: {c.usedCount}
                       </div>
                     </div>

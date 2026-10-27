@@ -19,6 +19,7 @@ import { getCurrentUser, setCurrentUser, UserAccount } from './services/auth';
 import { API_BASE_URL } from './services/api';
 import { ServicesHubPage, ProvisionedStore } from './pages/hub/ServicesHubPage';
 import { AiStoreBuilderPage } from './pages/onboarding/AiStoreBuilderPage';
+import { AdminHomePage } from './pages/dashboard/AdminHomePage';
 import { ChatCommandCenter } from './pages/dashboard/ChatCommandCenter';
 import { EcommerceStudioPage } from './pages/dashboard/EcommerceStudioPage';
 import { ProductsGridPage } from './pages/dashboard/ProductsGridPage';
@@ -37,14 +38,19 @@ import { StorefrontAiAssistant } from './components/chat/StorefrontAiAssistant';
 import { FloatingIslandNavbar } from './components/storefront/FloatingIslandNavbar';
 import { MiniCartDrawer } from './components/storefront/MiniCartDrawer';
 import { StorefrontFooter } from './components/storefront/StorefrontFooter';
+import { CommandPaletteModal } from './components/CommandPaletteModal';
 
 import {
   Check,
+  ShoppingBag,
   MessageSquare,
   Package,
   ShoppingCart,
   ShieldCheck,
   Terminal,
+  Home,
+  Search,
+  Command,
   Sun,
   Moon,
   Store,
@@ -63,6 +69,7 @@ import './i18n';
 const queryClient = new QueryClient();
 
 export type NavItemKey =
+  | 'home'
   | 'chat'
   | 'ecommerce'
   | 'products'
@@ -88,6 +95,16 @@ interface NavCategory {
 }
 
 const NAV_CATEGORIES: NavCategory[] = [
+  {
+    title_ar: 'نظرة عامة',
+    items: [
+      {
+        key: 'home',
+        label_ar: 'الرئيسية (لوحة التحكم)',
+        icon: Home,
+      },
+    ],
+  },
   {
     title_ar: 'الذكاء الاصطناعي والمحادثة',
     items: [
@@ -173,12 +190,27 @@ const MainAppContent: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<NavItemKey>(() => {
     const savedTab = localStorage.getItem('techzone_active_tab') as NavItemKey | null;
-    return savedTab || 'analytics';
+    return savedTab || 'home';
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Storefront sub-navigation (Home, Cart, Checkout)
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const totalCartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0);
+
   const [storefrontSubView, setStorefrontSubView] = useState<StorefrontSubView>(() => {
     const p = window.location.pathname;
     if (p.includes('/cart')) return 'cart';
@@ -341,13 +373,50 @@ const MainAppContent: React.FC = () => {
   // ==============================================================
   const renderStorefront = () => (
     <div dir="rtl" className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 font-sans flex flex-col selection:bg-sky-500 selection:text-white">
-      {/* Spatial Minimalist Floating Island Navigation (NO لوحة التاجر) */}
-      <FloatingIslandNavbar
-        storeName={activeStore?.name || 'المتجر الإلكتروني'}
-        activeSubView={storefrontSubView}
-        onNavigateSubView={(view) => setStorefrontSubView(view)}
-        onOpenMiniCart={() => setIsMiniCartOpen(true)}
-      />
+      {/* Global Action Bar: لوحة التحكم (Hub) */}
+      <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => navigate('/hub')}
+          className="group flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900/95 hover:bg-black dark:bg-white/95 dark:hover:bg-white text-white dark:text-slate-950 font-bold text-xs shadow-lg shadow-black/15 backdrop-blur-md transition-all hover:scale-105 active:scale-95 border border-white/10 dark:border-slate-800 cursor-pointer"
+          title="الانتقال إلى لوحة التحكم الرئيسية (Hub)"
+        >
+          <Store className="w-4 h-4 text-sky-400 dark:text-sky-600 transition-transform group-hover:scale-110" />
+          <span>لوحة التحكم (Hub)</span>
+        </button>
+
+        {storefrontSubView !== 'home' && (
+          <button
+            type="button"
+            onClick={() => setStorefrontSubView('home')}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 font-bold text-xs shadow-md border border-slate-200 dark:border-slate-800 backdrop-blur-md hover:scale-105 transition-all cursor-pointer"
+          >
+            <Home className="w-3.5 h-3.5 text-sky-500" />
+            <span>المتجر</span>
+          </button>
+        )}
+
+        {totalCartCount > 0 && (
+          <button
+            type="button"
+            onClick={() => setIsMiniCartOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white font-bold text-xs shadow-lg shadow-black/10 backdrop-blur-md hover:scale-105 active:scale-95 transition-all border border-slate-200 dark:border-slate-800 cursor-pointer"
+            title="عرض سلة المشتريات"
+          >
+            <ShoppingBag className="w-4 h-4 text-emerald-500" />
+            <span>السلة ({totalCartCount})</span>
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={toggleMode}
+          className="p-2 rounded-xl bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-md backdrop-blur-md transition-all hover:scale-105 cursor-pointer"
+          title={theme.mode === 'dark' ? 'التحويل للوضع النهاري' : 'التحويل للوضع الليلي'}
+        >
+          {theme.mode === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+        </button>
+      </div>
 
       {/* Slide-Over Frosted Glass Mini-Cart Drawer */}
       <MiniCartDrawer
@@ -412,22 +481,35 @@ const MainAppContent: React.FC = () => {
       );
     }
 
+    const currentTabLabel = NAV_CATEGORIES.flatMap((c) => c.items).find((i) => i.key === activeTab)?.label_ar || 'لوحة التحكم';
+
     return (
       <div
         dir="rtl"
         className="fixed inset-0 h-screen h-[100dvh] w-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex font-sans transition-colors duration-200 antialiased z-0"
       >
-        {/* Sidebar Navigation - Strictly for This Merchant's Store */}
+        {/* Command Palette Modal */}
+        <CommandPaletteModal
+          isOpen={isCommandPaletteOpen}
+          onClose={() => setIsCommandPaletteOpen(false)}
+          onNavigateTab={(tab) => setActiveTab(tab)}
+          onToggleTheme={toggleMode}
+          isDark={theme.mode === 'dark'}
+          onOpenStorefront={() => window.open('/', '_blank')}
+          onNavigateHub={() => navigate('/hub')}
+        />
+
+        {/* Sidebar Navigation - Executive Deep Slate Frame (Restful for eyes in light mode) */}
         <aside
           className={`${
-            isSidebarOpen ? 'w-64' : 'w-16'
-          } shrink-0 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-200 z-30 select-none shadow-xs h-full overflow-hidden`}
+            isSidebarOpen ? 'w-[230px]' : 'w-14'
+          } shrink-0 bg-[#0F172A] border-l border-slate-800/90 flex flex-col transition-all duration-200 z-30 select-none shadow-md h-full overflow-hidden text-slate-300`}
         >
           {/* Sidebar Header: Shows ONLY this store */}
-          <div className="h-14 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <div className="flex items-center space-x-2.5 space-x-reverse overflow-hidden">
-              <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Terminal className="w-4 h-4" />
+          <div className="h-12 px-3 border-b border-slate-800/80 flex items-center justify-between bg-[#0B132B]/60">
+            <div className="flex items-center space-x-2 space-x-reverse overflow-hidden">
+              <div className="w-6 h-6 rounded bg-slate-800 border border-slate-700 text-sky-400 flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs">
+                {activeStore?.name?.charAt(0) || 'M'}
               </div>
               {isSidebarOpen && (
                 <div className="truncate">
@@ -438,21 +520,21 @@ const MainAppContent: React.FC = () => {
                         const found = merchantStores.find((s) => s.id === e.target.value);
                         if (found) setActiveStore(found);
                       }}
-                      className="font-bold text-xs text-slate-900 dark:text-slate-100 bg-transparent border-0 cursor-pointer focus:outline-none max-w-[130px] truncate"
+                      className="font-bold text-xs text-white bg-slate-800/90 rounded px-1.5 py-0.5 border border-slate-700 cursor-pointer focus:outline-none max-w-[130px] truncate"
                     >
                       {merchantStores.map((s) => (
-                        <option key={s.id} value={s.id} className="dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                        <option key={s.id} value={s.id} className="bg-slate-900 text-white">
                           {s.name}
                         </option>
                       ))}
                     </select>
                   ) : (
-                    <span className="font-bold text-xs text-slate-900 dark:text-slate-100 block truncate">
+                    <span className="font-bold text-xs text-white block truncate">
                       {activeStore?.name || user?.storeName || 'متجري الخاص'}
                     </span>
                   )}
-                  <span className="text-[10px] text-emerald-500 font-semibold block truncate">
-                    <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /><span>لوحة التحكم الخاصة</span></span>
+                  <span className="text-[11px] text-emerald-400 font-medium block truncate">
+                    لوحة الإدارة الرسمية
                   </span>
                 </div>
               )}
@@ -461,23 +543,24 @@ const MainAppContent: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              title={isSidebarOpen ? "طي القائمة" : "توسيع القائمة"}
             >
-              {isSidebarOpen ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+              {isSidebarOpen ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
             </button>
           </div>
 
           {/* Navigation Categories and Items */}
-          <nav className="flex-1 overflow-y-auto px-2.5 py-4 space-y-4">
+          <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-3.5">
             {NAV_CATEGORIES.map((cat, catIdx) => (
-              <div key={catIdx} className="space-y-1">
+              <div key={catIdx} className="space-y-0.5">
                 {isSidebarOpen && (
-                  <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 pb-1">
+                  <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-1">
                     {cat.title_ar}
                   </h3>
                 )}
 
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {cat.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeTab === item.key;
@@ -487,23 +570,23 @@ const MainAppContent: React.FC = () => {
                         key={item.key}
                         type="button"
                         onClick={() => setActiveTab(item.key)}
-                        className={`w-full flex items-center space-x-2.5 space-x-reverse px-2.5 py-2 rounded-xl text-xs transition-colors ${
+                        className={`w-full flex items-center space-x-2 space-x-reverse px-2.5 py-1.5 rounded-lg text-xs transition-all ${
                           isActive
-                            ? 'bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 font-bold shadow-2xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-slate-200'
+                            ? 'bg-sky-500/20 text-sky-300 font-semibold border border-sky-500/30 shadow-xs'
+                            : 'text-slate-400 hover:bg-slate-800/70 hover:text-white'
                         }`}
                         title={item.label_ar}
                       >
                         <Icon
-                          className={`w-4 h-4 shrink-0 ${
-                            isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 dark:text-slate-500'
+                          className={`w-3.5 h-3.5 shrink-0 ${
+                            isActive ? 'text-sky-400' : 'text-slate-500'
                           }`}
                         />
                         {isSidebarOpen && (
                           <div className="flex-1 flex items-center justify-between truncate text-right">
                             <span className="truncate">{item.label_ar}</span>
                             {badgeText && (
-                              <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300">
+                              <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">
                                 {badgeText}
                               </span>
                             )}
@@ -518,66 +601,81 @@ const MainAppContent: React.FC = () => {
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900 space-y-2">
+          <div className="p-2.5 border-t border-slate-800 bg-[#0B132B]">
             <button
               type="button"
               onClick={() => navigate('/hub')}
-              className="w-full flex items-center justify-center p-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="w-full flex items-center justify-center p-1.5 rounded-lg text-xs font-bold bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 transition-colors"
             >
-              <Store className="w-3.5 h-3.5 ml-1.5 text-sky-500" />
-              {isSidebarOpen && <span>إدارة المتاجر (Hub)</span>}
+              <Store className="w-3.5 h-3.5 ml-1.5 text-sky-400" />
+              {isSidebarOpen && <span>لوحة التحكم (Hub)</span>}
             </button>
           </div>
         </aside>
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-slate-100/60 dark:bg-slate-950">
-          {/* ERP Header: Scoped strictly to THIS store */}
-          <header className="h-14 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between shrink-0 shadow-2xs z-20">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-bold text-slate-500">{activeStore?.name}</span>
+        {/* Main Content Area - Soothing Cashmere Mineral Slate Canvas */}
+        <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-[#EEF2F6] dark:bg-slate-950">
+          {/* ERP Header: High-Density 48px Header */}
+          <header className="h-12 px-4 border-b border-slate-300/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900 backdrop-blur-md flex items-center justify-between shrink-0 shadow-[0_1px_3px_rgba(15,23,42,0.03)] z-20">
+            <div className="flex items-center gap-2.5 text-xs">
+              <span className="font-semibold text-slate-500">{activeStore?.name}</span>
               <span className="text-slate-300 dark:text-slate-600">/</span>
-              <span className="font-extrabold text-slate-800 dark:text-slate-200">
-                {activeTab === 'chat' && 'مركز قيادة الوكيل الذكي (AI Command Center)'}
-                {activeTab === 'ecommerce' && 'استوديو تخصيص متجر العملاء (E-Commerce Studio)'}
-                {activeTab === 'products' && 'إدارة المنتجات والكتالوج'}
-                {activeTab === 'categories' && 'الأقسام والتصنيفات'}
-                {activeTab === 'orders' && 'الطلبات والشحن'}
-                {activeTab === 'inventory' && 'المخزون ونواقص السلع'}
-                {activeTab === 'customers' && 'إدارة علاقات العملاء (CRM)'}
-                {activeTab === 'coupons' && 'الكوبونات والعروض'}
-                {activeTab === 'analytics' && 'مؤشرات الأداء والـ BI'}
-                {activeTab === 'settings' && 'إعدادات المتجر والهوية البصرية'}
-                {activeTab === 'audit' && 'سجل التدقيق والأمان (Audit Log)'}
+              <span className="font-bold text-slate-900 dark:text-slate-100">
+                {currentTabLabel}
               </span>
             </div>
 
-            <div className="flex items-center space-x-3 space-x-reverse">
+            {/* Quick Command Launcher (⌘K) */}
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <button
+                type="button"
+                onClick={() => setIsCommandPaletteOpen(true)}
+                className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/70 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
+              >
+                <Search className="w-3.5 h-3.5 text-slate-400" />
+                <span>بحث سريع أو أمر...</span>
+                <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-[10px] font-mono font-semibold text-slate-600 dark:text-slate-300">
+                  ⌘K
+                </kbd>
+              </button>
+
+              <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1 hidden md:block" />
+
+              {/* Action: لوحة التحكم (Hub) */}
+              <button
+                type="button"
+                onClick={() => navigate('/hub')}
+                className="px-2.5 py-1 rounded-lg border border-sky-300 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                title="الانتقال إلى لوحة التحكم الرئيسية (Hub)"
+              >
+                <Store className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                <span>لوحة التحكم (Hub)</span>
+              </button>
+
               {/* Action 1: Visit THIS store's public storefront */}
               <button
                 type="button"
                 onClick={() => {
                   window.open('/', '_blank');
                 }}
-                className="px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors text-xs font-bold flex items-center gap-1.5 shadow-2xs"
+                className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-xs font-medium flex items-center gap-1.5 shadow-2xs"
                 title="معاينة كيف يظهر متجرك للعملاء والمشترين"
               >
-                <ExternalLink className="w-3.5 h-3.5 text-emerald-500" />
-                <span>معاينة متجري كعميل</span>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                <span>معاينة المتجر</span>
               </button>
-
-              <div className="h-5 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1" />
 
               {/* Dark Mode toggle */}
               <button
                 type="button"
                 onClick={toggleMode}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title={theme.mode === 'dark' ? "التحويل للوضع النهاري" : "التحويل للوضع الليلي"}
               >
                 {theme.mode === 'dark' ? (
-                  <Sun className="w-4 h-4 text-amber-400" />
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
                 ) : (
-                  <Moon className="w-4 h-4 text-slate-700" />
+                  <Moon className="w-3.5 h-3.5 text-slate-600" />
                 )}
               </button>
 
@@ -585,10 +683,10 @@ const MainAppContent: React.FC = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 hover:text-rose-600 transition-colors"
                 title="تسجيل الخروج من لوحة الإدارة"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           </header>
@@ -602,6 +700,14 @@ const MainAppContent: React.FC = () => {
                 : 'flex-1 overflow-auto p-6 max-w-7xl w-full mx-auto'
             }
           >
+            {activeTab === 'home' && (
+              <AdminHomePage
+                tenantId={activeStore?.id || user?.tenantId}
+                storeName={activeStore?.name || user?.storeName}
+                merchantName={user?.name}
+                onNavigateTab={(tab) => setActiveTab(tab)}
+              />
+            )}
             {activeTab === 'chat' && (
               <ChatCommandCenter
                 tenantId={activeStore?.id || user?.tenantId}

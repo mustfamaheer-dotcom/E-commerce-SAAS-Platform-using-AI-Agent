@@ -236,7 +236,7 @@ export const StoreSettingsPage: React.FC<StoreSettingsPageProps> = ({ tenantId }
           <h3 className="font-bold text-xs text-slate-900 dark:text-slate-100">
             شعار وهوية المتجر
           </h3>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
+          <p className="text-xs text-slate-400 leading-relaxed">
             ارفع شعار متجرك لتحليل الألوان آلياً وتطبيقها فوراً على متجر الزوار والواجهات الحية
           </p>
           <LogoUploader tenantId={activeTid} />
@@ -306,7 +306,7 @@ export const StoreSettingsPage: React.FC<StoreSettingsPageProps> = ({ tenantId }
                   <Share2 className="w-4 h-4 text-sky-500" />
                   <span>قنوات التواصل الاجتماعي (الظهور في الفوتر)</span>
                 </h4>
-                <span className="text-[10px] text-slate-400">
+                <span className="text-xs text-slate-400">
                   تفعيل أو تعطيل كل منصة مع تحديد الرابط
                 </span>
               </div>
@@ -358,7 +358,7 @@ export const StoreSettingsPage: React.FC<StoreSettingsPageProps> = ({ tenantId }
                         value={item?.url || ''}
                         onChange={(e) => handleUrlChange(ch.key, e.target.value)}
                         placeholder={ch.placeholder}
-                        className="w-full p-2 text-[11px] rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500 font-mono disabled:cursor-not-allowed"
+                        className="w-full p-2 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500 font-mono disabled:cursor-not-allowed"
                       />
                     </div>
                   );
@@ -392,7 +392,7 @@ export const StoreSettingsPage: React.FC<StoreSettingsPageProps> = ({ tenantId }
                   <CreditCard className="w-4 h-4 text-indigo-500" />
                   <span>العملة الرسمية</span>
                 </h4>
-                <span className="text-[11px] text-slate-400 font-mono">{currency} — الجنيه المصري</span>
+                <span className="text-xs text-slate-400 font-mono">{currency} — الجنيه المصري</span>
               </div>
 
               <div className="flex items-center gap-3">

@@ -59,7 +59,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({ tenantId }) => {
             <span className="font-bold block">
               تنبيه ذكي: يوجد {lowStockCount} منتجات في مستوى مخزون حرج!
             </span>
-            <span className="text-[11px] text-amber-700 dark:text-amber-400">
+            <span className="text-xs text-amber-700 dark:text-amber-400">
               يُنصح بإعادة التوريد لتجنب خسارة المبيعات اليومية المحتملة.
             </span>
           </div>
@@ -70,7 +70,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({ tenantId }) => {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-right text-xs border-collapse">
-            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px]">
+            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-xs">
               <tr>
                 <th className="px-4 py-3 font-semibold">SKU</th>
                 <th className="px-4 py-3 font-semibold">اسم المنتج</th>
@@ -92,7 +92,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({ tenantId }) => {
                       <p className="font-semibold text-xs text-slate-600 dark:text-slate-300">
                         لا توجد عناصر مسجلة في مستودع متجرك حالياً
                       </p>
-                      <p className="text-[11px]">
+                      <p className="text-xs">
                         قم بإضافة منتجات من صفحة الكتالوج لتظهر كميات المخزون وتنبيهات الأمان هنا
                       </p>
                     </div>
@@ -118,7 +118,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({ tenantId }) => {
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                        className={`px-2 py-0.5 rounded-full text-xs font-bold border ${
                           item.isLowStock
                             ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border-rose-200 dark:border-rose-800'
                             : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'

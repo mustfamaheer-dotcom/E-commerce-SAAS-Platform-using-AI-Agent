@@ -179,6 +179,8 @@ def update_product(
         prod.featured = payload.featured
     if payload.images is not None:
         prod.images = payload.images
+    if payload.category_id is not None:
+        prod.category_id = payload.category_id or None
 
     db.commit()
     return {"status": "success", "message": f"تم تحديث بيانات '{prod.name_ar}' بنجاح"}

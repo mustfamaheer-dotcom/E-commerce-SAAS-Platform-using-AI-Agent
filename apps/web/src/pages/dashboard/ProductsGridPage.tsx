@@ -76,8 +76,12 @@ export const ProductsGridPage: React.FC<ProductsGridPageProps> = ({ tenantId }) 
       search === '' ||
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
       p.sku?.toLowerCase().includes(search.toLowerCase());
+    const activeCat = categories.find((c) => c.id === selectedCategory);
     const matchesCategory =
-      selectedCategory === 'ALL' || p.categoryId === selectedCategory;
+      selectedCategory === 'ALL' ||
+      p.categoryId === selectedCategory ||
+      p.category_id === selectedCategory ||
+      (activeCat && (p.categoryId === activeCat.slug || p.category_id === activeCat.slug));
     return matchesSearch && matchesCategory;
   });
 
@@ -168,7 +172,7 @@ export const ProductsGridPage: React.FC<ProductsGridPageProps> = ({ tenantId }) 
       <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-right text-xs border-collapse">
-            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px]">
+            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-xs">
               <tr>
                 <th className="p-3 w-10 text-center">
                   <button onClick={toggleSelectAll} className="focus:outline-none">
@@ -199,7 +203,7 @@ export const ProductsGridPage: React.FC<ProductsGridPageProps> = ({ tenantId }) 
                       <p className="font-semibold text-xs text-slate-700 dark:text-slate-300">
                         لا توجد منتجات في متجرك حالياً
                       </p>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-xs text-slate-400">
                         ابدأ بتأسيس كتالوج متجرك عبر إضافة أول منتج للبيع
                       </p>
                       <button
@@ -239,21 +243,21 @@ export const ProductsGridPage: React.FC<ProductsGridPageProps> = ({ tenantId }) 
                           )}
                         </button>
                       </td>
-                      <td className="px-4 py-2.5 font-mono text-sky-600 dark:text-sky-400 font-semibold">
+                      <td className="px-4 py-2.5 font-mono tabular-nums text-slate-700 dark:text-slate-300 font-medium">
                         {p.sku}
                       </td>
                       <td className="px-4 py-2.5 font-medium text-slate-900 dark:text-slate-200">
                         {p.name}
                       </td>
-                      <td className="px-4 py-2.5 font-mono text-slate-900 dark:text-slate-100 font-bold">
+                      <td className="px-4 py-2.5 font-mono tabular-nums text-slate-900 dark:text-slate-100 font-bold">
                         {p.price?.toLocaleString()} ج.م
                       </td>
-                      <td className="px-4 py-2.5 font-mono text-slate-700 dark:text-slate-200">
+                      <td className="px-4 py-2.5 font-mono tabular-nums text-slate-700 dark:text-slate-200">
                         {p.stock}
                       </td>
                       <td className="px-4 py-2.5">
                         <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border ${
+                          className={`px-2 py-0.5 rounded-md text-xs font-semibold border ${
                             isLow
                               ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border-rose-200 dark:border-rose-800'
                               : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'

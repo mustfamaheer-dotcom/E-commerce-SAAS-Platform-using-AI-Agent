@@ -108,7 +108,7 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ tenantId }) => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs">
         <table className="w-full text-right border-collapse text-xs">
           <thead>
-            <tr className="bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-[11px]">
+            <tr className="bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs">
               <th className="p-3 font-semibold">المعرف (ID)</th>
               <th className="p-3 font-semibold">العملية / الأداة</th>
               <th className="p-3 font-semibold">الحالة</th>
@@ -130,14 +130,14 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ tenantId }) => {
                   <td className="p-3 font-mono text-sky-600 dark:text-sky-400">{item.toolName}</td>
                   <td className="p-3">
                     <span
-                      className={`inline-block px-2 py-0.5 rounded-md font-medium border text-[11px] ${getStatusBadge(
+                      className={`inline-block px-2 py-0.5 rounded-md font-medium border text-xs ${getStatusBadge(
                         item.status
                       )}`}
                     >
                       {item.status}
                     </span>
                   </td>
-                  <td className="p-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">{item.createdAt}</td>
+                  <td className="p-3 text-slate-500 dark:text-slate-400 font-mono text-xs">{item.createdAt}</td>
                   <td className="p-3">
                     <button
                       onClick={() => setSelectedAction(item)}
@@ -192,16 +192,16 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ tenantId }) => {
               </div>
 
               <div>
-                <label className="block text-[11px] font-sans font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-sans font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   معاملات الاستدعاء (Parameters):
                 </label>
-                <pre className="p-3 rounded-lg bg-slate-900 text-slate-100 text-[11px] overflow-x-auto border border-slate-800 font-mono">
+                <pre className="p-3 rounded-lg bg-slate-900 text-slate-100 text-xs overflow-x-auto border border-slate-800 font-mono">
                   {JSON.stringify(selectedAction.params, null, 2)}
                 </pre>
               </div>
 
               {selectedAction.errorMessage && (
-                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 text-[11px] font-sans">
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 text-xs font-sans">
                   <span className="font-semibold block mb-0.5">رسالة الخطأ / الحظر:</span>
                   {selectedAction.errorMessage}
                 </div>
