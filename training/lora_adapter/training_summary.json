@@ -1,0 +1,11 @@
+{
+  "base_model_id": "Qwen/Qwen2.5-Coder-0.5B-Instruct",
+  "lora_r": 16,
+  "lora_alpha": 32,
+  "lora_dropout": 0.05,
+  "epochs": 1,
+  "learning_rate": 0.0002,
+  "train_samples_count": 30,
+  "status": "trained_successfully",
+  "device": "cuda"
+}

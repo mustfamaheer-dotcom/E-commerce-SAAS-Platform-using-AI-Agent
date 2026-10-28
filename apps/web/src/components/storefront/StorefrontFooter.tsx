@@ -39,7 +39,7 @@ export const StorefrontFooter: React.FC<StorefrontFooterProps> = ({
   logoUrl,
   socialLinks = {},
   contactPhone = '01000000000',
-  contactEmail = 'support@techzone.eg',
+  contactEmail = 'support@talkshow.eg',
   governorate = 'القاهرة',
 }) => {
   const { theme } = useAppTheme();
@@ -113,12 +113,11 @@ export const StorefrontFooter: React.FC<StorefrontFooterProps> = ({
                   className="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200 dark:border-slate-700"
                 />
               ) : (
-                <div
-                  style={{ backgroundColor: primaryColor }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-md shadow-sky-500/20"
-                >
-                  <Sparkles className="w-5 h-5" />
-                </div>
+                <img
+                  src="/TransparentLogo.png"
+                  alt={storeName}
+                  className="w-10 h-10 object-contain drop-shadow-sm"
+                />
               )}
               <div>
                 <span className="font-extrabold text-base text-slate-900 dark:text-slate-100 block leading-tight">

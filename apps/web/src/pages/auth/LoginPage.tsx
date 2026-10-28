@@ -83,11 +83,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <span>الرئيسية</span>
           </button>
 
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center shadow-xs font-bold text-xs">
-              TZ
-            </div>
-            <span className="font-bold text-sm text-slate-900 dark:text-slate-100">TechZone ERP</span>
+          <div className="flex items-center gap-3">
+            <img
+              src="/TransparentLogo.png"
+              alt="TalkShow Logo"
+              className="h-10 w-auto object-contain drop-shadow-sm"
+            />
+            <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-slate-100">TalkShow</span>
           </div>
         </div>
 

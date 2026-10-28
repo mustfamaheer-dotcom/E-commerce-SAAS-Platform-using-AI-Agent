@@ -558,13 +558,15 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
             <ArrowRight className="w-4 h-4" />
           </button>
 
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center shadow-xs">
-              <Sparkles className="w-4 h-4" />
-            </div>
+          <div className="flex items-center gap-3">
+            <img
+              src="/TransparentLogo.png"
+              alt="TalkShow Logo"
+              className="h-10 w-auto object-contain drop-shadow-sm"
+            />
             <div>
               <h1 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <span>وكيل تيك زون لتأسيس المتاجر (Store Builder Agent)</span>
+                <span>وكيل TalkShow لتأسيس المتاجر (Store Builder Agent)</span>
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300">
                   بالمصري 
                 </span>
@@ -607,7 +609,7 @@ export const AiStoreBuilderPage: React.FC<AiStoreBuilderPageProps> = ({
               } space-y-1`}
             >
               <div className="flex items-center gap-1.5 text-[10px] text-slate-400 px-1">
-                <span>{msg.sender === 'user' ? user.name : 'وكيل تيك زون الذكي'}</span>
+                <span>{msg.sender === 'user' ? user.name : 'وكيل TalkShow الذكي'}</span>
                 <span>•</span>
                 <span>{msg.timestamp}</span>
               </div>

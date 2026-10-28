@@ -66,13 +66,13 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
   tenantId,
   onOpenStorefront,
 }) => {
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
   const { theme, updateThemeColors } = useAppTheme();
 
   // Storefront Identity State
-  const [storeName, setStoreName] = useState('Moustafa Tech');
-  const [storeSlug, setStoreSlug] = useState('-moustafa-tech--102');
-  const [heroTitle, setHeroTitle] = useState('أفضل الأجهزة والإلكترونيات الذكية بأسعار لا تُنافس');
+  const [storeName, setStoreName] = useState('');
+  const [storeSlug, setStoreSlug] = useState('');
+  const [heroTitle, setHeroTitle] = useState('أهلاً بك في متجرنا الإلكتروني الرسمي');
   const [heroSubtitle, setHeroSubtitle] = useState(
     'تسوق الآن مع ضمان حقيقي، تقسيط وبطاقات بنكية Paymob، تحويل InstaPay فوري، وخيارات الدفع عند الاستلام.'
   );
@@ -1003,7 +1003,7 @@ export const EcommerceStudioPage: React.FC<EcommerceStudioPageProps> = ({
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                   </div>
                   <div className="px-3 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] text-slate-500 font-mono">
-                    https://techzone.eg/store/{storeSlug}
+                    https://talkshow.eg/store/{storeSlug}
                   </div>
                   <RefreshCw className="w-3 h-3 text-slate-400" />
                 </div>

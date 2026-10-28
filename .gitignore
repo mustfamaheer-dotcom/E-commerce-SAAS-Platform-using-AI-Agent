@@ -79,6 +79,12 @@ backend/techzone.db
 # Uploaded assets
 backend/static/uploads/
 
+# Large models & GGUF binaries (>100MB exceeds GitHub limit)
+*.gguf
+models/*.gguf
+llama.cpp/
+training/lora_adapter/checkpoint-*/
+
 # Local agent & skills tool caches
 .claude/
 agent/

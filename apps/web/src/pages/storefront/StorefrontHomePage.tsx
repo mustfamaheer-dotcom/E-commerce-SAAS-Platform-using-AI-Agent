@@ -168,6 +168,17 @@ export const StorefrontHomePage: React.FC<StorefrontHomePageProps> = ({
     return () => window.removeEventListener('techzone:select-sort', handleSelectSort);
   }, []);
 
+  useEffect(() => {
+    const handleSearchQuery = (e: any) => {
+      if (typeof e?.detail?.query === 'string') {
+        setSearchQuery(e.detail.query);
+        catalogTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('techzone:search-query', handleSearchQuery);
+    return () => window.removeEventListener('techzone:search-query', handleSearchQuery);
+  }, []);
+
   // Reset pagination when filter criteria change
   useEffect(() => {
     setCurrentPage(1);

@@ -40,10 +40,13 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ tenantId }) => {
   const [copiedAwb, setCopiedAwb] = useState<string | null>(null);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
 
-  const activeTid =
-    tenantId || localStorage.getItem('techzone_active_store_id') || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
 
   const loadOrders = async () => {
+    if (!activeTid) {
+      setOrders([]);
+      return;
+    }
     try {
       const url =
         selectedStatus === 'ALL'
@@ -62,9 +65,13 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ tenantId }) => {
           if (data.length > 0 && !selectedOrderId) {
             setSelectedOrderId(data[0].id);
           }
+        } else {
+          setOrders([]);
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      setOrders([]);
+    }
   };
 
   useEffect(() => {

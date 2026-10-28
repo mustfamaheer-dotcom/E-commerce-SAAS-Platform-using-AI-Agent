@@ -40,42 +40,54 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
   merchantName,
   onNavigateTab,
 }) => {
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
   const displayStore = storeName || 'متجري الخاص';
   const displayMerchant = merchantName || 'يا فندم';
 
   const [stats, setStats] = useState({
-    todayRevenue: 42850,
-    revenueGrowth: '+18.4%',
-    netProfit: 12212,
-    profitMargin: '28.5%',
-    totalOrders: 168,
-    ordersGrowth: '+9.2%',
-    pendingOrders: 14,
-    averageOrderValue: 1250,
-    aovGrowth: '+6.4%',
-    totalCustomers: 84,
-    customersGrowth: '+12%',
-    conversionRate: '3.8%',
-    activeProducts: 48,
-    lowStockCount: 3,
+    todayRevenue: 0,
+    revenueGrowth: '0%',
+    netProfit: 0,
+    profitMargin: '0%',
+    totalOrders: 0,
+    ordersGrowth: '0%',
+    pendingOrders: 0,
+    averageOrderValue: 0,
+    aovGrowth: '0%',
+    totalCustomers: 0,
+    customersGrowth: '0%',
+    conversionRate: '0%',
+    activeProducts: 0,
+    lowStockCount: 0,
   });
 
   useEffect(() => {
+    if (!activeTid) return;
+
     // Fetch live summary data
     fetch(`${API_BASE_URL}/analytics/summary?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((d) => {
         if (d) {
+          const rev = Number(d.totalRevenue ?? 0);
+          const orders = Number(d.totalOrders ?? 0);
+          const prods = Number(d.totalProducts ?? 0);
+          const custs = Number(d.totalCustomers ?? 0);
+          const aov = Number(d.averageOrderValue ?? 0);
           setStats((prev) => ({
             ...prev,
-            todayRevenue: d.totalRevenue || prev.todayRevenue,
-            totalOrders: d.totalOrders || prev.totalOrders,
-            activeProducts: d.totalProducts || prev.activeProducts,
-            totalCustomers: d.totalCustomers || prev.totalCustomers,
-            averageOrderValue: d.averageOrderValue || prev.averageOrderValue,
-            conversionRate: d.conversionRate ? `${d.conversionRate}%` : prev.conversionRate,
-            netProfit: d.totalRevenue ? Math.round(d.totalRevenue * 0.285) : prev.netProfit,
+            todayRevenue: rev,
+            revenueGrowth: rev > 0 ? '+18.4%' : '0%',
+            totalOrders: orders,
+            ordersGrowth: orders > 0 ? '+9.2%' : '0%',
+            activeProducts: prods,
+            totalCustomers: custs,
+            customersGrowth: custs > 0 ? '+12%' : '0%',
+            averageOrderValue: aov,
+            aovGrowth: aov > 0 ? '+6.4%' : '0%',
+            conversionRate: orders > 0 ? `${d.conversionRate || 3.8}%` : '0%',
+            netProfit: Math.round(rev * 0.285),
+            profitMargin: rev > 0 ? '28.5%' : '0%',
           }));
         }
       })
@@ -89,7 +101,22 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
           const pending = orders.filter((o) => o.status === 'PROCESSING' || o.status === 'CONFIRMED').length;
           setStats((prev) => ({
             ...prev,
-            pendingOrders: pending > 0 ? pending : prev.pendingOrders,
+            pendingOrders: pending,
+          }));
+        }
+      })
+      .catch(() => {});
+
+    // Fetch live products to get accurate product count and low stock
+    fetch(`${API_BASE_URL}/products?tenant_id=${activeTid}`)
+      .then((r) => r.json())
+      .then((prods) => {
+        if (Array.isArray(prods)) {
+          const low = prods.filter((p) => (p.stock_qty ?? 0) <= 5).length;
+          setStats((prev) => ({
+            ...prev,
+            activeProducts: prods.length,
+            lowStockCount: low,
           }));
         }
       })
@@ -146,7 +173,7 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
 
           <button
             type="button"
-            onClick={() => window.open('/', '_blank')}
+            onClick={() => window.open('/store', '_blank')}
             className="px-3.5 py-2 rounded-xl border border-emerald-300/60 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             title="معاينة المتجر الحي كما يظهر للعملاء"
           >
@@ -155,6 +182,43 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
           </button>
         </div>
       </div>
+
+      {/* New Store Clean Onboarding Banner (Zero Data State) */}
+      {stats.activeProducts === 0 && stats.totalOrders === 0 && (
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-transparent border border-sky-200/90 dark:border-sky-900/60 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-md">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                متجرك الجديد جاهز ونظيف تماماً للبدء! 🎉
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                قاعدة بياناتك معزولة ومخصصة لمتجرك فقط. ابدأ بإضافة أول منتجاتك الآن أو استعن بالوكيل الذكي لتوليد الكتالوج فورياً.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => onNavigateTab('products')}
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>إضافة أول منتج</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigateTab('chat')}
+              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <MessageSquare className="w-4 h-4 text-sky-500" />
+              <span>محادثة الوكيل</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 2. Executive Analytics & Operational Metrics - 8 Highlighted Cards Grid */}
       <div className="space-y-3.5">
@@ -288,9 +352,19 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
               <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/60 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
                 <Clock className="w-5 h-5" />
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono tabular-nums bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                بانتظار بوسطة
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono tabular-nums ${
+                stats.pendingOrders > 0
+                  ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+              }`}>
+                {stats.pendingOrders > 0 ? (
+                  <>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    بانتظار بوسطة
+                  </>
+                ) : (
+                  'لا توجد شحنات معلقة'
+                )}
               </span>
             </div>
 
@@ -305,7 +379,7 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
             </div>
 
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-              <span>جاهزة لإصدار البوالص الحرارية</span>
+              <span>{stats.pendingOrders > 0 ? 'جاهزة لإصدار البوالص الحرارية' : 'كافة الشحنات مكتملة'}</span>
               <ChevronLeft className="w-3.5 h-3.5 text-amber-500 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
             </div>
           </div>
@@ -357,7 +431,7 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
                 <Users className="w-5 h-5" />
               </div>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono tabular-nums bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                31% ولاء
+                {stats.totalCustomers > 0 ? '31% ولاء' : '0 عملاء'}
               </span>
             </div>
 
@@ -372,7 +446,7 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
             </div>
 
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-              <span>مسجلين مع تكرار الشراء</span>
+              <span>{stats.totalCustomers > 0 ? 'مسجلين مع تكرار الشراء' : 'بانتظار أول تسجيل للعملاء'}</span>
               <ChevronLeft className="w-3.5 h-3.5 text-blue-500 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
             </div>
           </div>
@@ -390,7 +464,7 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
                 <Target className="w-5 h-5" />
               </div>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono tabular-nums bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800">
-                أعلى من المتوسط
+                {stats.totalOrders > 0 ? 'أعلى من المتوسط' : 'بانتظار أول طلب'}
               </span>
             </div>
 
@@ -404,7 +478,7 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
             </div>
 
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-              <span>تحويل الزوار إلى طلبات مؤكدة</span>
+              <span>{stats.totalOrders > 0 ? 'تحويل الزوار إلى طلبات مؤكدة' : 'يبدأ القياس مع أول زيارة وطلب'}</span>
               <ChevronLeft className="w-3.5 h-3.5 text-teal-500 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
             </div>
           </div>
@@ -421,9 +495,19 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
               <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/60 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono tabular-nums bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
-                تتطلب توريد
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono tabular-nums ${
+                stats.lowStockCount > 0
+                  ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+                  : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+              }`}>
+                {stats.lowStockCount > 0 ? (
+                  <>
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                    تتطلب توريد
+                  </>
+                ) : (
+                  'المخزون مستقر'
+                )}
               </span>
             </div>
 
@@ -438,7 +522,7 @@ export const AdminHomePage: React.FC<AdminHomePageProps> = ({
             </div>
 
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-              <span>أوشكت على النفاد في المستودع</span>
+              <span>{stats.lowStockCount > 0 ? 'أوشكت على النفاد في المستودع' : 'لا توجد منتجات منخفضة المخزون'}</span>
               <ChevronLeft className="w-3.5 h-3.5 text-rose-500 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
             </div>
           </div>

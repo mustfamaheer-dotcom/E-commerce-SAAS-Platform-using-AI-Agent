@@ -83,9 +83,10 @@ export const StoreSettingsPage: React.FC<StoreSettingsPageProps> = ({ tenantId }
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
 
   useEffect(() => {
+    if (!activeTid) return;
     fetch(`${API_BASE_URL}/stores/me?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {

@@ -23,16 +23,21 @@ export const AuditLogPage: React.FC<AuditLogPageProps> = ({ tenantId }) => {
   const [filterTool, setFilterTool] = useState<string>('ALL');
   const [selectedAction, setSelectedAction] = useState<AuditActionItem | null>(null);
 
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
 
   useEffect(() => {
+    if (!activeTid) {
+      setActions([]);
+      return;
+    }
     fetch(`${API_BASE_URL}/orders/audit-logs?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setActions(data);
+        else setActions([]);
       })
-      .catch(() => {});
-  }, [tenantId]);
+      .catch(() => setActions([]));
+  }, [activeTid]);
 
   const uniqueTools = Array.from(new Set(actions.map((a) => a.toolName)));
 

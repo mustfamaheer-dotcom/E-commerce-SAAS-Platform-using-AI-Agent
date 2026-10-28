@@ -1,39 +1,135 @@
 {
-  "timestamp": "2026-10-22T13:28:14Z",
-  "total_samples": 210,
+  "timestamp": "2026-10-27T10:35:37Z",
+  "backend": "llama-cpp",
+  "model_path": "models/qwen2.5-coder-3b-egyptian.Q4_K_M.gguf",
+  "live_db_executed": true,
+  "total_samples": 25,
   "valid_sql_rate_pct": 100.0,
-  "execution_accuracy_pct": 100.0,
-  "evaluation_duration_seconds": 0.22,
+  "execution_accuracy_pct": 12.0,
+  "evaluation_duration_seconds": 44.73,
   "target_standards": {
     "valid_sql_rate": ">= 95.0%",
     "execution_accuracy": ">= 85.0%"
   },
-  "status": "PASSED",
+  "status": "FAILED",
   "domain_breakdown": {
     "Production": {
-      "total": 45,
-      "valid": 45,
-      "accurate": 45
+      "total": 4,
+      "valid": 4,
+      "accurate": 0
     },
     "Purchasing": {
-      "total": 40,
-      "valid": 40,
-      "accurate": 40
+      "total": 5,
+      "valid": 5,
+      "accurate": 0
     },
     "HumanResources": {
-      "total": 37,
-      "valid": 37,
-      "accurate": 37
+      "total": 6,
+      "valid": 6,
+      "accurate": 0
     },
     "Sales": {
-      "total": 42,
-      "valid": 42,
-      "accurate": 42
+      "total": 3,
+      "valid": 3,
+      "accurate": 0
     },
     "Person": {
-      "total": 46,
-      "valid": 46,
-      "accurate": 46
+      "total": 7,
+      "valid": 7,
+      "accurate": 3
     }
-  }
+  },
+  "failures_count": 22,
+  "failures_sample": [
+    {
+      "id": "eg_aw_00369",
+      "domain": "Production",
+      "input_prompt": "أكتر 3 منتجات تكلفة تصنيعها عالية",
+      "gold_sql": "SELECT TOP 3 ProductID, Name, StandardCost, ListPrice FROM Production.Product WHERE StandardCost > 0 ORDER BY StandardCost DESC;",
+      "predicted_sql": "SELECT TOP 3 ProductID, Name, StandardCost\nFROM Production.Product\nORDER BY StandardCost DESC;",
+      "is_valid_sql": true,
+      "error": "Mismatch with gold result set"
+    },
+    {
+      "id": "eg_aw_00442",
+      "domain": "Purchasing",
+      "input_prompt": "مجموع تكاليف الشحن المدفوعة لموردي البضائع",
+      "gold_sql": "SELECT sm.Name AS ShippingMethod, SUM(poh.Freight) AS TotalFreight FROM Purchasing.PurchaseOrderHeader poh JOIN Purchasing.ShipMethod sm ON poh.ShipMethodID = sm.ShipMethodID GROUP BY sm.Name ORDER BY TotalFreight DESC;",
+      "predicted_sql": "SELECT SUM(Freight) AS TotalFreight\nFROM Purchasing.PurchaseOrderHeader;",
+      "is_valid_sql": true,
+      "error": "Mismatch with gold result set"
+    },
+    {
+      "id": "eg_aw_00713",
+      "domain": "HumanResources",
+      "input_prompt": "متوسط متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+      "gold_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+      "predicted_sql": "SELECT \n    AVG(Rate) AS AverageRate,\n    AVG(PayFrequency) AS AveragePayFrequency\nFROM \n    HumanResources.EmployeePayHistory\nWHERE \n    DepartmentID = (SELECT DepartmentID FROM HumanResources.Department WHERE Name = 'Sales');",
+      "is_valid_sql": true,
+      "error": "('42S22', \"[42S22] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Invalid column name 'DepartmentID'. (207) (SQLExecDirectW)\")"
+    },
+    {
+      "id": "eg_aw_00759",
+      "domain": "HumanResources",
+      "input_prompt": "احسب متوسط متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+      "gold_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+      "predicted_sql": "SELECT \n    AVG(Rate) AS AverageRate,\n    AVG(PayFrequency) AS AveragePayFrequency\nFROM \n    HumanResources.EmployeePayHistory\nWHERE \n    DepartmentID = (SELECT DepartmentID FROM HumanResources.Department WHERE Name = 'Sales');",
+      "is_valid_sql": true,
+      "error": "('42S22', \"[42S22] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Invalid column name 'DepartmentID'. (207) (SQLExecDirectW)\")"
+    },
+    {
+      "id": "eg_aw_00592",
+      "domain": "Purchasing",
+      "input_prompt": "أفضل 5 موردين بنشتري منهم بضاعة",
+      "gold_sql": "SELECT TOP 5 v.BusinessEntityID, v.Name, SUM(poh.TotalDue) AS TotalPurchases FROM Purchasing.Vendor v JOIN Purchasing.PurchaseOrderHeader poh ON v.BusinessEntityID = poh.VendorID GROUP BY v.BusinessEntityID, v.Name ORDER BY TotalPurchases DESC;",
+      "predicted_sql": "SELECT TOP 5 \n    v.Name AS VendorName,\n    SUM(p.TotalDue) AS TotalDue\nFROM \n    Purchasing.Vendor v\nJOIN \n    Purchasing.PurchaseOrderHeader p ON v.BusinessEntityID = p.VendorID\nGROUP BY \n    v.Name\nORDER BY \n    TotalDue DESC;",
+      "is_valid_sql": true,
+      "error": "Mismatch with gold result set"
+    },
+    {
+      "id": "eg_aw_00251",
+      "domain": "Production",
+      "input_prompt": "الأفريج بتاع أيام تصنيع المنتجات المتعلقة بـ خط الإنتاج",
+      "gold_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+      "predicted_sql": "SELECT \n    p.Name AS ProductName,\n    ps.Name AS ProductSubcategoryName,\n    DaysToManufacture\nFROM \n    Production.Product p\nJOIN \n    Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID\nJOIN \n    Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID\nWHERE \n    pc.Name = 'Egyptian Arabic';",
+      "is_valid_sql": true,
+      "error": "Mismatch with gold result set"
+    },
+    {
+      "id": "eg_aw_00032",
+      "domain": "Sales",
+      "input_prompt": "كم مرة الأوردرات الموجودة في اتعملت آخر شهر",
+      "gold_sql": "SELECT COUNT(SalesOrderID) AS TotalOrders FROM Sales.SalesOrderHeader WHERE MONTH(OrderDate) = 1 AND YEAR(OrderDate) = 2014;",
+      "predicted_sql": "SELECT COUNT(SalesOrderID) AS NumberOfOrders\nFROM Sales.SalesOrderHeader\nWHERE OrderDate = DATEADD(MONTH, -1, GETDATE());",
+      "is_valid_sql": true,
+      "error": "Mismatch with gold result set"
+    },
+    {
+      "id": "eg_aw_00510",
+      "domain": "Purchasing",
+      "input_prompt": "وريني عدد طلبات الشراء المتأخرة آخر سنة",
+      "gold_sql": "SELECT COUNT(PurchaseOrderID) AS DelayedOrders FROM Purchasing.PurchaseOrderHeader WHERE Status = 3 AND YEAR(OrderDate) = 2012;",
+      "predicted_sql": "SELECT COUNT(*) AS LateOrdersCount\nFROM Purchasing.PurchaseOrderHeader\nWHERE OrderDate < DATEADD(year, -1, GETDATE())\n  AND Status = 'Shipped';",
+      "is_valid_sql": true,
+      "error": "('22018', \"[22018] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Conversion failed when converting the varchar value 'Shipped' to data type tinyint. (245) (SQLExecDirectW)\")"
+    },
+    {
+      "id": "eg_aw_00366",
+      "domain": "Production",
+      "input_prompt": "الأفريج بتاع أيام تصنيع المنتجات اللي في خط الإنتاج",
+      "gold_sql": "SELECT pc.Name AS CategoryName, AVG(p.DaysToManufacture) AS AvgDays FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID GROUP BY pc.Name;",
+      "predicted_sql": "SELECT p.ProductID, p.Name\nFROM Production.Product p\nJOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID\nJOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID\nWHERE p.DaysToManufacture <= 5;",
+      "is_valid_sql": true,
+      "error": "Mismatch with gold result set"
+    },
+    {
+      "id": "eg_aw_00676",
+      "domain": "HumanResources",
+      "input_prompt": "متوسط متوسط المرتب ومعدل الأجر في إدارة المبيعات",
+      "gold_sql": "SELECT d.Name, AVG(eph.Rate) AS AverageHourlyRate FROM HumanResources.EmployeePayHistory eph JOIN HumanResources.EmployeeDepartmentHistory edh ON eph.BusinessEntityID = edh.BusinessEntityID JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID WHERE edh.EndDate IS NULL GROUP BY d.Name;",
+      "predicted_sql": "SELECT \n    AVG(HRP.Rate) AS AverageRate,\n    AVG(HRP.Rate * HRP.PayFrequency) AS AveragePay\nFROM \n    HumanResources.EmployeePayHistory HRP\nJOIN \n    HumanResources.Department HD ON HRP.BusinessEntityID = HD.BusinessEntityID\nWHERE \n    HD.Name = 'Sales';",
+      "is_valid_sql": true,
+      "error": "('42S22', \"[42S22] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Invalid column name 'BusinessEntityID'. (207) (SQLExecDirectW)\")"
+    }
+  ]
 }

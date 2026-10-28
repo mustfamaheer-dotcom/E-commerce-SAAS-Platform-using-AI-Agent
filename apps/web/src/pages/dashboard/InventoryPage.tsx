@@ -9,21 +9,29 @@ interface InventoryPageProps {
 
 export const InventoryPage: React.FC<InventoryPageProps> = ({ tenantId }) => {
   const [items, setItems] = useState<any[]>([]);
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
 
   const loadInventory = async () => {
+    if (!activeTid) {
+      setItems([]);
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE_URL}/inventory?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
-        setItems(data);
+        setItems(Array.isArray(data) ? data : []);
+      } else {
+        setItems([]);
       }
-    } catch (_) {}
+    } catch (_) {
+      setItems([]);
+    }
   };
 
   useEffect(() => {
     loadInventory();
-  }, [tenantId]);
+  }, [activeTid]);
 
   const handleAdjustStock = async (productId: string, currentStock: number, delta: number) => {
     const nextStock = Math.max(0, currentStock + delta);

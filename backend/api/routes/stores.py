@@ -313,12 +313,7 @@ def create_store(payload: StoreCreatePayload, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_tenant)
 
-    # Auto-seed the newly created tenant from demo catalog & ERP transactions
-    try:
-        from backend.services.tenant_seeder import seed_tenant_from_demo
-        seed_tenant_from_demo(db, target_tenant_id=tenant_id, source_tenant_id="tenant-moustafa-tech")
-    except Exception as exc:
-        print(f"Warning: Auto-seeding tenant '{tenant_id}' failed: {exc}")
+    # Newly created stores start clean with zero products and zero orders
 
     return {
         "status": "success",

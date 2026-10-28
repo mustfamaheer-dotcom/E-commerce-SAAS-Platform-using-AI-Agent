@@ -15,21 +15,29 @@ export const CouponsPage: React.FC<CouponsPageProps> = ({ tenantId }) => {
   const [minOrder, setMinOrder] = useState('0');
   const [isAdding, setIsAdding] = useState(false);
 
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
 
   const loadCoupons = async () => {
+    if (!activeTid) {
+      setCoupons([]);
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE_URL}/coupons?tenant_id=${activeTid}`);
       if (res.ok) {
         const data = await res.json();
-        setCoupons(data);
+        setCoupons(Array.isArray(data) ? data : []);
+      } else {
+        setCoupons([]);
       }
-    } catch (_) {}
+    } catch (_) {
+      setCoupons([]);
+    }
   };
 
   useEffect(() => {
     loadCoupons();
-  }, [tenantId]);
+  }, [activeTid]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

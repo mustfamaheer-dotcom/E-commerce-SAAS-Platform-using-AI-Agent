@@ -10,16 +10,21 @@ interface CustomersPageProps {
 
 export const CustomersPage: React.FC<CustomersPageProps> = ({ tenantId }) => {
   const [customers, setCustomers] = useState<any[]>([]);
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
 
   useEffect(() => {
+    if (!activeTid) {
+      setCustomers([]);
+      return;
+    }
     fetch(`${API_BASE_URL}/customers?tenant_id=${activeTid}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setCustomers(data);
+        else setCustomers([]);
       })
-      .catch(() => {});
-  }, [tenantId]);
+      .catch(() => setCustomers([]));
+  }, [activeTid]);
 
   return (
     <div dir="rtl" className="space-y-6 font-sans text-slate-800 dark:text-slate-100">

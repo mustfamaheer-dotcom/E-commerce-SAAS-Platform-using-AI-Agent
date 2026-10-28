@@ -27,9 +27,14 @@ export const ProductsGridPage: React.FC<ProductsGridPageProps> = ({ tenantId }) 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
 
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
 
   const loadData = async () => {
+    if (!activeTid) {
+      setProducts([]);
+      setCategories([]);
+      return;
+    }
     try {
       const [prodData, catData] = await Promise.all([
         apiFetch(`/products?tenant_id=${activeTid}`),
@@ -37,16 +42,23 @@ export const ProductsGridPage: React.FC<ProductsGridPageProps> = ({ tenantId }) 
       ]);
       if (Array.isArray(prodData)) {
         setProducts(prodData);
+      } else {
+        setProducts([]);
       }
       if (Array.isArray(catData)) {
         setCategories(catData);
+      } else {
+        setCategories([]);
       }
-    } catch (_) {}
+    } catch (_) {
+      setProducts([]);
+      setCategories([]);
+    }
   };
 
   useEffect(() => {
     loadData();
-  }, [tenantId]);
+  }, [activeTid]);
 
   const handleSaveProduct = async (formData: any) => {
     const isEdit = Boolean(editingProduct);

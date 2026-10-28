@@ -89,6 +89,15 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
             <ArrowRight className="w-4 h-4" />
             <span>العودة للرئيسية</span>
           </button>
+
+          <div className="flex items-center gap-3">
+            <img
+              src="/TransparentLogo.png"
+              alt="TalkShow Logo"
+              className="h-10 w-auto object-contain drop-shadow-sm"
+            />
+            <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-slate-100">TalkShow</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -121,7 +130,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
           <div className="hidden lg:flex lg:col-span-5 flex-col space-y-6 text-right">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 w-fit">
               <Sparkles className="w-4 h-4" />
-              <span>انضم إلى مجتمع تجار تيك زون</span>
+              <span>انضم إلى مجتمع تجار TalkShow</span>
             </div>
 
             <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 leading-tight">

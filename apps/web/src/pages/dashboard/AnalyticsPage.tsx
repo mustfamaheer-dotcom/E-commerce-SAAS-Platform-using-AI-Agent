@@ -161,7 +161,7 @@ const renderVisualChatMessage = (content: string, isAssistant: boolean) => {
 };
 
 export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ tenantId }) => {
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
   
   let themeMode: 'dark' | 'light' = 'dark';
   try {
@@ -277,7 +277,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ tenantId }) => {
     setThinkingStep('تحليل استفسارك وفهم المؤشرات المطلوبة...');
 
     const stepTimer1 = setTimeout(() => {
-      setThinkingStep('فحص 2,833 طلباً وسجلات الإيرادات الحية (103.5M ج.م)...');
+      setThinkingStep('فحص سجلات المتجر وتدفق العمليات الحية...');
     }, 700);
 
     const stepTimer2 = setTimeout(() => {

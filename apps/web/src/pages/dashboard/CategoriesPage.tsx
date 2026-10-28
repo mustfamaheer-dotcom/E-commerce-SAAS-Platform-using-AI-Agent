@@ -32,9 +32,14 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({ tenantId }) => {
   const [expandedCatId, setExpandedCatId] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
 
   const loadData = async () => {
+    if (!activeTid) {
+      setCategories([]);
+      setProducts([]);
+      return;
+    }
     try {
       const [catRes, prodRes] = await Promise.all([
         fetch(`${API_BASE_URL}/categories?tenant_id=${activeTid}`),
@@ -42,18 +47,25 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({ tenantId }) => {
       ]);
       if (catRes.ok) {
         const catData = await catRes.json();
-        setCategories(catData);
+        setCategories(Array.isArray(catData) ? catData : []);
+      } else {
+        setCategories([]);
       }
       if (prodRes.ok) {
         const prodData = await prodRes.json();
-        setProducts(prodData);
+        setProducts(Array.isArray(prodData) ? prodData : []);
+      } else {
+        setProducts([]);
       }
-    } catch (_) {}
+    } catch (_) {
+      setCategories([]);
+      setProducts([]);
+    }
   };
 
   useEffect(() => {
     loadData();
-  }, [tenantId]);
+  }, [activeTid]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

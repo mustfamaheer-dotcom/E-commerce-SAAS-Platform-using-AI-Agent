@@ -239,7 +239,8 @@ const MainAppContent: React.FC = () => {
   const [liveSettings, setLiveSettings] = useState<any>(null);
 
   useEffect(() => {
-    const tid = activeStore?.id || user?.tenantId || 'tenant-moustafa-tech';
+    const tid = activeStore?.id || user?.tenantId;
+    if (!tid) return;
     fetch(`${API_BASE_URL}/stores/me?tenant_id=${tid}`)
       .then((r) => r.json())
       .then((data) => {
@@ -314,7 +315,11 @@ const MainAppContent: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
-    const tid = activeStore?.id || user?.tenantId || 'tenant-moustafa-tech';
+    const tid = activeStore?.id || user?.tenantId;
+    if (!tid) {
+      setNavBadges({ products: '0', orders: '0', customers: '0', analytics: '0' });
+      return;
+    }
     fetch(`${API_BASE_URL}/analytics/summary?tenant_id=${tid}`)
       .then((r) => r.json())
       .then((d) => {
@@ -339,14 +344,39 @@ const MainAppContent: React.FC = () => {
   const handleAuthSuccess = (account: UserAccount) => {
     setUser(account);
     setCurrentUser(account);
+    localStorage.removeItem('techzone_active_store');
+    if (account.tenantId) {
+      localStorage.setItem('techzone_active_store_id', account.tenantId);
+      const newStore: ProvisionedStore = {
+        id: account.tenantId,
+        slug: account.tenantId.replace('tenant-', '').replace('tenant_', ''),
+        name: account.storeName || 'متجري الجديد',
+        category: account.businessType || 'تجارة عامة',
+        currency: 'EGP',
+        themeMode: 'dark',
+        createdAt: new Date().toISOString(),
+        adminUrl: '/swm-admin',
+        storefrontUrl: '/store',
+      };
+      setActiveStore(newStore);
+      setMerchantStores([newStore]);
+      localStorage.setItem('techzone_active_store', JSON.stringify(newStore));
+    } else {
+      setActiveStore(null);
+      setMerchantStores([]);
+    }
+    setActiveTab('home');
     navigate('/swm-admin');
   };
 
   const handleLogout = () => {
     setUser(null);
     setCurrentUser(null);
+    setActiveStore(null);
+    setMerchantStores([]);
     localStorage.removeItem('techzone_active_tab');
     localStorage.removeItem('techzone_active_store');
+    localStorage.removeItem('techzone_active_store_id');
     navigate('/login');
   };
 
@@ -364,7 +394,7 @@ const MainAppContent: React.FC = () => {
   const handleOpenStorefront = (storeObj: ProvisionedStore) => {
     setActiveStore(storeObj);
     setStorefrontSubView('home');
-    navigate('/');
+    navigate('/store');
   };
 
   // ==============================================================
@@ -373,50 +403,13 @@ const MainAppContent: React.FC = () => {
   // ==============================================================
   const renderStorefront = () => (
     <div dir="rtl" className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 font-sans flex flex-col selection:bg-sky-500 selection:text-white">
-      {/* Global Action Bar: لوحة التحكم (Hub) */}
-      <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => navigate('/hub')}
-          className="group flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900/95 hover:bg-black dark:bg-white/95 dark:hover:bg-white text-white dark:text-slate-950 font-bold text-xs shadow-lg shadow-black/15 backdrop-blur-md transition-all hover:scale-105 active:scale-95 border border-white/10 dark:border-slate-800 cursor-pointer"
-          title="الانتقال إلى لوحة التحكم الرئيسية (Hub)"
-        >
-          <Store className="w-4 h-4 text-sky-400 dark:text-sky-600 transition-transform group-hover:scale-110" />
-          <span>لوحة التحكم (Hub)</span>
-        </button>
-
-        {storefrontSubView !== 'home' && (
-          <button
-            type="button"
-            onClick={() => setStorefrontSubView('home')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 font-bold text-xs shadow-md border border-slate-200 dark:border-slate-800 backdrop-blur-md hover:scale-105 transition-all cursor-pointer"
-          >
-            <Home className="w-3.5 h-3.5 text-sky-500" />
-            <span>المتجر</span>
-          </button>
-        )}
-
-        {totalCartCount > 0 && (
-          <button
-            type="button"
-            onClick={() => setIsMiniCartOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white font-bold text-xs shadow-lg shadow-black/10 backdrop-blur-md hover:scale-105 active:scale-95 transition-all border border-slate-200 dark:border-slate-800 cursor-pointer"
-            title="عرض سلة المشتريات"
-          >
-            <ShoppingBag className="w-4 h-4 text-emerald-500" />
-            <span>السلة ({totalCartCount})</span>
-          </button>
-        )}
-
-        <button
-          type="button"
-          onClick={toggleMode}
-          className="p-2 rounded-xl bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-md backdrop-blur-md transition-all hover:scale-105 cursor-pointer"
-          title={theme.mode === 'dark' ? 'التحويل للوضع النهاري' : 'التحويل للوضع الليلي'}
-        >
-          {theme.mode === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-        </button>
-      </div>
+      {/* Spatial Minimalist Floating Island Navigation */}
+      <FloatingIslandNavbar
+        storeName={activeStore?.name || user?.storeName || 'المتجر الإلكتروني'}
+        activeSubView={storefrontSubView}
+        onNavigateSubView={(view) => setStorefrontSubView(view)}
+        onOpenMiniCart={() => setIsMiniCartOpen(true)}
+      />
 
       {/* Slide-Over Frosted Glass Mini-Cart Drawer */}
       <MiniCartDrawer
@@ -431,7 +424,7 @@ const MainAppContent: React.FC = () => {
       <main className="flex-1 pb-12">
         {storefrontSubView === 'home' && (
           <StorefrontHomePage
-            tenantId={activeStore?.id}
+            tenantId={activeStore?.id || user?.tenantId}
             onOpenCart={() => setStorefrontSubView('cart')}
             onOpenCheckout={() => setStorefrontSubView('checkout')}
             onOpenMiniCart={() => setIsMiniCartOpen(true)}
@@ -443,7 +436,7 @@ const MainAppContent: React.FC = () => {
             onContinueShopping={() => setStorefrontSubView('home')}
           />
         )}
-        {storefrontSubView === 'checkout' && <CheckoutPage tenantId={activeStore?.id} />}
+        {storefrontSubView === 'checkout' && <CheckoutPage tenantId={activeStore?.id || user?.tenantId} />}
       </main>
 
       {/* Customer AI Shopping Assistant */}
@@ -476,11 +469,12 @@ const MainAppContent: React.FC = () => {
         <LoginPage
           onSuccess={handleAuthSuccess}
           onNavigateToRegister={() => navigate('/register')}
-          onNavigateToHome={() => navigate('/')}
+          onNavigateToHome={() => navigate('/landing')}
         />
       );
     }
 
+    const currentTenantId = activeStore?.id || user?.tenantId;
     const currentTabLabel = NAV_CATEGORIES.flatMap((c) => c.items).find((i) => i.key === activeTab)?.label_ar || 'لوحة التحكم';
 
     return (
@@ -495,7 +489,7 @@ const MainAppContent: React.FC = () => {
           onNavigateTab={(tab) => setActiveTab(tab)}
           onToggleTheme={toggleMode}
           isDark={theme.mode === 'dark'}
-          onOpenStorefront={() => window.open('/', '_blank')}
+          onOpenStorefront={() => window.open('/store', '_blank')}
           onNavigateHub={() => navigate('/hub')}
         />
 
@@ -506,11 +500,13 @@ const MainAppContent: React.FC = () => {
           } shrink-0 bg-[#0F172A] border-l border-slate-800/90 flex flex-col transition-all duration-200 z-30 select-none shadow-md h-full overflow-hidden text-slate-300`}
         >
           {/* Sidebar Header: Shows ONLY this store */}
-          <div className="h-12 px-3 border-b border-slate-800/80 flex items-center justify-between bg-[#0B132B]/60">
-            <div className="flex items-center space-x-2 space-x-reverse overflow-hidden">
-              <div className="w-6 h-6 rounded bg-slate-800 border border-slate-700 text-sky-400 flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs">
-                {activeStore?.name?.charAt(0) || 'M'}
-              </div>
+          <div className="h-13 px-3 border-b border-slate-800/80 flex items-center justify-between bg-[#0B132B]/60">
+            <div className="flex items-center space-x-2.5 space-x-reverse overflow-hidden">
+              <img
+                src="/TransparentLogo.png"
+                alt="TalkShow Logo"
+                className="h-8 w-auto max-w-[36px] object-contain shrink-0 drop-shadow-sm"
+              />
               {isSidebarOpen && (
                 <div className="truncate">
                   {merchantStores.length > 1 ? (
@@ -656,7 +652,7 @@ const MainAppContent: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  window.open('/', '_blank');
+                  window.open('/store', '_blank');
                 }}
                 className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-xs font-medium flex items-center gap-1.5 shadow-2xs"
                 title="معاينة كيف يظهر متجرك للعملاء والمشترين"
@@ -702,7 +698,7 @@ const MainAppContent: React.FC = () => {
           >
             {activeTab === 'home' && (
               <AdminHomePage
-                tenantId={activeStore?.id || user?.tenantId}
+                tenantId={currentTenantId}
                 storeName={activeStore?.name || user?.storeName}
                 merchantName={user?.name}
                 onNavigateTab={(tab) => setActiveTab(tab)}
@@ -710,28 +706,28 @@ const MainAppContent: React.FC = () => {
             )}
             {activeTab === 'chat' && (
               <ChatCommandCenter
-                tenantId={activeStore?.id || user?.tenantId}
+                tenantId={currentTenantId}
                 merchantName={user?.name}
                 storeName={activeStore?.name || user?.storeName}
               />
             )}
             {activeTab === 'ecommerce' && (
               <EcommerceStudioPage
-                tenantId={activeStore?.id}
+                tenantId={currentTenantId}
                 onOpenStorefront={() => {
-                  window.open('/', '_blank');
+                  window.open('/store', '_blank');
                 }}
               />
             )}
-            {activeTab === 'products' && <ProductsGridPage tenantId={activeStore?.id} />}
-            {activeTab === 'categories' && <CategoriesPage tenantId={activeStore?.id} />}
-            {activeTab === 'orders' && <OrdersPage tenantId={activeStore?.id} />}
-            {activeTab === 'inventory' && <InventoryPage tenantId={activeStore?.id} />}
-            {activeTab === 'customers' && <CustomersPage tenantId={activeStore?.id} />}
-            {activeTab === 'coupons' && <CouponsPage tenantId={activeStore?.id} />}
-            {activeTab === 'analytics' && <AnalyticsPage tenantId={activeStore?.id} />}
-            {activeTab === 'settings' && <StoreSettingsPage tenantId={activeStore?.id} />}
-            {activeTab === 'audit' && <AuditLogPage tenantId={activeStore?.id} />}
+            {activeTab === 'products' && <ProductsGridPage tenantId={currentTenantId} />}
+            {activeTab === 'categories' && <CategoriesPage tenantId={currentTenantId} />}
+            {activeTab === 'orders' && <OrdersPage tenantId={currentTenantId} />}
+            {activeTab === 'inventory' && <InventoryPage tenantId={currentTenantId} />}
+            {activeTab === 'customers' && <CustomersPage tenantId={currentTenantId} />}
+            {activeTab === 'coupons' && <CouponsPage tenantId={currentTenantId} />}
+            {activeTab === 'analytics' && <AnalyticsPage tenantId={currentTenantId} />}
+            {activeTab === 'settings' && <StoreSettingsPage tenantId={currentTenantId} />}
+            {activeTab === 'audit' && <AuditLogPage tenantId={currentTenantId} />}
           </main>
         </div>
       </div>
@@ -740,24 +736,38 @@ const MainAppContent: React.FC = () => {
 
   return (
     <Routes>
-      {/* 1. Customer Storefront (Public Main Route) */}
-      <Route path="/" element={renderStorefront()} />
+      {/* 1. Default Route -> Platform Landing Page (/landing) */}
+      <Route path="/" element={<Navigate to="/landing" replace />} />
+      <Route
+        path="/landing"
+        element={
+          <LandingPage
+            onStartBuilding={() => navigate('/register')}
+            onOpenAuth={(mode) => navigate(mode === 'register' ? '/register' : '/login')}
+            theme={theme.mode}
+            onToggleTheme={toggleMode}
+          />
+        }
+      />
+
+      {/* 2. Customer Storefront (Public Store Routes) */}
+      <Route path="/store" element={renderStorefront()} />
       <Route path="/store/*" element={renderStorefront()} />
       <Route path="/cart" element={renderStorefront()} />
       <Route path="/checkout" element={renderStorefront()} />
 
-      {/* 2. Merchant ERP Admin Route */}
+      {/* 3. Merchant ERP Admin Route */}
       <Route path="/swm-admin/*" element={renderAdminDashboard()} />
       <Route path="/admin/*" element={<Navigate to="/swm-admin" replace />} />
 
-      {/* 3. Auth & Onboarding Routes */}
+      {/* 4. Auth & Onboarding Routes */}
       <Route
         path="/login"
         element={
           <LoginPage
             onSuccess={handleAuthSuccess}
             onNavigateToRegister={() => navigate('/register')}
-            onNavigateToHome={() => navigate('/')}
+            onNavigateToHome={() => navigate('/landing')}
           />
         }
       />
@@ -767,7 +777,7 @@ const MainAppContent: React.FC = () => {
           <RegisterPage
             onSuccess={handleAuthSuccess}
             onNavigateToLogin={() => navigate('/login')}
-            onNavigateToHome={() => navigate('/')}
+            onNavigateToHome={() => navigate('/landing')}
           />
         }
       />
@@ -808,20 +818,8 @@ const MainAppContent: React.FC = () => {
           )
         }
       />
-      <Route
-        path="/landing"
-        element={
-          <LandingPage
-            onStartBuilding={() => navigate('/register')}
-            onOpenAuth={(mode) => navigate(mode === 'register' ? '/register' : '/login')}
-            theme={theme.mode}
-            onToggleTheme={toggleMode}
-          />
-        }
-      />
-
-      {/* Fallback to Customer Storefront */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Fallback to Platform Landing Page */}
+      <Route path="*" element={<Navigate to="/landing" replace />} />
     </Routes>
   );
 };

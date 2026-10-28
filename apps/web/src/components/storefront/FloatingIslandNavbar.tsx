@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { RootState } from '../../store';
 import { useAppTheme } from '../../contexts/ThemeContext';
+import { API_BASE_URL } from '../../services/api';
 
 interface FloatingIslandNavbarProps {
   storeName?: string;
@@ -35,7 +36,7 @@ interface FloatingIslandNavbarProps {
 }
 
 export const FloatingIslandNavbar: React.FC<FloatingIslandNavbarProps> = ({
-  storeName: initialStoreName = 'تيك زون',
+  storeName: initialStoreName = 'TalkShow',
   activeSubView,
   onNavigateSubView,
   onOpenMiniCart,
@@ -53,6 +54,29 @@ export const FloatingIslandNavbar: React.FC<FloatingIslandNavbarProps> = ({
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isBranchesOpen, setIsBranchesOpen] = useState(false);
   const [isCartPopping, setIsCartPopping] = useState(false);
+  const [internalCategories, setInternalCategories] = useState<any[]>([]);
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+
+  useEffect(() => {
+    setLocalSearch(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      setInternalCategories(categories);
+      return;
+    }
+    const tid = localStorage.getItem('techzone_active_store_id') || '';
+    if (!tid) return;
+    fetch(`${API_BASE_URL}/categories?tenant_id=${tid}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setInternalCategories(data);
+      })
+      .catch(() => {});
+  }, [categories]);
+
+  const effectiveCategories = categories.length > 0 ? categories : internalCategories;
 
   useEffect(() => {
     setCurrentStoreName(initialStoreName);
@@ -87,8 +111,8 @@ export const FloatingIslandNavbar: React.FC<FloatingIslandNavbarProps> = ({
   const activeCategoryName =
     selectedCategory === 'all'
       ? 'جميع الأقسام'
-      : categories.find((c) => c.id === selectedCategory || c.slug === selectedCategory)?.name ||
-        categories.find((c) => c.id === selectedCategory || c.slug === selectedCategory)?.name_ar ||
+      : effectiveCategories.find((c) => c.id === selectedCategory || c.slug === selectedCategory)?.name ||
+        effectiveCategories.find((c) => c.id === selectedCategory || c.slug === selectedCategory)?.name_ar ||
         'الأقسام';
 
   const handleGoHome = () => {
@@ -131,12 +155,11 @@ export const FloatingIslandNavbar: React.FC<FloatingIslandNavbarProps> = ({
                     className="w-9 h-9 rounded-full object-cover shadow-md border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform"
                   />
                 ) : (
-                  <div
-                    style={{ backgroundColor: primaryColor }}
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                  </div>
+                  <img
+                    src="/TransparentLogo.png"
+                    alt={currentStoreName}
+                    className="h-9 w-auto max-w-[38px] object-contain group-hover:scale-105 transition-transform drop-shadow-sm"
+                  />
                 )}
                 <div className="hidden sm:block text-right">
                   <span className="font-extrabold text-sm text-slate-900 dark:text-slate-100 block leading-tight tracking-tight">
@@ -158,16 +181,23 @@ export const FloatingIslandNavbar: React.FC<FloatingIslandNavbarProps> = ({
                   <input
                     type="text"
                     autoFocus
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange?.(e.target.value)}
+                    value={localSearch}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setLocalSearch(val);
+                      onSearchChange?.(val);
+                      window.dispatchEvent(new CustomEvent('techzone:search-query', { detail: { query: val } }));
+                    }}
                     placeholder="ابحث بالاسم أو الكود..."
                     className="bg-transparent border-none text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none w-full text-right"
                   />
                   <button
                     type="button"
                     onClick={() => {
+                      setLocalSearch('');
                       setIsSearchExpanded(false);
                       onSearchChange?.('');
+                      window.dispatchEvent(new CustomEvent('techzone:search-query', { detail: { query: '' } }));
                     }}
                     className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   >
@@ -211,7 +241,7 @@ export const FloatingIslandNavbar: React.FC<FloatingIslandNavbarProps> = ({
                   </button>
 
                   {/* Categories Dropdown in Navigation */}
-                  {categories && categories.length > 0 && (
+                  {effectiveCategories && effectiveCategories.length > 0 && (
                     <div className="relative">
                       <button
                         type="button"
@@ -242,7 +272,7 @@ export const FloatingIslandNavbar: React.FC<FloatingIslandNavbarProps> = ({
                           >
                             جميع الأقسام
                           </button>
-                          {categories.map((c) => (
+                          {effectiveCategories.map((c) => (
                             <button
                               key={c.id}
                               type="button"
@@ -285,16 +315,14 @@ export const FloatingIslandNavbar: React.FC<FloatingIslandNavbarProps> = ({
                   </button>
 
                   {/* Quick Search Trigger */}
-                  {onSearchChange && (
-                    <button
-                      type="button"
-                      onClick={() => setIsSearchExpanded(true)}
-                      className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 flex items-center gap-1 transition-colors shrink-0"
-                      title="بحث في الكتالوج"
-                    >
-                      <Search className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsSearchExpanded(true)}
+                    className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 flex items-center gap-1 transition-colors shrink-0"
+                    title="بحث في الكتالوج"
+                  >
+                    <Search className="w-3.5 h-3.5" />
+                  </button>
                 </>
               )}
             </div>

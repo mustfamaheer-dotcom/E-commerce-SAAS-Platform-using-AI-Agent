@@ -49,7 +49,7 @@ export const ChatCommandCenter: React.FC<ChatCommandCenterProps> = ({
   merchantName,
   storeName,
 }) => {
-  const activeTid = tenantId || 'tenant-moustafa-tech';
+  const activeTid = tenantId || localStorage.getItem('techzone_active_store_id') || '';
   const displayName = merchantName || 'يا فندم';
   const displayStore = storeName ? `متجر "${storeName}"` : 'متجرك الخاص';
 

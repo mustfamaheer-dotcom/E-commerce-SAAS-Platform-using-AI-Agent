@@ -38,7 +38,18 @@ const env = {
 
 const child = spawn(
   pythonExe,
-  ['-m', 'uvicorn', 'backend.main:app', '--host', '0.0.0.0', '--port', env.PORT, '--reload'],
+  [
+    '-m',
+    'uvicorn',
+    'backend.main:app',
+    '--host',
+    '0.0.0.0',
+    '--port',
+    env.PORT,
+    '--reload',
+    '--reload-dir',
+    path.join(rootDir, 'backend'),
+  ],
   {
     cwd: rootDir,
     stdio: 'inherit',
