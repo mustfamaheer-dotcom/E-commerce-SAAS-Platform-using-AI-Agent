@@ -3,6 +3,8 @@
 LangGraph StateGraph for Secure Text-to-SQL Execution with Self-Correction Loop.
 """
 from typing import Optional, List, Dict, Any
+from typing_extensions import Annotated
+from langgraph.graph.message import AnyMessage, add_messages
 from pydantic import BaseModel, Field
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.graph import StateGraph, MessagesState, START, END

@@ -1,0 +1,2882 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TalkShop — Graduation Defense Presentation Deck 2026</title>
+  <!-- Google Fonts: Cairo (Arabic), Plus Jakarta Sans & Inter (English), JetBrains Mono (Code/Metrics) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- MathJax for crisp LaTeX formulas -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pearl: '#F8FAFC',
+            skyTech: '#0284C7',
+            skyLight: '#0EA5E9',
+            aiViolet: '#6366F1',
+            aiPurple: '#7C3AED',
+            finEmerald: '#059669',
+            finLight: '#10B981',
+            warnAmber: '#D97706',
+            dangerRose: '#E11D48',
+            slateDark: '#0F172A',
+            slateBody: '#475569',
+            borderFine: '#E2E8F0'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+            arabic: ['"Cairo"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #E2E8F0;
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      color: #0F172A;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 16:9 Fixed Resolution Slide Canvas (1600 x 900 scaled dynamically) */
+    #deck-viewport {
+      position: relative;
+      width: 1600px;
+      height: 900px;
+      background: #F8FAFC;
+      border-radius: 18px;
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(226, 232, 240, 0.9);
+      overflow: hidden;
+      transform-origin: center center;
+      transition: transform 0.2s ease;
+    }
+
+    /* Subtle Ambient Architectural Grid Background */
+    .bg-tech-grid {
+      background-color: #F8FAFC;
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(2, 132, 199, 0.05) 0px, transparent 45%),
+        radial-gradient(at 90% 15%, rgba(99, 102, 241, 0.05) 0px, transparent 45%),
+        radial-gradient(at 50% 90%, rgba(5, 150, 105, 0.04) 0px, transparent 45%),
+        linear-gradient(to right, rgba(226, 232, 240, 0.45) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(226, 232, 240, 0.45) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 1600px;
+      height: 900px;
+      padding: 44px 60px 68px 60px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+      z-index: 10;
+    }
+
+    /* Bento Cards */
+    .bento-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.04), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
+      transition: all 0.2s ease;
+    }
+    .bento-card:hover {
+      border-color: #CBD5E1;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.07);
+    }
+
+    /* Arabic Text Helper */
+    .ar-text {
+      font-family: 'Cairo', sans-serif;
+      direction: rtl;
+    }
+
+    /* Speaker Notes Drawer */
+    #speaker-drawer {
+      position: absolute;
+      bottom: 54px;
+      left: 60px;
+      right: 60px;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(16px);
+      border: 1px solid #CBD5E1;
+      border-top: 4px solid #0284C7;
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 -20px 40px rgba(15, 23, 42, 0.12);
+      z-index: 45;
+      transform: translateY(115%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 20px 28px;
+    }
+    #speaker-drawer.open {
+      transform: translateY(0);
+    }
+
+    /* Slide Overview Modal */
+    #grid-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(248, 250, 252, 0.95);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      padding: 40px 60px;
+      overflow-y: auto;
+    }
+    #grid-modal.open {
+      display: flex;
+    }
+
+    /* Print Options Modal */
+    #print-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #print-modal.open {
+      display: flex;
+    }
+
+    /* Print Script Card & Booklet (Screen Mode) */
+    .print-script-card {
+      display: none !important;
+    }
+    #script-booklet-container {
+      display: none !important;
+    }
+
+    /* Print / PDF Landscape Rules (Strict 1-Slide-Per-Page) */
+    @page {
+      size: 16in 9in;
+      margin: 0;
+    }
+    @media print {
+      *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-sizing: border-box !important;
+      }
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #F8FAFC !important;
+        width: 16in !important;
+        height: auto !important;
+        overflow: visible !important;
+        display: block !important;
+      }
+      #deck-viewport {
+        position: static !important;
+        width: 16in !important;
+        height: auto !important;
+        transform: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+        background: transparent !important;
+      }
+      .slide {
+        position: relative !important;
+        inset: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        width: 16in !important;
+        height: 9in !important;
+        min-height: 9in !important;
+        max-height: 9in !important;
+        box-sizing: border-box !important;
+        padding: 0.42in 0.62in !important;
+        page-break-before: auto !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        opacity: 1 !important;
+        transform: none !important;
+        overflow: hidden !important;
+        background: #F8FAFC !important;
+        background-image: 
+          radial-gradient(at 10% 10%, rgba(2, 132, 199, 0.05) 0px, transparent 45%),
+          radial-gradient(at 90% 15%, rgba(99, 102, 241, 0.05) 0px, transparent 45%),
+          radial-gradient(at 50% 90%, rgba(5, 150, 105, 0.04) 0px, transparent 45%),
+          linear-gradient(to right, rgba(226, 232, 240, 0.45) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(226, 232, 240, 0.45) 1px, transparent 1px) !important;
+        background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px !important;
+      }
+      .slide:last-of-type {
+        page-break-after: auto !important;
+        break-after: auto !important;
+      }
+      #bottom-hud, #speaker-drawer, #grid-modal, #print-modal {
+        display: none !important;
+      }
+
+      /* Print Mode: With Script */
+      body.print-mode-with-script .slide {
+        padding: 0.30in 0.58in 0.22in 0.58in !important;
+        justify-content: flex-start !important;
+        gap: 0.12in !important;
+      }
+      body.print-mode-with-script .slide-inner {
+        transform: scale(0.80) !important;
+        transform-origin: top center !important;
+        width: 100% !important;
+        height: 5.65in !important;
+        max-height: 5.65in !important;
+        overflow: hidden !important;
+        margin-bottom: -0.85in !important;
+      }
+      body.print-mode-with-script .print-script-card {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        height: 2.35in !important;
+        min-height: 2.35in !important;
+        max-height: 2.35in !important;
+        background: #FFFFFF !important;
+        border: 2px solid #0284C7 !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+        padding: 0.14in 0.25in !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      /* Print Mode: Script Booklet Only */
+      body.print-mode-script-booklet .slide {
+        display: none !important;
+      }
+      body.print-mode-script-booklet #script-booklet-container {
+        display: block !important;
+        width: 16in !important;
+        margin: 0 auto !important;
+      }
+      body.print-mode-script-booklet .booklet-page {
+        width: 16in !important;
+        height: 9in !important;
+        min-height: 9in !important;
+        max-height: 9in !important;
+        box-sizing: border-box !important;
+        padding: 0.45in 0.65in !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        background: #FFFFFF !important;
+      }
+      body.print-mode-script-booklet .booklet-page:last-of-type {
+        page-break-after: auto !important;
+        break-after: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 16:9 WIDESCREEN PRESENTATION CANVAS -->
+  <div id="deck-viewport" class="bg-tech-grid">
+
+    <!-- =====================================================================
+         SLIDE 1: TITLE & HERO COVER (THE HOOK)
+    ====================================================================== -->
+    <section class="slide active" data-slide="1" data-section="01 // Cover & Team"
+      data-script="بسم الله الرحمن الرحيم، السادة أعضاء لجنة التحكيم الموقرين، أهلاً بكم في عرض مشروع تخرجنا: منصة TalkShop. اليوم بنقدم نقلة نوعية في إدارة التجارة الإلكترونية وأنظمة الـ ERP، بنحول النظام من مجرد شاشات إدخال يدوية معقدة ومملة، إلى وكيل ذكاء اصطناعي تنفيذي بيتكلم ويفهم العامية المصرية، بيحمي أرباح التاجر، وبيتنبأ بالمبيعات بضغطة زر واحدة.">
+      
+      <!-- Top Bar -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm">
+          <span class="w-2.5 h-2.5 rounded-full bg-skyTech animate-pulse"></span>
+          <span class="text-xs font-bold tracking-wider uppercase text-slate-700">HITU — Faculty of AI &amp; Data Science — Class of 2026</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-sky-50 text-skyTech border border-sky-200">Multi-Tenant SaaS</span>
+          <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-indigo-50 text-aiViolet border border-indigo-200">LangGraph + LightGBM</span>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-finEmerald border border-emerald-200">Egyptian Dialect NLP</span>
+        </div>
+      </div>
+
+      <!-- Center Hero Area with Official TalkShop Logo & Visual Widgets -->
+      <div class="my-auto grid grid-cols-12 gap-6 items-center max-w-6xl mx-auto w-full">
+        <!-- Left Floating Visual Card: Dialectal Command Preview -->
+        <div class="col-span-3 bento-card p-4 border-l-4 border-l-skyTech text-left shadow-md">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] font-mono font-bold uppercase text-skyTech">Live Voice &amp; Chat</span>
+            <span class="w-2 h-2 rounded-full bg-finEmerald"></span>
+          </div>
+          <div class="bg-slate-900 text-white p-2.5 rounded-xl font-arabic ar-text text-xs font-bold mb-2">
+            "وريني أرباح فرع مدينة نصر وطبق خصم 15%"
+          </div>
+          <!-- Voice Wave SVG -->
+          <div class="flex items-center justify-between bg-sky-50/70 px-3 py-1.5 rounded-lg border border-sky-200">
+            <svg class="w-24 h-5" viewBox="0 0 100 24" fill="none">
+              <rect x="4" y="8" width="4" height="8" rx="2" fill="#0284C7"/>
+              <rect x="14" y="4" width="4" height="16" rx="2" fill="#0EA5E9"/>
+              <rect x="24" y="2" width="4" height="20" rx="2" fill="#6366F1"/>
+              <rect x="34" y="6" width="4" height="12" rx="2" fill="#0284C7"/>
+              <rect x="44" y="3" width="4" height="18" rx="2" fill="#0EA5E9"/>
+              <rect x="54" y="7" width="4" height="10" rx="2" fill="#6366F1"/>
+              <rect x="64" y="1" width="4" height="22" rx="2" fill="#0284C7"/>
+              <rect x="74" y="5" width="4" height="14" rx="2" fill="#0EA5E9"/>
+              <rect x="84" y="8" width="4" height="8" rx="2" fill="#6366F1"/>
+            </svg>
+            <span class="font-mono text-[10px] font-bold text-skyTech">100.9ms</span>
+          </div>
+        </div>
+
+        <!-- Center: Official TalkShop Logo + Headline -->
+        <div class="col-span-6 flex flex-col items-center text-center">
+          <!-- Logo Hero Showcase with subtle luminous backdrop -->
+          <div class="relative mb-2 flex items-center justify-center">
+            <div class="absolute -inset-8 bg-gradient-to-r from-sky-400/20 via-indigo-500/15 to-emerald-400/15 rounded-full blur-2xl pointer-events-none"></div>
+            <img src="TransparentLogoCropped.png" alt="TalkShop Official Logo" class="relative z-10 h-36 max-h-40 w-auto object-contain drop-shadow-xl hover:scale-105 transition-all duration-300" />
+          </div>
+
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/90 border border-sky-200/80 shadow-sm text-skyTech text-xs font-bold uppercase tracking-wider mb-2">
+            <span class="w-2 h-2 rounded-full bg-skyTech animate-pulse"></span>
+            Graduation Project Defense Deck • Faculty of AI 2026
+          </div>
+
+          <h1 class="text-[32px] font-extrabold tracking-tight text-slateDark leading-tight mb-2">
+            Next-Gen Multi-Tenant <span class="text-transparent bg-clip-text bg-gradient-to-r from-skyTech to-aiViolet">Agentic E-Commerce &amp; ERP</span> OS
+          </h1>
+
+          <p class="text-sm text-slateBody font-medium max-w-xl mx-auto leading-relaxed">
+            Bridging <span class="text-slateDark font-semibold">Egyptian Colloquial Arabic</span>, Autonomous Relational Text-to-SQL &amp; Predictive MLOps for Retail
+          </p>
+        </div>
+
+        <!-- Right Floating Visual Card: Live MLOps & Margin Guard -->
+        <div class="col-span-3 bento-card p-4 border-r-4 border-r-finEmerald text-left shadow-md">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] font-mono font-bold uppercase text-finEmerald">Predictive MLOps</span>
+            <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-finEmerald font-mono text-[10px] font-bold">95% CI</span>
+          </div>
+          <svg class="w-full h-14 mb-2" viewBox="0 0 180 50">
+            <polygon points="5,40 45,32 85,20 125,15 170,8 170,32 125,35 85,38 45,44 5,48" fill="rgba(5, 150, 105, 0.16)"/>
+            <polyline fill="none" stroke="#059669" stroke-width="2.5" points="5,44 45,38 85,29 125,24 170,18"/>
+            <circle cx="85" cy="29" r="3" fill="#0284C7"/>
+            <circle cx="170" cy="18" r="3.5" fill="#059669"/>
+          </svg>
+          <div class="flex items-center justify-between text-[11px] font-mono bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200">
+            <span class="text-slateBody">LightGBM WAPE</span>
+            <span class="font-bold text-finEmerald">14.2% ✓</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom 6-Card Team Grid -->
+      <div>
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-skyTech animate-pulse"></span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Graduation Project Engineering Team</span>
+          </div>
+          <span class="text-xs font-arabic font-bold text-skyTech ar-text">فريق عمل مشروع التخرج • دفعة 2026</span>
+        </div>
+        <div class="grid grid-cols-6 gap-3.5">
+          <!-- Member 1 -->
+          <div class="bento-card p-3.5 border-t-4 border-t-skyTech flex flex-col justify-between hover:-translate-y-1 hover:shadow-md transition duration-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-7 h-7 rounded-lg bg-sky-50 text-skyTech flex items-center justify-center font-mono text-xs font-bold">01</span>
+              <i data-lucide="cpu" class="w-4 h-4 text-skyTech"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-[15px] text-slateDark tracking-tight">Moustafa Maher</div>
+              <div class="font-arabic text-xs font-bold text-skyTech ar-text mt-0.5">مصطفى ماهر</div>
+            </div>
+          </div>
+          <!-- Member 2 -->
+          <div class="bento-card p-3.5 border-t-4 border-t-aiViolet flex flex-col justify-between hover:-translate-y-1 hover:shadow-md transition duration-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-7 h-7 rounded-lg bg-indigo-50 text-aiViolet flex items-center justify-center font-mono text-xs font-bold">02</span>
+              <i data-lucide="database" class="w-4 h-4 text-aiViolet"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-[15px] text-slateDark tracking-tight">Adel Ahmed</div>
+              <div class="font-arabic text-xs font-bold text-aiViolet ar-text mt-0.5">عادل أحمد</div>
+            </div>
+          </div>
+          <!-- Member 3 -->
+          <div class="bento-card p-3.5 border-t-4 border-t-skyLight flex flex-col justify-between hover:-translate-y-1 hover:shadow-md transition duration-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-7 h-7 rounded-lg bg-sky-50 text-skyLight flex items-center justify-center font-mono text-xs font-bold">03</span>
+              <i data-lucide="layout-dashboard" class="w-4 h-4 text-skyLight"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-[15px] text-slateDark tracking-tight">Abdallah Sameh</div>
+              <div class="font-arabic text-xs font-bold text-skyLight ar-text mt-0.5">عبد الله سامح</div>
+            </div>
+          </div>
+          <!-- Member 4 -->
+          <div class="bento-card p-3.5 border-t-4 border-t-finEmerald flex flex-col justify-between hover:-translate-y-1 hover:shadow-md transition duration-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-7 h-7 rounded-lg bg-emerald-50 text-finEmerald flex items-center justify-center font-mono text-xs font-bold">04</span>
+              <i data-lucide="trending-up" class="w-4 h-4 text-finEmerald"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-[15px] text-slateDark tracking-tight">Retaj Hakim</div>
+              <div class="font-arabic text-xs font-bold text-finEmerald ar-text mt-0.5">ريتاج حكيم</div>
+            </div>
+          </div>
+          <!-- Member 5 -->
+          <div class="bento-card p-3.5 border-t-4 border-t-warnAmber flex flex-col justify-between hover:-translate-y-1 hover:shadow-md transition duration-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-7 h-7 rounded-lg bg-amber-50 text-warnAmber flex items-center justify-center font-mono text-xs font-bold">05</span>
+              <i data-lucide="users" class="w-4 h-4 text-warnAmber"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-[15px] text-slateDark tracking-tight">Renad Hakim</div>
+              <div class="font-arabic text-xs font-bold text-warnAmber ar-text mt-0.5">رناد حكيم</div>
+            </div>
+          </div>
+          <!-- Member 6 -->
+          <div class="bento-card p-3.5 border-t-4 border-t-aiPurple flex flex-col justify-between hover:-translate-y-1 hover:shadow-md transition duration-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-7 h-7 rounded-lg bg-purple-50 text-aiPurple flex items-center justify-center font-mono text-xs font-bold">06</span>
+              <i data-lucide="scale" class="w-4 h-4 text-aiPurple"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-[15px] text-slateDark tracking-tight">Roaa Ashraf</div>
+              <div class="font-arabic text-xs font-bold text-aiPurple ar-text mt-0.5">رُؤى أشرف</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 2: EXECUTIVE SUMMARY & PROJECT THESIS
+    ====================================================================== -->
+    <section class="slide" data-slide="2" data-section="01 // Executive Thesis"
+      data-script="الفكرة الجوهرية لمشروع TalkShop هي التحول من البرمجيات التقليدية القائمة على الجداول المعقدة (Static CRUD Dashboards) إلى مركز قيادة حواري يمتلك صلاحيات التنفيذ الآمن. النظام مرتكز على 3 أعمدة رئيسية: فهم اللهجة المصرية العامية بدون هلوسة، التنفيذ الذاتي المحمي ببروتوكول موافقة التاجر HITL لحماية هامش الربح، ودمج تعلم الآلة التنبؤي LightGBM و K-Means مباشرة مع قواعد البيانات العلائقية.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-skyTech">Slide 02 • TalkShop Executive Summary &amp; Thesis</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">The Paradigm Shift: From Traditional Software to Agentic Execution</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-mono">
+          Static CRUD Forms ➔ TalkShop Command Center
+        </div>
+      </div>
+
+      <!-- Visual Paradigm Shift Flow Diagram -->
+      <div class="bento-card p-4 bg-gradient-to-r from-rose-50/60 via-white to-sky-50/80 border-slate-200 grid grid-cols-12 items-center gap-4">
+        <!-- Old Paradigm -->
+        <div class="col-span-4 bg-white p-3 rounded-xl border border-rose-200 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-rose-50 text-dangerRose flex items-center justify-center shrink-0">
+            <i data-lucide="table-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-[10px] font-mono uppercase font-bold text-dangerRose">Legacy ERP (12+ Screens)</div>
+            <div class="text-xs font-bold text-slateDark">Manual Forms, SQL &amp; Static Grids</div>
+            <div class="text-[11px] text-slateBody">4.5 hrs/day wasted on context switching</div>
+          </div>
+        </div>
+
+        <!-- Visual Transformation Arrow SVG -->
+        <div class="col-span-4 flex flex-col items-center justify-center">
+          <div class="text-[10px] font-mono font-bold uppercase text-skyTech mb-1">TalkShop Agentic Bridge</div>
+          <svg class="w-full h-8" viewBox="0 0 260 32" fill="none">
+            <line x1="10" y1="16" x2="235" y2="16" stroke="url(#shiftGrad)" stroke-width="3" stroke-dasharray="6 4"/>
+            <polygon points="235,10 250,16 235,22" fill="#0284C7"/>
+            <circle cx="75" cy="16" r="5" fill="#E11D48"/>
+            <circle cx="130" cy="16" r="6" fill="#6366F1"/>
+            <circle cx="185" cy="16" r="5" fill="#059669"/>
+            <defs>
+              <linearGradient id="shiftGrad" x1="0" y1="0" x2="260" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#E11D48"/>
+                <stop offset="50%" stop-color="#6366F1"/>
+                <stop offset="100%" stop-color="#0284C7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="text-[10px] font-mono text-slate-500">Dialect NLP + LangGraph + LightGBM</div>
+        </div>
+
+        <!-- New TalkShop Paradigm -->
+        <div class="col-span-4 bg-white p-3 rounded-xl border border-sky-200 flex items-center gap-3 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-skyTech text-white flex items-center justify-center shrink-0">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-[10px] font-mono uppercase font-bold text-skyTech">TalkShop OS (1 Interface)</div>
+            <div class="text-xs font-bold text-slateDark">Autonomous Execution + GenUI Cards</div>
+            <div class="text-[11px] text-finEmerald font-semibold">Sub-120ms Verified Action Execution</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Pillars Bento Grid -->
+      <div class="grid grid-cols-3 gap-6 my-auto">
+        <!-- Pillar 1 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-skyTech">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 text-skyTech flex items-center justify-center text-2xl">🗣️</div>
+              <span class="px-2.5 py-1 rounded-md bg-sky-50 text-skyTech font-mono text-xs font-bold">Pillar 01 • NLP</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-2">Native Dialectal Grounding</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-4">
+              Zero-API understanding of Egyptian colloquial Arabic and Franco-Arab business idioms with deterministic schema mapping and zero numeric hallucination.
+            </p>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-mono text-slate-400 uppercase mb-1.5">Supported Egyptian Lexicon</div>
+            <div class="flex flex-wrap gap-1.5 font-arabic ar-text">
+              <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-skyTech">"عايز أعرف"</span>
+              <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-skyTech">"وريني السيلز"</span>
+              <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-skyTech">"رصيد الستوك"</span>
+              <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-skyTech">"فرع مدينة نصر"</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-aiViolet">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-aiViolet flex items-center justify-center text-2xl">🛡️</div>
+              <span class="px-2.5 py-1 rounded-md bg-indigo-50 text-aiViolet font-mono text-xs font-bold">Pillar 02 • Safety</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-2">Autonomous Execution with HITL</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-4">
+              Safe database mutations (Bulk discounting, Store provisioning, Targeted promo release) guarded by a mandatory <strong>Human-in-the-Loop</strong> margin protection gate.
+            </p>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-mono text-slate-400 uppercase mb-1">Margin Floor Invariant</div>
+            <div class="font-mono text-xs font-bold text-aiViolet bg-white px-3 py-2 rounded-lg border border-indigo-100 flex items-center justify-between">
+              <span>New_Price &gt; Cost_Price</span>
+              <span class="text-finEmerald">✓ Enforced</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-finEmerald flex items-center justify-center text-2xl">📈</div>
+              <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Pillar 03 • MLOps</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-2">Integrated Predictive MLOps</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-4">
+              Seamless union of live transactional OLTP records with quantile LightGBM demand forecasting ($95\%$ CI) and Log-RFM K-Means customer intelligence.
+            </p>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-mono text-slate-400 uppercase mb-1">Production ML Models</div>
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-700 bg-white px-3 py-2 rounded-lg border border-emerald-100">
+              <span>LightGBM ($\alpha \in \{.025,.5,.975\}$)</span>
+              <span class="font-mono text-finEmerald">WAPE 14.2%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Stat Badge Footer -->
+      <div class="bento-card p-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="px-3 py-1 rounded-lg bg-skyTech text-white font-mono text-xs font-bold">KEY BENCHMARK</span>
+          <span class="text-base font-bold">Over 71 relational tables in AdventureWorks &amp; Olist Egypt schemas unified in one conversational interface.</span>
+        </div>
+        <span class="font-mono text-xs text-sky-300">91 Foreign Keys • Zero Manual SQL</span>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 3: THE PROBLEM STATEMENT (EGYPT & MENA E-COMMERCE PAIN POINTS)
+    ====================================================================== -->
+    <section class="slide" data-slide="3" data-section="02 // Problem Statement"
+      data-script="لماذا بنينا TalkShop؟ في السوق المصري والشرق الأوسط، التاجر بيعاني من 4 مشاكل رئيسية: أولاً تشتت الإدارة بين أكثر من 12 شاشة وأداة منفصلة مما يهدر 4.5 ساعة يومياً. ثانياً، صعوبة استخراج التحليلات المالية لأنها تتطلب كتابة استعلامات SQL معقدة. ثالثاً، أزمة نفاد المخزون المفاجئ في المواسم مثل رمضان والجمعة البيضاء التي تضيع 23% من الإيرادات. رابعاً، فشل النماذج العالمية مثل ChatGPT في فهم مصطلحات التجارة المصرية وقانون حماية المستهلك 181 لسنة 2018.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-warnAmber">Slide 03 • Market Problem Statement</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Operational Friction in Traditional ERP &amp; E-Commerce</h2>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-warnAmber text-xs font-bold">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          Egypt &amp; MENA Retail Pain Points
+        </div>
+      </div>
+
+      <!-- 2x2 Card Grid -->
+      <div class="grid grid-cols-2 grid-rows-2 gap-6 my-auto flex-1 py-4">
+        <!-- Pain Point 1 -->
+        <div class="bento-card p-6 border-l-4 border-l-dangerRose flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl bg-rose-50 text-dangerRose flex items-center justify-center">
+                <i data-lucide="layers" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <span class="text-xs font-mono font-bold text-dangerRose uppercase">Friction 01 • Context Switching</span>
+                <h3 class="text-xl font-extrabold text-slateDark">Administrative Fragmentation</h3>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-rose-50 text-dangerRose font-mono text-sm font-extrabold">4.5 hrs/day lost</span>
+          </div>
+          <p class="text-sm text-slateBody leading-relaxed my-2">
+            Merchants waste <strong>4.5 hours daily</strong> switching between <strong>12+ disconnected dashboards</strong> (Inventory, POS, Shopify, Excel sheets, Bosta shipping, and Paymob portals).
+          </p>
+          <!-- Visual App Sprawl Mini Bar -->
+          <div class="flex items-center gap-1.5 my-1">
+            <span class="px-2 py-0.5 rounded bg-slate-100 border text-[10px] font-mono">POS</span>
+            <span class="text-slate-300">↔</span>
+            <span class="px-2 py-0.5 rounded bg-slate-100 border text-[10px] font-mono">Excel</span>
+            <span class="text-slate-300">↔</span>
+            <span class="px-2 py-0.5 rounded bg-slate-100 border text-[10px] font-mono">Bosta</span>
+            <span class="text-slate-300">↔</span>
+            <span class="px-2 py-0.5 rounded bg-slate-100 border text-[10px] font-mono">Paymob</span>
+            <span class="text-slate-300">↔</span>
+            <span class="px-2 py-0.5 rounded bg-rose-50 text-dangerRose border border-rose-200 text-[10px] font-mono font-bold">56% Day Wasted</span>
+          </div>
+          <div class="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-mono text-slate-500">Impact: Delayed pricing &amp; fulfillment errors</span>
+            <span class="font-arabic font-bold text-dangerRose ar-text">تشتت بين 12+ لوحة تحكم منفصلة</span>
+          </div>
+        </div>
+
+        <!-- Pain Point 2 -->
+        <div class="bento-card p-6 border-l-4 border-l-warnAmber flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl bg-amber-50 text-warnAmber flex items-center justify-center">
+                <i data-lucide="database-zap" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <span class="text-xs font-mono font-bold text-warnAmber uppercase">Friction 02 • Data Inaccessibility</span>
+                <h3 class="text-xl font-extrabold text-slateDark">Relational BI Blindspot</h3>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-amber-50 text-warnAmber font-mono text-sm font-extrabold">71 Tables / 91 FKs</span>
+          </div>
+          <p class="text-sm text-slateBody leading-relaxed my-2">
+            Extracting net profit drivers requires complex 5-table SQL joins separating unit price, discount, and cost. Non-technical store owners operate blind without real-time BI.
+          </p>
+          <!-- Visual SQL Complexity Snippet -->
+          <div class="bg-slate-900 text-amber-300 font-mono text-[10px] px-3 py-1.5 rounded-lg truncate">
+            SELECT SUM((oi.unit_price - p.cost) * oi.qty) FROM orders o JOIN order_items oi...
+          </div>
+          <div class="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-mono text-slate-500">Impact: Gut-feeling decisions instead of data</span>
+            <span class="font-arabic font-bold text-warnAmber ar-text">استحالة كتابة استعلامات SQL للتاجر</span>
+          </div>
+        </div>
+
+        <!-- Pain Point 3 -->
+        <div class="bento-card p-6 border-l-4 border-l-dangerRose flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl bg-rose-50 text-dangerRose flex items-center justify-center">
+                <i data-lucide="package-x" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <span class="text-xs font-mono font-bold text-dangerRose uppercase">Friction 03 • Supply Chain</span>
+                <h3 class="text-xl font-extrabold text-slateDark">Stockout &amp; Inventory Crisis</h3>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-rose-50 text-dangerRose font-mono text-sm font-extrabold">-23% Revenue</span>
+          </div>
+          <p class="text-sm text-slateBody leading-relaxed my-2">
+            <strong>23% of Egyptian retail revenue is lost</strong> due to reactive static inventory reordering and unpredicted seasonal demand spikes (Ramadan, Eid, and White Friday).
+          </p>
+          <!-- Visual Stockout Drop Bar -->
+          <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden flex">
+            <div class="bg-finEmerald h-full w-[77%]"></div>
+            <div class="bg-dangerRose h-full w-[23%]"></div>
+          </div>
+          <div class="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-mono text-slate-500">Impact: 23% Lost sales &amp; dead capital</span>
+            <span class="font-arabic font-bold text-dangerRose ar-text">خسارة 23% بسبب نفاد المخزون المفاجئ</span>
+          </div>
+        </div>
+
+        <!-- Pain Point 4 -->
+        <div class="bento-card p-6 border-l-4 border-l-warnAmber flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl bg-amber-50 text-warnAmber flex items-center justify-center">
+                <i data-lucide="languages" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <span class="text-xs font-mono font-bold text-warnAmber uppercase">Friction 04 • Localization Failure</span>
+                <h3 class="text-xl font-extrabold text-slateDark">The NLP Dialect &amp; Legal Gap</h3>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-amber-50 text-warnAmber font-mono text-sm font-extrabold">Law 181/2018</span>
+          </div>
+          <p class="text-sm text-slateBody leading-relaxed my-2">
+            Off-the-shelf global LLMs fail to map local Egyptian trade idioms, Franco-Arab slang, and mandatory Egyptian Consumer Protection regulations (Law 181/2018).
+          </p>
+          <div class="flex items-center gap-2 text-[11px] font-arabic ar-text">
+            <span class="px-2 py-0.5 rounded bg-rose-50 text-dangerRose border border-rose-200">❌ ChatGPT: لا يفهم "الأوردرات المرتجعة"</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-50 text-finEmerald border border-emerald-200">✓ TalkShop: مطابق للمادة 17 و21</span>
+          </div>
+          <div class="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-mono text-slate-500">Impact: High error rates on Arabic prompts</span>
+            <span class="font-arabic font-bold text-warnAmber ar-text">فجوة فهم العامية المصرية والقانون المحلي</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 4: WHY STANDARD LLMs / CHATBOTS FAIL IN ENTERPRISE ERP
+    ====================================================================== -->
+    <section class="slide" data-slide="4" data-section="02 // Paradigm Comparison"
+      data-script="قد يُطرح سؤال: لماذا لا نستخدم شات بوت تقليدي؟ الشات بوت التقليدي يكتفي بتوليد نصوص، يهلوس في الأرقام والأسعار، ولا يملك اتصالاً آمناً بقاعدة البيانات. أما نظام TalkShop فهو وكيل ذكي (Autonomous Agent) ينفذ استعلامات SQL مفحوصة بشجرة AST، يحمي هوامش الربح عبر HITL، ويعزل بيانات المتاجر عبر PostgreSQL RLS، ويعرض واجهات React تفاعلية.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-skyTech">Slide 04 • Architectural Distinction</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Traditional Chatbots vs. Autonomous AI Agents</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-aiViolet text-xs font-bold">
+          Function Calling + State Graphs + Guardrails
+        </div>
+      </div>
+
+      <!-- Comparison Table -->
+      <div class="bento-card overflow-hidden my-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-900 text-white text-xs uppercase tracking-wider">
+              <th class="py-4 px-6 w-1/4">Feature Dimension</th>
+              <th class="py-4 px-6 w-[37.5%] text-rose-300 border-l border-slate-700">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="x-circle" class="w-4 h-4 text-rose-400"></i>
+                  Traditional Chatbots (The Failure Mode)
+                </div>
+              </th>
+              <th class="py-4 px-6 w-[37.5%] text-emerald-300 border-l border-slate-700">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                  TalkShop Agentic System (Our Solution)
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-sm">
+            <!-- Row 1 -->
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-4 px-6 font-bold text-slateDark flex items-center gap-2.5">
+                <i data-lucide="terminal" class="w-4 h-4 text-skyTech"></i> Core Role
+              </td>
+              <td class="py-4 px-6 text-slateBody border-l border-slate-200 bg-rose-50/20">
+                <span class="font-semibold text-dangerRose">Static Text Generation (FAQ):</span> Passively answers questions from fixed text without operational agency.
+              </td>
+              <td class="py-4 px-6 text-slateDark font-medium border-l border-slate-200 bg-emerald-50/25">
+                <span class="font-bold text-finEmerald">Execution &amp; Action Privileges:</span> Builds stores, mutates prices, triggers ML models, and issues promos.
+              </td>
+            </tr>
+            <!-- Row 2 -->
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-4 px-6 font-bold text-slateDark flex items-center gap-2.5">
+                <i data-lucide="database" class="w-4 h-4 text-skyTech"></i> Data Access
+              </td>
+              <td class="py-4 px-6 text-slateBody border-l border-slate-200 bg-rose-50/20">
+                <span class="font-semibold text-dangerRose">No DB / Unsafe Raw SQL:</span> Disconnected from live ERP state or vulnerable to destructive SQL injection.
+              </td>
+              <td class="py-4 px-6 text-slateDark font-medium border-l border-slate-200 bg-emerald-50/25">
+                <span class="font-bold text-finEmerald">Strict AST-Validated SQL Execution:</span> 5-layer <code class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border">sqlglot</code> sandboxed read-only analytical execution.
+              </td>
+            </tr>
+            <!-- Row 3 -->
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-4 px-6 font-bold text-slateDark flex items-center gap-2.5">
+                <i data-lucide="shield-check" class="w-4 h-4 text-skyTech"></i> Safety &amp; Writes
+              </td>
+              <td class="py-4 px-6 text-slateBody border-l border-slate-200 bg-rose-50/20">
+                <span class="font-semibold text-dangerRose">Hallucinates Numbers &amp; Prices:</span> Invents discounts that violate cost floors and destroy store profitability.
+              </td>
+              <td class="py-4 px-6 text-slateDark font-medium border-l border-slate-200 bg-emerald-50/25">
+                <span class="font-bold text-finEmerald">Human-in-the-Loop Margin Protection:</span> Dry-run simulation enforcing $\text{New Price} > \text{Cost Price}$ before commit.
+              </td>
+            </tr>
+            <!-- Row 4 -->
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-4 px-6 font-bold text-slateDark flex items-center gap-2.5">
+                <i data-lucide="component" class="w-4 h-4 text-skyTech"></i> UI Experience
+              </td>
+              <td class="py-4 px-6 text-slateBody border-l border-slate-200 bg-rose-50/20">
+                <span class="font-semibold text-dangerRose">Isolated Plain-Text Chat Bubble:</span> Dumps hard-to-read markdown walls separated from the dashboard.
+              </td>
+              <td class="py-4 px-6 text-slateDark font-medium border-l border-slate-200 bg-emerald-50/25">
+                <span class="font-bold text-finEmerald">Generative UI (GenUI):</span> Streams interactive React cards (charts, diff tables, approval buttons) directly in chat.
+              </td>
+            </tr>
+            <!-- Row 5 -->
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-4 px-6 font-bold text-slateDark flex items-center gap-2.5">
+                <i data-lucide="lock" class="w-4 h-4 text-skyTech"></i> Multi-Tenancy
+              </td>
+              <td class="py-4 px-6 text-slateBody border-l border-slate-200 bg-rose-50/20">
+                <span class="font-semibold text-dangerRose">Vulnerable to Context Leaks:</span> Prompt injection can trick the bot into exposing competing merchants' data.
+              </td>
+              <td class="py-4 px-6 text-slateDark font-medium border-l border-slate-200 bg-emerald-50/25">
+                <span class="font-bold text-finEmerald">PostgreSQL Kernel RLS:</span> Cryptographic tenant isolation via <code class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border">app.current_tenant_id</code>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Callout Banner -->
+      <div class="bento-card p-4 bg-gradient-to-r from-skyTech to-aiViolet text-white flex items-center justify-between shadow-md">
+        <div class="flex items-center gap-3">
+          <i data-lucide="quote" class="w-6 h-6 text-sky-200"></i>
+          <span class="text-lg font-extrabold tracking-wide">"A Chatbot talks; an AI Agent operates, verifies, and executes."</span>
+        </div>
+        <span class="font-arabic font-bold text-sm ar-text bg-white/15 px-4 py-1 rounded-full">الشات بوت يتحدث فقط.. الوكيل الذكي يخطط، يتحقق، وينفذ بأمان</span>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 5: FOUR CORE ENGINEERING CHALLENGES
+    ====================================================================== -->
+    <section class="slide" data-slide="5" data-section="03 // Engineering Challenges"
+      data-script="خلال بناء المنصة، واجهنا 4 تحديات هندسية كبرى: التحدي الأول هو تحويل النص إلى SQL على قاعدة بيانات ضخمة تضم 71 جدولاً و91 مفتاحاً أجنبياً دون تجاوز نافذة السياق. التحدي الثاني هو كسر الحلقات غير المنتهية في ReAct واستبدالها بمخطط حالة حتمي عبر LangGraph. التحدي الثالث هو التنبؤ بالطلب المتقطع وغير المتماثل في قطاع التجزئة المصري. والتحدي الرابع هو العزل التام لبيانات المتاجر المتنافسة على نفس قاعدة البيانات.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-aiViolet">Slide 05 • Core Research &amp; Systems Challenges</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Overcoming the 4 Critical Engineering Hurdles</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-mono font-bold">
+          NLP • State Machines • MLOps • Security
+        </div>
+      </div>
+
+      <!-- 4 Horizontal Pillar Cards -->
+      <div class="grid grid-cols-4 gap-5 my-auto flex-1 py-4">
+        <!-- Challenge 1 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-skyTech">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-sky-50 text-skyTech flex items-center justify-center shadow-sm">
+                <i data-lucide="network" class="w-6 h-6"></i>
+              </div>
+              <span class="font-mono text-2xl font-extrabold text-slate-200">01</span>
+            </div>
+            <div class="text-xs font-mono font-bold text-skyTech uppercase mb-1">Schema Complexity</div>
+            <h3 class="text-lg font-extrabold text-slateDark leading-snug mb-3">
+              Text-to-SQL on 71 Tables &amp; 91 Foreign Keys
+            </h3>
+            <p class="text-xs text-slateBody leading-relaxed">
+              Dumping 71 ERP tables into an LLM prompt causes context overflow and hallucinated JOIN paths.
+            </p>
+          </div>
+          <div class="bg-sky-50/70 p-3.5 rounded-xl border border-sky-200 mt-4">
+            <div class="text-[11px] font-bold text-skyTech uppercase mb-1">Our Engineering Solution</div>
+            <p class="text-xs text-slateDark font-medium leading-snug">
+              Dynamic Vector Schema Scoping prunes 71 tables into <strong>2–4 target relations</strong> while preserving full FK JOIN fidelity.
+            </p>
+          </div>
+        </div>
+
+        <!-- Challenge 2 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-aiViolet">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-aiViolet flex items-center justify-center shadow-sm">
+                <i data-lucide="git-branch" class="w-6 h-6"></i>
+              </div>
+              <span class="font-mono text-2xl font-extrabold text-slate-200">02</span>
+            </div>
+            <div class="text-xs font-mono font-bold text-aiViolet uppercase mb-1">Agent Determinism</div>
+            <h3 class="text-lg font-extrabold text-slateDark leading-snug mb-3">
+              Breaking Unbounded ReAct Loops
+            </h3>
+            <p class="text-xs text-slateBody leading-relaxed">
+              Standard autonomous agents get stuck in infinite tool-calling loops or execute unapproved state mutations.
+            </p>
+          </div>
+          <div class="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-200 mt-4">
+            <div class="text-[11px] font-bold text-aiViolet uppercase mb-1">Our Engineering Solution</div>
+            <p class="text-xs text-slateDark font-medium leading-snug">
+              Deterministic Cyclic State Graphs (<strong>LangGraph</strong>) with bounded retries (max 3) and persistent <code class="font-mono">MemorySaver</code> checkpoints.
+            </p>
+          </div>
+        </div>
+
+        <!-- Challenge 3 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-finEmerald flex items-center justify-center shadow-sm">
+                <i data-lucide="activity" class="w-6 h-6"></i>
+              </div>
+              <span class="font-mono text-2xl font-extrabold text-slate-200">03</span>
+            </div>
+            <div class="text-xs font-mono font-bold text-finEmerald uppercase mb-1">Statistical MLOps</div>
+            <h3 class="text-lg font-extrabold text-slateDark leading-snug mb-3">
+              Intermittent &amp; Asymmetric Demand Forecasting
+            </h3>
+            <p class="text-xs text-slateBody leading-relaxed">
+              Retail SKU sales exhibit zero-inflated intermittent demand and non-Gaussian variance during local holidays.
+            </p>
+          </div>
+          <div class="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200 mt-4">
+            <div class="text-[11px] font-bold text-finEmerald uppercase mb-1">Our Engineering Solution</div>
+            <p class="text-xs text-slateDark font-medium leading-snug">
+              Non-parametric <strong>LightGBM Quantile Regression</strong> ($\alpha \in \{0.025, 0.5, 0.975\}$) with calendar holiday weights &amp; EWMA velocity.
+            </p>
+          </div>
+        </div>
+
+        <!-- Challenge 4 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-warnAmber">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-50 text-warnAmber flex items-center justify-center shadow-sm">
+                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+              </div>
+              <span class="font-mono text-2xl font-extrabold text-slate-200">04</span>
+            </div>
+            <div class="text-xs font-mono font-bold text-warnAmber uppercase mb-1">Multi-Tenant Security</div>
+            <h3 class="text-lg font-extrabold text-slateDark leading-snug mb-3">
+              Cryptographic Multi-Tenant Isolation
+            </h3>
+            <p class="text-xs text-slateBody leading-relaxed">
+              Competing merchants share database infrastructure; a single missing <code class="font-mono">WHERE</code> clause could leak rival financial data.
+            </p>
+          </div>
+          <div class="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 mt-4">
+            <div class="text-[11px] font-bold text-warnAmber uppercase mb-1">Our Engineering Solution</div>
+            <p class="text-xs text-slateDark font-medium leading-snug">
+              PostgreSQL 16 Kernel <strong>Row-Level Security (RLS)</strong> bound to verified JWT <code class="font-mono">tenant_id</code> session contexts.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 6: MASTER ARCHITECTURAL BLUEPRINT (FULL-STACK MONOREPO)
+    ====================================================================== -->
+    <section class="slide" data-slide="6" data-section="04 // System Architecture"
+      data-script="هذه هي المعمارية الهندسية الكاملة لمنصة TalkShop المبنية كـ Modular Monorepo من 5 طبقات متكاملة: الطبقة الأولى هي واجهة العرض بـ React 18 و Generative UI. الطبقة الثانية هي بوابة الـ API بـ FastAPI و NestJS مع جدار الحماية PromptGuard. الطبقة الثالثة هي عقل الوكيل الذكي بـ LangGraph والذاكرة ثلاثية الطبقات. الطبقة الرابعة هي خدمات تعلم الآلة بـ LightGBM و SHAP و MLflow. والطبقة الخامسة هي طبقة البيانات بـ PostgreSQL 16 مع RLS و Redis 7، محققة زمن استجابة أقل من 120 مللي ثانية.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-skyTech">Slide 06 • Master Architectural Blueprint</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">TalkShop End-to-End 5-Layer System Architecture</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-finEmerald font-mono text-xs font-bold">
+          ⚡ Sub-120ms p95 Latency • OLTP / OLAP Separation
+        </div>
+      </div>
+
+      <!-- 5-Layer Stack Diagram -->
+      <div class="flex flex-col gap-2.5 my-auto flex-1 justify-center">
+        <!-- Layer 1 -->
+        <div class="bento-card p-3.5 border-l-8 border-l-skyTech flex items-center justify-between">
+          <div class="w-60 shrink-0">
+            <span class="text-[10px] font-mono font-bold uppercase text-skyTech">Layer 01 • Presentation</span>
+            <h4 class="text-base font-extrabold text-slateDark">Client &amp; Generative UI</h4>
+          </div>
+          <div class="flex-1 grid grid-cols-4 gap-2.5">
+            <div class="bg-sky-50/70 border border-sky-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">React 18 + Vite + Tailwind</div>
+            <div class="bg-sky-50/70 border border-sky-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">GenUI Component Registry</div>
+            <div class="bg-sky-50/70 border border-sky-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">Redux Toolkit + React Query</div>
+            <div class="bg-sky-50/70 border border-sky-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">Recharts + RTL i18next</div>
+          </div>
+        </div>
+
+        <!-- Layer 2 -->
+        <div class="bento-card p-3.5 border-l-8 border-l-skyLight flex items-center justify-between">
+          <div class="w-60 shrink-0">
+            <span class="text-[10px] font-mono font-bold uppercase text-skyLight">Layer 02 • API &amp; Security</span>
+            <h4 class="text-base font-extrabold text-slateDark">Gateway &amp; Firewall</h4>
+          </div>
+          <div class="flex-1 grid grid-cols-4 gap-2.5">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">FastAPI + NestJS Gateway</div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">PromptGuard &amp; PII Masking</div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">JWT TenantContextGuard</div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">SSE Streaming (<code class="font-mono">X-Trace-ID</code>)</div>
+          </div>
+        </div>
+
+        <!-- Layer 3 -->
+        <div class="bento-card p-3.5 border-l-8 border-l-aiViolet flex items-center justify-between">
+          <div class="w-60 shrink-0">
+            <span class="text-[10px] font-mono font-bold uppercase text-aiViolet">Layer 03 • Agentic Core</span>
+            <h4 class="text-base font-extrabold text-slateDark">LangGraph Orchestrator</h4>
+          </div>
+          <div class="flex-1 grid grid-cols-4 gap-2.5">
+            <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">MasterCommandGraph (10 Routes)</div>
+            <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">3-Tier Memory (Session/Pref/Audit)</div>
+            <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">HITL Interrupt &amp; Margin Gate</div>
+            <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">Langfuse Distributed Tracing</div>
+          </div>
+        </div>
+
+        <!-- Layer 4 -->
+        <div class="bento-card p-3.5 border-l-8 border-l-finEmerald flex items-center justify-between">
+          <div class="w-60 shrink-0">
+            <span class="text-[10px] font-mono font-bold uppercase text-finEmerald">Layer 04 • MLOps Engine</span>
+            <h4 class="text-base font-extrabold text-slateDark">Predictive Microservices</h4>
+          </div>
+          <div class="flex-1 grid grid-cols-4 gap-2.5">
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">LightGBM Quantile Regressor</div>
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">SHAP TreeExplainer Attributions</div>
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">Log-RFM K-Means ($K=5$)</div>
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">Celery Workers + MLflow S3</div>
+          </div>
+        </div>
+
+        <!-- Layer 5 -->
+        <div class="bento-card p-3.5 border-l-8 border-l-warnAmber flex items-center justify-between">
+          <div class="w-60 shrink-0">
+            <span class="text-[10px] font-mono font-bold uppercase text-warnAmber">Layer 05 • Persistence</span>
+            <h4 class="text-base font-extrabold text-slateDark">Data &amp; Search Kernel</h4>
+          </div>
+          <div class="flex-1 grid grid-cols-4 gap-2.5">
+            <div class="bg-amber-50/70 border border-amber-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">PostgreSQL 16 + Kernel RLS</div>
+            <div class="bg-amber-50/70 border border-amber-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">Redis 7 Cache &amp; Idempotency</div>
+            <div class="bg-amber-50/70 border border-amber-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">Meilisearch v1.6 Bilingual</div>
+            <div class="bg-amber-50/70 border border-amber-200 rounded-xl px-3 py-2 text-xs font-semibold text-slateDark">SQLite Zero-Config Dev Mode</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Highlight Footer -->
+      <div class="bento-card p-3.5 bg-slate-900 text-white flex items-center justify-between text-xs">
+        <span class="font-mono text-sky-300">Monorepo Workspaces: apps/web • apps/api • apps/agent • apps/ml • backend • packages/database</span>
+        <span class="font-bold text-emerald-400">Complete Separation of OLTP Transactions from Analytical Feature Views (v_timeseries_daily_sales)</span>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 7: THE AGENTIC ENGINE: LANGGRAPH & HUMAN-IN-THE-LOOP (HITL) GATE
+    ====================================================================== -->
+    <section class="slide" data-slide="7" data-section="04 // Agentic Engine & HITL"
+      data-script="كيف نضمن أن الوكيل الذكي لن يقوم بتخفيض أسعار يدمر ربحية المتجر؟ صممنا MasterCommandGraph عبر LangGraph مع بروتوكول Human-in-the-Loop من 4 خطوات: أولاً تنفيذ محاكاة جافة Dry-Run تتأكد أن السعر الجديد أكبر من سعر التكلفة. ثانياً حفظ حالة العملية كـ PENDING_CONFIRMATION في قاعدة البيانات. ثالثاً إرسال بطاقة معاينة تفاعلية للتاجر. رابعاً لا يتم تعديل قاعدة البيانات إلا بعد ضغط التاجر على زر الموافقة المشفر.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-aiViolet">Slide 07 • Agentic Core &amp; Safety Protocol</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Deterministic Orchestration &amp; The 4-Step HITL Protocol</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-aiViolet font-mono text-xs font-bold">
+          Lead: Moustafa Maher • MasterCommandGraph
+        </div>
+      </div>
+
+      <!-- Two Column Split -->
+      <div class="grid grid-cols-12 gap-6 my-auto flex-1 py-3">
+        <!-- Left Column: Master Command Graph Flow (5 cols) -->
+        <div class="col-span-5 bento-card p-6 flex flex-col justify-between bg-gradient-to-b from-white to-indigo-50/30">
+          <div>
+            <span class="text-xs font-mono font-bold text-aiViolet uppercase">LangGraph State Machine</span>
+            <h3 class="text-xl font-extrabold text-slateDark mt-0.5 mb-4">MasterCommandGraph Flow</h3>
+          </div>
+
+          <div class="flex flex-col gap-2.5 my-auto">
+            <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center gap-3 shadow-sm">
+              <span class="w-7 h-7 rounded-lg bg-rose-50 text-dangerRose font-mono text-xs font-bold flex items-center justify-center">1</span>
+              <div>
+                <div class="text-xs font-bold text-slateDark">Guardrail &amp; PromptGuard Node</div>
+                <div class="text-[11px] text-slateBody">Regex &amp; token screening for adversarial injection / PII</div>
+              </div>
+            </div>
+            <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-slate-400"></i></div>
+            <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center gap-3 shadow-sm">
+              <span class="w-7 h-7 rounded-lg bg-sky-50 text-skyTech font-mono text-xs font-bold flex items-center justify-center">2</span>
+              <div>
+                <div class="text-xs font-bold text-slateDark">3-Tier Context Injector Node</div>
+                <div class="text-[11px] text-slateBody">Recalls Session history, Merchant Preferences &amp; Tenant context</div>
+              </div>
+            </div>
+            <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-slate-400"></i></div>
+            <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center gap-3 shadow-sm">
+              <span class="w-7 h-7 rounded-lg bg-aiViolet text-white font-mono text-xs font-bold flex items-center justify-center">3</span>
+              <div>
+                <div class="text-xs font-bold text-slateDark">Semantic Intent Router [10 Routes]</div>
+                <div class="text-[11px] text-slateBody">Routes to SQL BI, Forecast, Catalog, RFM, Promo, Policy RAG</div>
+              </div>
+            </div>
+            <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-slate-400"></i></div>
+            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-3 shadow-sm">
+              <span class="w-7 h-7 rounded-lg bg-warnAmber text-white font-mono text-xs font-bold flex items-center justify-center">4</span>
+              <div>
+                <div class="text-xs font-bold text-slateDark">Specialized Tools ➔ HITL Interrupt Gate</div>
+                <div class="text-[11px] text-slateBody">Pauses state-mutating operations until merchant approval</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-mono text-slate-500">
+            <span>Checkpointer: MemorySaver</span>
+            <span class="text-aiViolet font-bold">Zero Unbounded Loops</span>
+          </div>
+        </div>
+
+        <!-- Right Column: 4-Step HITL Safety Lifecycle (7 cols) -->
+        <div class="col-span-7 flex flex-col justify-between gap-3.5">
+          <!-- Step 1 -->
+          <div class="bento-card p-4 border-l-4 border-l-skyTech flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-xl bg-sky-50 text-skyTech font-mono font-extrabold flex items-center justify-center">01</div>
+              <div>
+                <h4 class="text-base font-extrabold text-slateDark">Dry-Run Mutation &amp; Margin Floor Check</h4>
+                <p class="text-xs text-slateBody">Computes price delta across target SKUs without writing to DB; verifies gross margin rule.</p>
+              </div>
+            </div>
+            <div class="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-mono font-bold text-skyTech shrink-0">
+              $\text{New Price} > \text{Cost Price}$
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="bento-card p-4 border-l-4 border-l-warnAmber flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-warnAmber font-mono font-extrabold flex items-center justify-center">02</div>
+              <div>
+                <h4 class="text-base font-extrabold text-slateDark">State Checkpoint &amp; Execution Interrupt</h4>
+                <p class="text-xs text-slateBody">Saves proposed payload in PostgreSQL <code class="font-mono">agent_actions</code> table and halts graph thread.</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-warnAmber font-mono text-[11px] font-bold shrink-0">
+              PENDING_CONFIRMATION
+            </span>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="bento-card p-4 border-l-4 border-l-aiViolet flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 text-aiViolet font-mono font-extrabold flex items-center justify-center">03</div>
+              <div>
+                <h4 class="text-base font-extrabold text-slateDark">Generative UI Interactive Preview Render</h4>
+                <p class="text-xs text-slateBody">Frontend receives typed SSE event and renders interactive React diff card with margin badges.</p>
+              </div>
+            </div>
+            <code class="px-2.5 py-1 rounded-lg bg-indigo-50 text-aiViolet font-mono text-xs font-bold shrink-0">
+              &lt;BulkPricePreviewCard /&gt;
+            </code>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="bento-card p-4 border-l-4 border-l-finEmerald flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-finEmerald font-mono font-extrabold flex items-center justify-center">04</div>
+              <div>
+                <h4 class="text-base font-extrabold text-slateDark">Cryptographic Confirmation &amp; Atomic Commit</h4>
+                <p class="text-xs text-slateBody">On merchant click ("Approve"), backend verifies token, commits SQL transaction, and invalidates Redis.</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-finEmerald font-mono text-[11px] font-bold shrink-0">
+              ✓ Redis Idempotency Lock
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 8: CONVERSATIONAL BI: 5-LAYER AST-SANDBOXED TEXT-TO-SQL
+    ====================================================================== -->
+    <section class="slide" data-slide="8" data-section="04 // Secure Text-to-SQL"
+      data-script="فيما يخص الذكاء التحليلي وتحويل كلام التاجر إلى SQL، قمنا ببناء خط أنابيب محمي من 5 طبقات: تبدأ بتطبيع العامية المصرية، ثم تقليص المخطط من 71 جدولاً إلى الجداول المستهدفة فقط، ثم فحص شجرة الـ AST عبر مكتبة sqlglot للتأكد أن الاستعلام SELECT فقط وحظر أي أوامر DROP أو DELETE أو UPDATE، ثم إجبار الاستعلام على LIMIT وفلتر المستأجر، وأخيراً حلقة تصحيح ذاتي. النتيجة: صد 20 من أصل 20 هجمة تدميرية بنسبة أمان 100%.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-finEmerald">Slide 08 • Conversational Business Intelligence</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Secure 5-Layer AST-Sandboxed Text-to-SQL Pipeline</h2>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-finEmerald text-xs font-mono font-bold">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          sqlglot AST Verification • Read-Only Sandbox
+        </div>
+      </div>
+
+      <!-- Horizontal 5-Step Pipeline -->
+      <div class="grid grid-cols-5 gap-4 my-auto py-4">
+        <!-- Step 1 -->
+        <div class="bento-card p-5 flex flex-col justify-between border-t-4 border-t-finEmerald relative">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Layer 01</span>
+              <i data-lucide="shield" class="w-5 h-5 text-finEmerald"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slateDark mb-2">Dialect Normalizer</h3>
+            <p class="text-xs text-slateBody leading-relaxed">
+              Strips tashkeel, unifies Alef/Ya variants, and maps Egyptian slang into canonical business entities.
+            </p>
+          </div>
+          <div class="mt-4 p-2.5 rounded-lg bg-slate-50 border border-slate-200 font-arabic ar-text text-xs font-bold text-skyTech">
+            "وريني أرباح فرع مدينة نصر"
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bento-card p-5 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Layer 02</span>
+              <i data-lucide="filter" class="w-5 h-5 text-finEmerald"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slateDark mb-2">Dynamic Schema Scoping</h3>
+            <p class="text-xs text-slateBody leading-relaxed">
+              Vector-prunes <strong>71 ERP tables</strong> down to the exact target relations needed for the query.
+            </p>
+          </div>
+          <div class="mt-4 p-2.5 rounded-lg bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700">
+            SalesOrderHeader, Product, Customer
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bento-card p-5 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Layer 03</span>
+              <i data-lucide="code-2" class="w-5 h-5 text-finEmerald"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slateDark mb-2">SQL AST Parsing</h3>
+            <p class="text-xs text-slateBody leading-relaxed">
+              <code class="font-mono">sqlglot</code> parses AST and verifies root node is strictly <code class="font-mono">exp.Select</code>. Blocks DDL/DML &amp; catalogs.
+            </p>
+          </div>
+          <div class="mt-4 p-2.5 rounded-lg bg-rose-50 border border-rose-200 font-mono text-[11px] font-bold text-dangerRose">
+            🚫 Rejects DROP, UPDATE, DELETE, sys
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="bento-card p-5 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Layer 04</span>
+              <i data-lucide="lock" class="w-5 h-5 text-finEmerald"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slateDark mb-2">Row-Clamp Guardrail</h3>
+            <p class="text-xs text-slateBody leading-relaxed">
+              Enforces mandatory row limits and injects cryptographic tenant isolation filter into AST.
+            </p>
+          </div>
+          <div class="mt-4 p-2.5 rounded-lg bg-slate-50 border border-slate-200 font-mono text-[11px] text-finEmerald font-bold">
+            LIMIT 100 + tenant_id = :id
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="bento-card p-5 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Layer 05</span>
+              <i data-lucide="refresh-cw" class="w-5 h-5 text-finEmerald"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slateDark mb-2">Self-Correction Loop</h3>
+            <p class="text-xs text-slateBody leading-relaxed">
+              Catches database execution tracebacks and automatically refactors JOIN/column syntax (up to 3 retries).
+            </p>
+          </div>
+          <div class="mt-4 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 font-mono text-[11px] font-bold text-finEmerald">
+            98.5% Valid SQL Rate (VSR)
+          </div>
+        </div>
+      </div>
+
+      <!-- Stat Box Banner -->
+      <div class="bento-card p-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-7 h-7 text-white"></i>
+          </div>
+          <div>
+            <div class="text-xs font-mono uppercase tracking-wider text-emerald-200">Adversarial Red-Team Evaluation</div>
+            <div class="text-2xl font-extrabold">100.0% Security Compliance (20/20 Destructive Adversarial Attacks Blocked)</div>
+          </div>
+        </div>
+        <div class="text-right font-mono text-xs bg-black/20 px-4 py-2.5 rounded-xl">
+          <div>SQL Injection • Piggybacked Semicolons • Schema Probing</div>
+          <div class="text-emerald-300 font-bold mt-0.5">All Intercepted Pre-Database Pool</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 9: PREDICTIVE MLOPS: QUANTILE FORECASTING & SHAP EXPLAINABILITY
+    ====================================================================== -->
+    <section class="slide" data-slide="9" data-section="05 // Predictive MLOps"
+      data-script="في طبقة تعلم الآلة، نقدم نموذجين أساسيين: الأول بقيادة ريتاج حكيم للتنبؤ بالمبيعات عبر LightGBM Quantile Regression لإنتاج توقعات بنطاق ثقة 95% مع تفسير القرار عبر قيم SHAP وحساب نقطة إعادة الطلب الآلية محققة خطأ WAPE بنسبة 14.2% فقط. الثاني بقيادة رناد حكيم لتجزئة العملاء عبر مصفوفة Log-RFM وخوارزمية K-Means إلى 5 شرائح بمعامل Silhouette يبلغ 0.5828 متجاوزاً المعيار الأكاديمي.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-aiViolet">Slide 09 • Machine Learning &amp; Statistical Intelligence</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Machine Learning in Retail: Demand Forecasting &amp; RFM</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-aiViolet font-mono text-xs font-bold">
+          Leads: Retaj Hakim (Forecasting) &amp; Renad Hakim (RFM)
+        </div>
+      </div>
+
+      <!-- Split 2-Panel Layout -->
+      <div class="grid grid-cols-2 gap-6 my-auto flex-1 py-3">
+        <!-- Panel A: Demand Forecasting (Retaj) -->
+        <div class="bento-card p-6 border-t-4 border-t-skyTech flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full bg-sky-50 text-skyTech font-mono text-xs font-bold">Panel A • Demand Forecasting (Retaj Hakim)</span>
+              <span class="font-mono text-xs font-bold text-finEmerald bg-emerald-50 px-2.5 py-1 rounded-md">WAPE = 14.2%</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-2">LightGBM Quantile Regression &amp; SHAP</h3>
+            <p class="text-xs text-slateBody leading-relaxed mb-4">
+              Multi-quantile gradient boosting ($\alpha = 0.025, 0.5, 0.975$) generating median demand forecasts bounded by a <strong>95% Confidence Interval</strong>.
+            </p>
+
+            <!-- SHAP Attribution Bar Preview -->
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 mb-3">
+              <div class="text-[11px] font-mono font-bold uppercase text-slate-500 mb-2">SHAP TreeExplainer Forecast Decomposition</div>
+              <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-slateDark">Price Discount Feature</span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-32 h-2 bg-emerald-500 rounded-full"></div>
+                    <span class="font-mono font-bold text-finEmerald w-16 text-right">+65 units</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-slateDark">Ramadan / Eid Seasonality</span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-24 h-2 bg-skyTech rounded-full"></div>
+                    <span class="font-mono font-bold text-skyTech w-16 text-right">+42 units</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-slateDark">Day-of-Week Effect</span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-10 h-2 bg-rose-500 rounded-full"></div>
+                    <span class="font-mono font-bold text-dangerRose w-16 text-right">-12 units</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulas & Metrics -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-sky-50/60 p-3 rounded-xl border border-sky-200">
+              <div class="text-[10px] font-mono uppercase text-skyTech font-bold">Safety Stock &amp; Reorder Point</div>
+              <div class="text-xs font-bold text-slateDark mt-1">$$SS = Z_{\alpha} \times \sigma_L, \quad ROP = \mu_L + SS$$</div>
+            </div>
+            <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200 flex flex-col justify-center">
+              <div class="text-[10px] font-mono uppercase text-finEmerald font-bold">Empirical Accuracy</div>
+              <div class="text-sm font-mono font-extrabold text-slateDark mt-1">WAPE: 14.2% | Coverage: 94.8%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel B: Customer Intelligence (Renad) -->
+        <div class="bento-card p-6 border-t-4 border-t-aiViolet flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full bg-indigo-50 text-aiViolet font-mono text-xs font-bold">Panel B • Customer Intelligence (Renad Hakim)</span>
+              <span class="font-mono text-xs font-bold text-aiViolet bg-indigo-50 px-2.5 py-1 rounded-md">Silhouette = 0.5828</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-2">Log-Transformed RFM &amp; K-Means ($K=5$)</h3>
+            <p class="text-xs text-slateBody leading-relaxed mb-4">
+              Corrects right-skewed monetary distributions via $\text{StandardScaler}(\log(1 + [R, F, M]))$ clustered into 5 actionable behavioral personas:
+            </p>
+
+            <!-- 5 Clusters List -->
+            <div class="grid grid-cols-5 gap-2 mb-4">
+              <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+                <div class="text-xs font-extrabold text-finEmerald">Champions</div>
+                <div class="text-[10px] text-slateBody mt-0.5">High R, F, M</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-sky-50 border border-sky-200 text-center">
+                <div class="text-xs font-extrabold text-skyTech">Loyal</div>
+                <div class="text-[10px] text-slateBody mt-0.5">Consistent</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-center">
+                <div class="text-xs font-extrabold text-aiViolet">Potential</div>
+                <div class="text-[10px] text-slateBody mt-0.5">Recent Buyers</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-center">
+                <div class="text-xs font-extrabold text-warnAmber">At-Risk</div>
+                <div class="text-[10px] text-slateBody mt-0.5">Churn Alert</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-100 border border-slate-300 text-center">
+                <div class="text-xs font-extrabold text-slate-700">Hibernating</div>
+                <div class="text-[10px] text-slateBody mt-0.5">Inactive</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Silhouette & Win-Back Trigger -->
+          <div class="space-y-3">
+            <div class="bg-indigo-50/60 p-3.5 rounded-xl border border-indigo-200 flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-mono uppercase text-aiViolet font-bold">Cluster Separation Quality</div>
+                <div class="text-sm font-extrabold text-slateDark">Silhouette Score: 0.5828 <span class="text-xs font-normal text-slateBody">(Surpasses 0.40 Academic Benchmark)</span></div>
+              </div>
+              <span class="px-2.5 py-1 rounded bg-white text-aiViolet font-mono text-xs font-bold border border-indigo-200">+45.7% Above Target</span>
+            </div>
+            <div class="bg-amber-50/70 p-3 rounded-xl border border-amber-200 flex items-center justify-between text-xs">
+              <span class="font-bold text-slateDark">🎯 Automated Win-Back Coupon Trigger (At-Risk Segment)</span>
+              <span class="font-mono font-bold text-warnAmber">HITL Approval Gate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 10: GENERATIVE UI (GenUI): THE MODERN USER EXPERIENCE
+    ====================================================================== -->
+    <section class="slide" data-slide="10" data-section="06 // Generative UI (GenUI)"
+      data-script="بقيادة عبد الله سامح، تخلصنا تماماً من الردود النصية الطويلة المملة. عندما يتحدث التاجر مع TalkShop، يقوم الوكيل ببث مكونات React حية وتفاعلية مباشرة داخل المحادثة (Generative UI): مثل كارت معاينة تعديل الأسعار الجماعي، كارت التنبؤ بالمبيعات مع منحنى الثقة، كارت شرائح العملاء RFM، وكارت إنذارات المخزون مع الشحن عبر بوسطة.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-skyTech">Slide 10 • Generative UI (GenUI) Component Registry</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Transforming Chat into Dynamic Interactive React Widgets</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-sky-50 border border-sky-200 text-skyTech font-mono text-xs font-bold">
+          Lead: Abdallah Sameh • Zero Plain-Markdown Blobs
+        </div>
+      </div>
+
+      <!-- 2x2 Visual Card Mockups -->
+      <div class="grid grid-cols-2 grid-rows-2 gap-5 my-auto flex-1 py-2">
+        <!-- Mockup 1: BulkPricePreviewCard -->
+        <div class="bento-card p-4 flex flex-col justify-between border-t-4 border-t-skyTech">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div class="flex items-center gap-2">
+              <code class="text-xs font-mono font-bold text-skyTech bg-sky-50 px-2 py-0.5 rounded">&lt;BulkPricePreviewCard /&gt;</code>
+              <span class="text-xs text-slate-400">Category: Speakers (-15%)</span>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-emerald-50 text-finEmerald font-mono text-[10px] font-bold">Margin Safe ✓</span>
+          </div>
+          <div class="my-2 bg-slate-50 rounded-xl p-2.5 border border-slate-200 text-xs">
+            <div class="grid grid-cols-4 font-mono text-[10px] text-slate-400 pb-1 border-b border-slate-200">
+              <span>SKU / Item</span><span>Old Price</span><span>New Price</span><span>Gross Margin</span>
+            </div>
+            <div class="grid grid-cols-4 py-1.5 font-semibold text-slateDark items-center">
+              <span>JBL Flip 6</span><span class="line-through text-slate-400">4,800 EGP</span><span class="text-skyTech font-bold">4,080 EGP</span><span class="text-finEmerald font-mono">28.9%</span>
+            </div>
+            <div class="grid grid-cols-4 py-1 font-semibold text-slateDark items-center border-t border-slate-100">
+              <span>Anker Soundcore</span><span class="line-through text-slate-400">2,200 EGP</span><span class="text-skyTech font-bold">1,870 EGP</span><span class="text-finEmerald font-mono">31.4%</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-[11px] font-mono text-slate-500">14 SKUs Affected • Cost Floor Verified</span>
+            <div class="flex gap-2">
+              <span class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold">Cancel</span>
+              <span class="px-3 py-1 rounded-lg bg-finEmerald text-white text-xs font-bold shadow-sm">✓ Commit Changes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mockup 2: SalesForecastCard -->
+        <div class="bento-card p-4 flex flex-col justify-between border-t-4 border-t-aiViolet">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div class="flex items-center gap-2">
+              <code class="text-xs font-mono font-bold text-aiViolet bg-indigo-50 px-2 py-0.5 rounded">&lt;SalesForecastCard /&gt;</code>
+              <span class="text-xs text-slate-400">Horizon: 30 Days</span>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-amber-50 text-warnAmber font-mono text-[10px] font-bold">Restock Alert: 9 Days</span>
+          </div>
+          <!-- Mini SVG Line Chart with Shaded 95% Confidence Band -->
+          <div class="my-2 bg-slate-50 rounded-xl p-3 border border-slate-200 flex items-center justify-between">
+            <svg class="w-3/4 h-20" viewBox="0 0 300 70">
+              <!-- 95% Confidence Band Polygon -->
+              <polygon points="10,50 70,40 130,25 190,18 250,10 290,8 290,45 250,42 190,48 130,52 70,58 10,62" fill="rgba(99, 102, 241, 0.18)" />
+              <!-- Median Forecast Line -->
+              <polyline fill="none" stroke="#6366F1" stroke-width="3" points="10,56 70,49 130,38 190,32 250,25 290,22" />
+              <!-- Dots -->
+              <circle cx="130" cy="38" r="4" fill="#0284C7" />
+              <circle cx="250" cy="25" r="4" fill="#6366F1" />
+            </svg>
+            <div class="text-right">
+              <div class="text-[10px] font-mono text-slate-400">Predicted Demand</div>
+              <div class="text-lg font-extrabold text-aiViolet">+342 Units</div>
+              <div class="text-[10px] font-mono text-finEmerald">95% CI: [298–389]</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-mono text-[11px] text-slate-500">SHAP Top Driver: Discount (+65)</span>
+            <span class="font-bold text-aiViolet">ROP = 145 Units</span>
+          </div>
+        </div>
+
+        <!-- Mockup 3: CustomerSegmentsCard -->
+        <div class="bento-card p-4 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div class="flex items-center gap-2">
+              <code class="text-xs font-mono font-bold text-finEmerald bg-emerald-50 px-2 py-0.5 rounded">&lt;CustomerSegmentsCard /&gt;</code>
+              <span class="text-xs text-slate-400">K-Means (K=5)</span>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-indigo-50 text-aiViolet font-mono text-[10px] font-bold">Silhouette: 0.5828</span>
+          </div>
+          <div class="my-2 flex items-center justify-between bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <!-- SVG Donut Chart -->
+            <div class="flex items-center gap-4">
+              <svg class="w-16 h-16" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.9" fill="transparent" stroke="#10B981" stroke-width="4.5" stroke-dasharray="30 70" stroke-dashoffset="25"></circle>
+                <circle cx="18" cy="18" r="15.9" fill="transparent" stroke="#0284C7" stroke-width="4.5" stroke-dasharray="25 75" stroke-dashoffset="95"></circle>
+                <circle cx="18" cy="18" r="15.9" fill="transparent" stroke="#D97706" stroke-width="4.5" stroke-dasharray="20 80" stroke-dashoffset="70"></circle>
+                <circle cx="18" cy="18" r="15.9" fill="transparent" stroke="#6366F1" stroke-width="4.5" stroke-dasharray="25 75" stroke-dashoffset="50"></circle>
+              </svg>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-finEmerald"></span>Champions (28%)</span>
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-skyTech"></span>Loyal (24%)</span>
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-warnAmber"></span>At-Risk (19%)</span>
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-aiViolet"></span>Potential (29%)</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-[11px] font-mono text-slate-500">412 At-Risk Customers Identified</span>
+            <span class="px-3 py-1 rounded-lg bg-skyTech text-white text-xs font-bold shadow-sm">🚀 Launch Targeted Promo</span>
+          </div>
+        </div>
+
+        <!-- Mockup 4: InventoryAlertsList -->
+        <div class="bento-card p-4 flex flex-col justify-between border-t-4 border-t-warnAmber">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div class="flex items-center gap-2">
+              <code class="text-xs font-mono font-bold text-warnAmber bg-amber-50 px-2 py-0.5 rounded">&lt;InventoryAlertsList /&gt;</code>
+              <span class="text-xs text-slate-400">Stockout Velocity Engine</span>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-rose-50 text-dangerRose font-mono text-[10px] font-bold">3 Critical SKUs</span>
+          </div>
+          <div class="my-2 space-y-2 text-xs">
+            <div class="p-2 rounded-xl bg-rose-50/60 border border-rose-200 flex items-center justify-between">
+              <div>
+                <div class="font-bold text-slateDark">Anker 65W GaN Fast Charger</div>
+                <div class="text-[11px] text-slateBody font-mono">Stock: 12 units | ROP: 45 units</div>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-dangerRose text-white font-mono text-xs font-bold">3.2 Days to Zero</span>
+            </div>
+            <div class="p-2 rounded-xl bg-amber-50/60 border border-amber-200 flex items-center justify-between">
+              <div>
+                <div class="font-bold text-slateDark">Samsung T7 Shield 1TB SSD</div>
+                <div class="text-[11px] text-slateBody font-mono">Stock: 19 units | ROP: 35 units</div>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-warnAmber text-white font-mono text-xs font-bold">5.8 Days to Zero</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-[11px] font-mono text-slate-500">Courier: Bosta Express Restock</span>
+            <span class="px-3 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold">📦 Issue Supplier PO</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 11: REAL-WORLD SCENARIOS IN EGYPTIAN ARABIC
+    ====================================================================== -->
+    <section class="slide" data-slide="11" data-section="06 // Egyptian Arabic Scenarios"
+      data-script="نستعرض هنا 3 سيناريوهات حقيقية بالعامية المصرية من داخل النظام: السيناريو الأول تشغيلي لتطبيق خصم 15% على السماعات اللي رصيدها أكثر من 50 قطعة. السيناريو الثاني تحليلي لمقارنة مبيعات فرع التجمع بفرع المعادي الشهر الماضي. والسيناريو الثالث قانوني يجيب على سؤال التاجر حول حق العميل في إرجاع سماعة بعد 20 يوماً بالاستناد إلى مواد قانون حماية المستهلك المصري 181 لسنة 2018.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-skyTech">Slide 11 • Live Production Workflows</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Dialectal NLP &amp; Autonomous Operations in Action</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-sky-50 border border-sky-200 text-skyTech font-arabic text-xs font-bold ar-text">
+          من الأمر بالعامية المصرية إلى التنفيذ الفوري
+        </div>
+      </div>
+
+      <!-- 3 Scenario Cards -->
+      <div class="grid grid-cols-3 gap-6 my-auto flex-1 py-4">
+        <!-- Scenario 1 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-skyTech">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-md bg-sky-50 text-skyTech font-mono text-xs font-bold">Scenario 01 • Operational</span>
+              <i data-lucide="tag" class="w-5 h-5 text-skyTech"></i>
+            </div>
+            <div class="bg-slate-900 text-white p-4 rounded-xl mb-4 font-arabic ar-text">
+              <div class="text-[10px] font-mono text-sky-300 uppercase mb-1">Merchant Prompt</div>
+              <div class="text-base font-bold leading-relaxed">"طبق خصم 15% على السماعات اللي رصيدها أكتر من 50"</div>
+            </div>
+            <div class="space-y-2.5 text-xs text-slateBody">
+              <div class="flex items-start gap-2">
+                <span class="font-mono font-bold text-skyTech">01.</span>
+                <span>Extracts intent <code class="font-mono">bulk_update_prices</code>, category=<code class="font-mono">Speakers</code>, stock &gt; 50.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="font-mono font-bold text-skyTech">02.</span>
+                <span>Executes dry-run verifying $\text{New Price} > \text{Cost Price}$ across 14 matching SKUs.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="font-mono font-bold text-skyTech">03.</span>
+                <span>Renders <code class="font-mono">&lt;BulkPricePreviewCard /&gt;</code> and updates 14 SKUs atomically upon approval.</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Execution Mode</span>
+            <span class="text-finEmerald font-bold">HITL Guarded Write</span>
+          </div>
+        </div>
+
+        <!-- Scenario 2 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-aiViolet">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-md bg-indigo-50 text-aiViolet font-mono text-xs font-bold">Scenario 02 • Analytical BI</span>
+              <i data-lucide="bar-chart-3" class="w-5 h-5 text-aiViolet"></i>
+            </div>
+            <div class="bg-slate-900 text-white p-4 rounded-xl mb-4 font-arabic ar-text">
+              <div class="text-[10px] font-mono text-indigo-300 uppercase mb-1">Merchant Prompt</div>
+              <div class="text-base font-bold leading-relaxed">"عايز أعرف مبيعات فرع التجمع مقارنة بفرع المعادي الشهر اللي فات"</div>
+            </div>
+            <div class="space-y-2.5 text-xs text-slateBody">
+              <div class="flex items-start gap-2">
+                <span class="font-mono font-bold text-aiViolet">01.</span>
+                <span>Normalizes Egyptian location entities (New Cairo / Maadi) &amp; relative date window.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="font-mono font-bold text-aiViolet">02.</span>
+                <span>Generates AST-validated 3-table JOIN SQL query with <code class="font-mono">tenant_id</code> filter.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="font-mono font-bold text-aiViolet">03.</span>
+                <span>Formats currency in EGP and streams interactive Recharts Bar Chart + Arabic insight.</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Execution Mode</span>
+            <span class="text-aiViolet font-bold">AST Sandboxed SELECT</span>
+          </div>
+        </div>
+
+        <!-- Scenario 3 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Scenario 03 • Legal &amp; Policy RAG</span>
+              <i data-lucide="scale" class="w-5 h-5 text-finEmerald"></i>
+            </div>
+            <div class="bg-slate-900 text-white p-4 rounded-xl mb-4 font-arabic ar-text">
+              <div class="text-[10px] font-mono text-emerald-300 uppercase mb-1">Merchant Prompt</div>
+              <div class="text-base font-bold leading-relaxed">"العميل عايز يرجع سماعة بعد 20 يوم.. هل ده قانوني؟"</div>
+            </div>
+            <div class="space-y-2.5 text-xs text-slateBody">
+              <div class="flex items-start gap-2">
+                <span class="font-mono font-bold text-finEmerald">01.</span>
+                <span>Queries Store Policy RAG indexed with <strong>Egyptian Consumer Protection Law 181/2018</strong>.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="font-mono font-bold text-finEmerald">02.</span>
+                <span>Distinguishes <strong>Article 17</strong> (14-day return without defect) vs. <strong>Article 21</strong> (30-day return if defective).</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="font-mono font-bold text-finEmerald">03.</span>
+                <span>Advises merchant: Only eligible if manufacturing defect exists; cites official legal clause.</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Execution Mode</span>
+            <span class="text-finEmerald font-bold">Citation-Grounded RAG</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 12: EGYPTIAN COMMERCE LOCALIZATION & INTEGRATIONS
+    ====================================================================== -->
+    <section class="slide" data-slide="12" data-section="07 // Egyptian Localization"
+      data-script="لتكون المنصة قابلة للتشغيل الفوري في السوق المصري، قمنا بدمج 3 ركائز محلية بقيادة عادل أحمد ورؤى أشرف: أولاً بوابات الدفع عبر Paymob لدعم بطاقات ميزة، فيزا، إنستاباي، وأكواد فوري. ثانياً الشحن الذكي عبر Bosta لإصدار بوالص الشحن AWB تلقائياً وحساب وقت التوصيل حسب المحافظة. ثالثاً محرك RAG القانوني المحمل مسبقاً بقانون حماية المستهلك المصري 181 لسنة 2018.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-finEmerald">Slide 12 • Ecosystem Localization</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Tailored for Egyptian Market Realities</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-finEmerald font-mono text-xs font-bold">
+          Leads: Adel Ahmed (Integrations) &amp; Roaa Ashraf (Policy RAG)
+        </div>
+      </div>
+
+      <!-- 3 Integrated Pillars -->
+      <div class="grid grid-cols-3 gap-6 my-auto flex-1 py-4">
+        <!-- Pillar 1: Paymob -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-skyTech">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-sky-50 text-skyTech flex items-center justify-center">
+                <i data-lucide="credit-card" class="w-6 h-6"></i>
+              </div>
+              <span class="px-3 py-1 rounded-full bg-sky-50 text-skyTech font-mono text-xs font-bold">FinTech Gateway</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-2">Payment Infrastructure (Paymob)</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-4">
+              Native EGP checkout flow supporting Egypt's dominant digital and cash-reference payment rails with webhook verification.
+            </p>
+            <div class="grid grid-cols-2 gap-2.5 text-xs font-bold text-slateDark">
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-skyTech"></span> Meeza National Cards
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-aiViolet"></span> InstaPay Transfers
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-warnAmber"></span> Fawry Reference Code
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-finEmerald"></span> Visa / Mastercard
+              </div>
+            </div>
+          </div>
+          <div class="bg-sky-50/70 p-3 rounded-xl border border-sky-200 text-xs font-mono text-skyTech font-bold">
+            ✓ HMAC Webhook Verification &amp; Auto Order State Sync
+          </div>
+        </div>
+
+        <!-- Pillar 2: Bosta -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-warnAmber">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-50 text-warnAmber flex items-center justify-center">
+                <i data-lucide="truck" class="w-6 h-6"></i>
+              </div>
+              <span class="px-3 py-1 rounded-full bg-amber-50 text-warnAmber font-mono text-xs font-bold">Last-Mile Logistics</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-2">Smart Logistics (Bosta Integration)</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-4">
+              Automatic Air Waybill (<code class="font-mono">shipping_awb</code>) generation upon order confirmation with live tracking and governorate-based SLAs:
+            </p>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span class="font-bold text-slateDark">Cairo &amp; Giza Hub</span>
+                <span class="font-mono font-bold text-finEmerald">24 Hours ETA</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span class="font-bold text-slateDark">Alexandria &amp; Delta</span>
+                <span class="font-mono font-bold text-skyTech">48 Hours ETA</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span class="font-bold text-slateDark">Upper Egypt &amp; Red Sea</span>
+                <span class="font-mono font-bold text-warnAmber">72 Hours ETA</span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-amber-50/70 p-3 rounded-xl border border-amber-200 text-xs font-mono text-warnAmber font-bold">
+            ✓ Real-time <code class="font-mono">&lt;OrderTrackingCard /&gt;</code> in Chat
+          </div>
+        </div>
+
+        <!-- Pillar 3: Law 181/2018 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-finEmerald flex items-center justify-center">
+                <i data-lucide="book-open-check" class="w-6 h-6"></i>
+              </div>
+              <span class="px-3 py-1 rounded-full bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Regulatory Compliance</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-2">Legal Guardrails (Law 181/2018)</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-4">
+              Policy RAG engine pre-loaded with official Egyptian Consumer Protection statutes protecting both merchant and consumer rights.
+            </p>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="font-bold text-slateDark">14-Day Standard Return Window</div>
+                <div class="text-slateBody text-[11px]">Unopened merchandise in original packaging with invoice.</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="font-bold text-slateDark">30-Day Defective Item Protection</div>
+                <div class="text-slateBody text-[11px]">Full refund or replacement for verified manufacturing defects.</div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200 text-xs font-mono text-finEmerald font-bold">
+            ✓ Zero-Hallucination Legal Article Citations
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 13: OFFLINE & EDGE AI CAPABILITIES (ZERO-API ARCHITECTURE)
+    ====================================================================== -->
+    <section class="slide" data-slide="13" data-section="08 // Offline Edge AI"
+      data-script="ماذا لو أرادت مؤسسة كبرى تشغيل النظام بدون اتصال بالإنترنت نهائياً للحفاظ على سرية البيانات وتوفير تكلفة الـ APIs؟ قمنا بعمل Fine-Tuning لنموذج Qwen2.5-Coder-3B باستخدام تقنية QLoRA على مجموعة بيانات اللهجة المصرية لـ SQL، وضغطه إلى 4-bit GGUF. النموذج يعمل محلياً بالكامل على كارت شاشة استهلاكي RTX 3050 بذاكرة 2.2 جيجابايت فقط وبسرعة 38 توكن في الثانية وبتكلفة تشغيل 0 دولار.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-aiViolet">Slide 13 • Air-Gapped Edge AI Deployment</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">100% Offline Zero-API Architecture (Local GGUF Runtime)</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-slate-900 text-white font-mono text-xs font-bold">
+          Zero Cloud Fees • 100% On-Premise Data Sovereignty
+        </div>
+      </div>
+
+      <!-- Two Visual Feature Cards -->
+      <div class="grid grid-cols-2 gap-8 my-auto flex-1 py-4">
+        <!-- Card 1: Custom Fine-Tuned Model -->
+        <div class="bento-card p-7 flex flex-col justify-between border-t-4 border-t-aiViolet">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-aiViolet flex items-center justify-center">
+                <i data-lucide="brain-circuit" class="w-8 h-8"></i>
+              </div>
+              <span class="px-3 py-1 rounded-full bg-indigo-50 text-aiViolet font-mono text-xs font-bold">QLoRA Fine-Tuning + GGUF</span>
+            </div>
+            <h3 class="text-2xl font-extrabold text-slateDark mb-2">Custom Fine-Tuned Egyptian SQL Model</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-6">
+              Fine-tuned specifically on Egyptian colloquial Arabic and Franco-Arab Text-to-SQL schemas, eliminating dependence on external OpenAI or Google cloud APIs.
+            </p>
+
+            <div class="space-y-3">
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span class="text-xs font-bold text-slateBody uppercase font-mono">Base Foundation Model</span>
+                <span class="font-mono text-sm font-extrabold text-slateDark">Qwen2.5-Coder-3B-Instruct</span>
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span class="text-xs font-bold text-slateBody uppercase font-mono">Adaptation Method</span>
+                <span class="font-mono text-sm font-extrabold text-aiViolet">QLoRA (4-bit NormalFloat)</span>
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span class="text-xs font-bold text-slateBody uppercase font-mono">Quantized Artifact</span>
+                <code class="font-mono text-xs font-bold text-skyTech bg-sky-50 px-2.5 py-1 rounded">qwen2.5-coder-3b-egyptian.Q4_K_M.gguf</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-mono text-slate-500">
+            <span>Runtime Engine: llama.cpp / llama-cpp-python</span>
+            <span class="text-aiViolet font-bold">Air-Gapped Ready</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Consumer Hardware Feasibility -->
+        <div class="bento-card p-7 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-finEmerald flex items-center justify-center">
+                <i data-lucide="cpu" class="w-8 h-8"></i>
+              </div>
+              <span class="px-3 py-1 rounded-full bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Edge Hardware Benchmark</span>
+            </div>
+            <h3 class="text-2xl font-extrabold text-slateDark mb-2">Consumer Hardware Feasibility</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-6">
+              Engineered to run smoothly on standard merchant laptops and affordable local office workstations without costly enterprise A100 GPUs.
+            </p>
+
+            <!-- 3 Big Hardware Stat Boxes -->
+            <div class="grid grid-cols-3 gap-3.5 mb-4">
+              <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-center">
+                <div class="text-xs font-mono text-slateBody uppercase">VRAM Footprint</div>
+                <div class="text-3xl font-mono font-extrabold text-finEmerald my-1">2.2 GB</div>
+                <div class="text-[11px] text-slateBody">Fits on 4GB GPU</div>
+              </div>
+              <div class="p-4 rounded-2xl bg-sky-50/70 border border-sky-200 text-center">
+                <div class="text-xs font-mono text-slateBody uppercase">Inference Speed</div>
+                <div class="text-3xl font-mono font-extrabold text-skyTech my-1">38 tok/s</div>
+                <div class="text-[11px] text-slateBody">CUDA Accelerated</div>
+              </div>
+              <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-center">
+                <div class="text-xs font-mono text-slateBody uppercase">Operating Cost</div>
+                <div class="text-3xl font-mono font-extrabold text-aiViolet my-1">$0.00</div>
+                <div class="text-[11px] text-slateBody">Zero Token Fees</div>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-900 text-white flex items-center justify-between text-xs font-mono">
+              <span>Verified Target GPU: NVIDIA GeForce RTX 3050 (4GB VRAM)</span>
+              <span class="text-emerald-400 font-bold">✓ 100% Local</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-mono text-slate-500">
+            <span>Zero External Network Calls Required</span>
+            <span class="text-finEmerald font-bold">Enterprise Privacy Compliant</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 14: ACADEMIC BENCHMARKS, QA & EVALUATION RESULTS
+    ====================================================================== -->
+    <section class="slide" data-slide="14" data-section="09 // Evaluation & QA"
+      data-script="من الناحية الأكاديمية وهندسة الجودة، قمنا بتقييم النظام على معيار من 100 برومبت: حققنا 100% في الأمان وصد الهجمات، 98.5% في صحة بناء جمل الـ SQL، و92.0% في دقة التنفيذ الفعلي على الجداول المعقدة، بمتوسط زمن استجابة 100.9 مللي ثانية. كما اجتازت جميع حزم الاختبارات الآلية الـ 6 الخاصة بكل عضو من أعضاء الفريق نسبة نجاح 100%.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-skyTech">Slide 14 • Empirical Evaluation &amp; Quality Assurance</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Academic Benchmarks &amp; Automated Slice Verification</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-finEmerald font-mono text-xs font-bold">
+          100-Prompt Evaluation Dataset • 6 Unittest Suites
+        </div>
+      </div>
+
+      <!-- Top KPI Summary Grid (4 Large Stat Badges) -->
+      <div class="grid grid-cols-4 gap-5 my-auto">
+        <div class="bento-card p-6 border-t-4 border-t-finEmerald">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold uppercase text-finEmerald">Security Compliance</span>
+            <i data-lucide="shield-check" class="w-5 h-5 text-finEmerald"></i>
+          </div>
+          <div class="text-5xl font-mono font-extrabold text-slateDark my-2">100.0%</div>
+          <p class="text-xs text-slateBody font-medium">20/20 Destructive Adversarial SQL &amp; Prompt Injection Attacks Blocked</p>
+        </div>
+
+        <div class="bento-card p-6 border-t-4 border-t-skyTech">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold uppercase text-skyTech">Valid SQL Rate (VSR)</span>
+            <i data-lucide="check-check" class="w-5 h-5 text-skyTech"></i>
+          </div>
+          <div class="text-5xl font-mono font-extrabold text-slateDark my-2">98.5%</div>
+          <p class="text-xs text-slateBody font-medium">Syntactically valid AST-verified SQL queries across 100 test prompts</p>
+        </div>
+
+        <div class="bento-card p-6 border-t-4 border-t-aiViolet">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold uppercase text-aiViolet">Execution Accuracy (EX)</span>
+            <i data-lucide="target" class="w-5 h-5 text-aiViolet"></i>
+          </div>
+          <div class="text-5xl font-mono font-extrabold text-slateDark my-2">92.0%</div>
+          <p class="text-xs text-slateBody font-medium">Exact ground-truth relational result match on multi-table ERP joins</p>
+        </div>
+
+        <div class="bento-card p-6 border-t-4 border-t-warnAmber">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold uppercase text-warnAmber">Median Latency ($p_{50}$)</span>
+            <i data-lucide="zap" class="w-5 h-5 text-warnAmber"></i>
+          </div>
+          <div class="text-5xl font-mono font-extrabold text-slateDark my-2">100.9<span class="text-2xl">ms</span></div>
+          <p class="text-xs text-slateBody font-medium">Tail latency $p_{95} = 119.8\text{ ms}$ for end-to-end tool routing &amp; validation</p>
+        </div>
+      </div>
+
+      <!-- Bottom Half: Automated QA Test Suites Verified -->
+      <div class="bento-card p-6 bg-white">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <span class="text-xs font-mono font-bold uppercase text-skyTech">Continuous Integration Verification</span>
+            <h3 class="text-lg font-extrabold text-slateDark">100% Pass Rate Across All 6 Individual Team Engineering Slice Suites</h3>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-emerald-50 text-finEmerald border border-emerald-200 font-mono text-xs font-bold">
+            ✓ All Assertions Passing
+          </span>
+        </div>
+
+        <div class="grid grid-cols-6 gap-3">
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="w-2 h-2 rounded-full bg-finEmerald"></span>
+              <span class="font-mono text-[10px] font-bold text-finEmerald">PASS</span>
+            </div>
+            <div class="font-mono text-xs font-bold text-slateDark truncate">test_moustafa_slice</div>
+            <div class="text-[11px] text-slateBody mt-0.5">LangGraph, AST &amp; HITL</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="w-2 h-2 rounded-full bg-finEmerald"></span>
+              <span class="font-mono text-[10px] font-bold text-finEmerald">PASS</span>
+            </div>
+            <div class="font-mono text-xs font-bold text-slateDark truncate">test_adel_slice</div>
+            <div class="text-[11px] text-slateBody mt-0.5">RLS, Auth &amp; Order State</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="w-2 h-2 rounded-full bg-finEmerald"></span>
+              <span class="font-mono text-[10px] font-bold text-finEmerald">PASS</span>
+            </div>
+            <div class="font-mono text-xs font-bold text-slateDark truncate">test_abdallah_slice</div>
+            <div class="text-[11px] text-slateBody mt-0.5">GenUI Cards &amp; RTL UI</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="w-2 h-2 rounded-full bg-finEmerald"></span>
+              <span class="font-mono text-[10px] font-bold text-finEmerald">PASS</span>
+            </div>
+            <div class="font-mono text-xs font-bold text-slateDark truncate">test_retaj_slice</div>
+            <div class="text-[11px] text-slateBody mt-0.5">LightGBM, SHAP &amp; ROP</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="w-2 h-2 rounded-full bg-finEmerald"></span>
+              <span class="font-mono text-[10px] font-bold text-finEmerald">PASS</span>
+            </div>
+            <div class="font-mono text-xs font-bold text-slateDark truncate">test_renad_slice</div>
+            <div class="text-[11px] text-slateBody mt-0.5">Log-RFM &amp; Benchmark</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="w-2 h-2 rounded-full bg-finEmerald"></span>
+              <span class="font-mono text-[10px] font-bold text-finEmerald">PASS</span>
+            </div>
+            <div class="font-mono text-xs font-bold text-slateDark truncate">test_roaa_slice</div>
+            <div class="text-[11px] text-slateBody mt-0.5">Policy RAG &amp; Guardrails</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 15: STRATEGIC FUTURE ROADMAP
+    ====================================================================== -->
+    <section class="slide" data-slide="15" data-section="10 // Future Roadmap"
+      data-script="رؤيتنا لمنصة TalkShop لا تتوقف عند مشروع التخرج، بل وضعنا خارطة طريق استراتيجية من 3 مراحل: المرحلة الأولى تشمل الربط المباشر مع منظومة الفاتورة الإلكترونية لمصلحة الضرائب المصرية ومساعد صوتي بالعامية المصرية عبر Whisper. المرحلة الثانية تشمل مساعد التجارة الاجتماعية لتحويل رسائل واتساب وإنستجرام إلى طلبات آلية. والمرحلة الثالثة هي التعلم الفيدرالي Federated Learning عبر المتاجر لتحسين التنبؤ بالطلب دون كشف سرية بيانات أي تاجر.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-aiViolet">Slide 15 • Strategic Product Evolution</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Beyond Graduation: Scaling TalkShop Across MENA</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-aiViolet font-mono text-xs font-bold">
+          3-Horizon Enterprise Expansion Plan
+        </div>
+      </div>
+
+      <!-- Visual Timeline Progress Bar -->
+      <div class="bento-card px-6 py-3 bg-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-skyTech text-white font-mono text-xs font-bold flex items-center justify-center">1</span>
+          <span class="text-xs font-bold text-slateDark">Q3–Q4 2026: ETA Tax + Voice AI</span>
+        </div>
+        <div class="flex-1 h-1 bg-gradient-to-r from-skyTech to-aiViolet mx-4 rounded-full"></div>
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-aiViolet text-white font-mono text-xs font-bold flex items-center justify-center">2</span>
+          <span class="text-xs font-bold text-slateDark">2027: Omnichannel Social Copilot</span>
+        </div>
+        <div class="flex-1 h-1 bg-gradient-to-r from-aiViolet to-finEmerald mx-4 rounded-full"></div>
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-finEmerald text-white font-mono text-xs font-bold flex items-center justify-center">3</span>
+          <span class="text-xs font-bold text-slateDark">2028+: Cross-Tenant Federated ML</span>
+        </div>
+      </div>
+
+      <!-- 3 Phased Horizons -->
+      <div class="grid grid-cols-3 gap-6 my-auto flex-1 py-4">
+        <!-- Horizon 1 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-skyTech">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 rounded-full bg-sky-50 text-skyTech font-mono text-xs font-bold">Horizon 01 • Near-Term (Q3–Q4 2026)</span>
+              <i data-lucide="mic" class="w-5 h-5 text-skyTech"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-3">ETA e-Invoicing &amp; Egyptian Voice Copilot</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-4">
+              Direct cryptographic integration with the <strong>Egyptian Tax Authority (ETA)</strong> e-Receipt/e-Invoicing portal alongside hands-free dialectal voice commands.
+            </p>
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2.5">
+                <i data-lucide="file-check-2" class="w-4 h-4 text-skyTech shrink-0"></i>
+                <span class="font-medium text-slateDark">Automated ETA Tax UUID signing on order completion</span>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2.5">
+                <i data-lucide="audio-waveform" class="w-4 h-4 text-skyTech shrink-0"></i>
+                <span class="font-medium text-slateDark">Fine-tuned Whisper-Large-v3 for Egyptian Arabic speech-to-intent</span>
+              </div>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-arabic ar-text text-skyTech font-bold">
+            <span>الربط مع الفاتورة الإلكترونية والأوامر الصوتية</span>
+            <span class="font-mono">Phase I</span>
+          </div>
+        </div>
+
+        <!-- Horizon 2 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-aiViolet">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 rounded-full bg-indigo-50 text-aiViolet font-mono text-xs font-bold">Horizon 02 • Medium-Term (2027)</span>
+              <i data-lucide="message-square-share" class="w-5 h-5 text-aiViolet"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-3">Unified Social Commerce Copilot</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-4">
+              Autonomous omnichannel agent converting unstructured shopper chats on <strong>WhatsApp Business, Instagram DMs, and Messenger</strong> into verified ERP orders.
+            </p>
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2.5">
+                <i data-lucide="shopping-bag" class="w-4 h-4 text-aiViolet shrink-0"></i>
+                <span class="font-medium text-slateDark">Real-time inventory reservation &amp; Paymob payment link generation in DMs</span>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2.5">
+                <i data-lucide="image" class="w-4 h-4 text-aiViolet shrink-0"></i>
+                <span class="font-medium text-slateDark">Multimodal visual product search from customer screenshots</span>
+              </div>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-arabic ar-text text-aiViolet font-bold">
+            <span>تحويل محادثات واتساب وإنستجرام لطلبات آلية</span>
+            <span class="font-mono">Phase II</span>
+          </div>
+        </div>
+
+        <!-- Horizon 3 -->
+        <div class="bento-card p-6 flex flex-col justify-between border-t-4 border-t-finEmerald">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 rounded-full bg-emerald-50 text-finEmerald font-mono text-xs font-bold">Horizon 03 • Long-Term (2028+)</span>
+              <i data-lucide="globe-lock" class="w-5 h-5 text-finEmerald"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-slateDark mb-3">Cross-Tenant Federated Learning</h3>
+            <p class="text-sm text-slateBody leading-relaxed mb-4">
+              Privacy-preserving collaborative demand forecasting across thousands of stores without ever sharing or centralizing raw merchant sales records.
+            </p>
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2.5">
+                <i data-lucide="share-2" class="w-4 h-4 text-finEmerald shrink-0"></i>
+                <span class="font-medium text-slateDark">Encrypted gradient aggregation solving cold-start for new stores</span>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2.5">
+                <i data-lucide="shield" class="w-4 h-4 text-finEmerald shrink-0"></i>
+                <span class="font-medium text-slateDark">Differential privacy guarantees preserving strict tenant isolation</span>
+              </div>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-arabic ar-text text-finEmerald font-bold">
+            <span>التعلم الفيدرالي المشترك مع حفظ الخصوصية</span>
+            <span class="font-mono">Phase III</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 16: CONCLUSION & LIVE DEMONSTRATION INVITATION
+    ====================================================================== -->
+    <section class="slide" data-slide="16" data-section="10 // Conclusion & Live Demo"
+      data-script="في الختام، نفخر بتقديم منصة TalkShop كأول نظام ERP وتجارة إلكترونية وكيل (Agentic) متكامل مصمم خصيصاً للسوق المصري يجمع بين هندسة البرمجيات المتقدمة، تعلم الآلة التنبؤي، ومعالجة اللغة العربية الطبيعية بأمان تام. نشكر حضراتكم جزيل الشكر على حسن الاستماع، وندعو لجنة التحكيم الموقرة الآن لتجربة المنصة في العرض الحي المباشر (Live Demo) وتلقي أسئلتكم.">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-3.5">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-9 w-auto object-contain drop-shadow-sm shrink-0" />
+          <div class="border-l border-slate-200 pl-3.5">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-skyTech">Slide 16 • Conclusion &amp; Live Defense Stage</span>
+            <h2 class="text-3xl font-extrabold text-slateDark mt-1 mt-0.5 tracking-tight">Conclusion &amp; Live TalkShop System Demonstration</h2>
+          </div>
+        </div>
+        <div class="px-4 py-1.5 rounded-xl bg-sky-50 border border-sky-200 text-skyTech font-mono text-xs font-bold">
+          Class of 2026 • Data Science &amp; AI Department
+        </div>
+      </div>
+
+      <!-- Two Main Cards -->
+      <div class="grid grid-cols-12 gap-6 my-auto flex-1 py-4">
+        <!-- Left Card: Project Milestones (6 cols) -->
+        <div class="col-span-6 bento-card p-7 flex flex-col justify-between border-t-4 border-t-skyTech">
+          <div>
+            <span class="text-xs font-mono font-bold uppercase text-skyTech">Key Contributions &amp; Milestones</span>
+            <h3 class="text-2xl font-extrabold text-slateDark mt-1 mb-5">What We Achieved in TalkShop</h3>
+
+            <div class="space-y-4">
+              <div class="flex items-start gap-3.5">
+                <div class="w-9 h-9 rounded-xl bg-sky-50 text-skyTech flex items-center justify-center shrink-0 mt-0.5">
+                  <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h4 class="text-base font-bold text-slateDark">First Production-Grade Agentic ERP for Egypt</h4>
+                  <p class="text-xs text-slateBody leading-relaxed">Native Egyptian dialect understanding integrated with Paymob, Bosta, and Consumer Protection Law 181/2018.</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3.5">
+                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-aiViolet flex items-center justify-center shrink-0 mt-0.5">
+                  <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h4 class="text-base font-bold text-slateDark">Elimination of Manual SQL &amp; Margin Risk</h4>
+                  <p class="text-xs text-slateBody leading-relaxed">5-layer AST-sandboxed Text-to-SQL (100% security block rate) + Human-in-the-Loop gross margin protection.</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3.5">
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-finEmerald flex items-center justify-center shrink-0 mt-0.5">
+                  <i data-lucide="award" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h4 class="text-base font-bold text-slateDark">High Academic Rigor Across AI Disciplines</h4>
+                  <p class="text-xs text-slateBody leading-relaxed">Unifies LangGraph State Machines, LightGBM Quantile Forecasting (14.2% WAPE), Log-RFM K-Means (0.5828 Silhouette), and 4-bit GGUF Edge AI.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-200 flex items-center justify-between text-xs font-mono text-slate-500">
+            <span>6 Team Slices • 100% Unittest Verified</span>
+            <span class="text-finEmerald font-bold">Production Ready</span>
+          </div>
+        </div>
+
+        <!-- Right Card: The Live Stage (6 cols) -->
+        <div class="col-span-6 bento-card p-7 flex flex-col justify-between bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white border-none shadow-xl">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 font-mono text-xs font-bold mb-4">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              LIVE SYSTEM READY FOR INSPECTION
+            </div>
+            <h3 class="text-2xl font-extrabold leading-snug mb-3">
+              "Now, we invite the esteemed evaluation committee to experience the live platform in action."
+            </h3>
+            <p class="text-sm text-slate-300 font-arabic ar-text leading-relaxed mb-6">
+              ندعو السادة أعضاء لجنة التحكيم الموقرين الآن لتجربة المنصة بشكل حي ومباشر، ومناقشة الكود المصدري والنماذج الإحصائية.
+            </p>
+
+            <!-- Live Demo Links -->
+            <div class="space-y-3">
+              <div class="p-4 rounded-xl bg-white/10 border border-white/15 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="layout" class="w-5 h-5 text-sky-400"></i>
+                  <div>
+                    <div class="text-xs text-slate-300">Frontend Command Center &amp; Storefront</div>
+                    <div class="font-mono text-sm font-bold text-white">http://localhost:5173</div>
+                  </div>
+                </div>
+                <span class="px-2.5 py-1 rounded bg-skyTech text-white font-mono text-xs font-bold">React 18 + GenUI</span>
+              </div>
+
+              <div class="p-4 rounded-xl bg-white/10 border border-white/15 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="server" class="w-5 h-5 text-emerald-400"></i>
+                  <div>
+                    <div class="text-xs text-slate-300">Backend API &amp; Interactive Swagger Docs</div>
+                    <div class="font-mono text-sm font-bold text-white">http://localhost:8001/docs</div>
+                  </div>
+                </div>
+                <span class="px-2.5 py-1 rounded bg-finEmerald text-white font-mono text-xs font-bold">FastAPI + LangGraph</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-white/15 flex items-center justify-between">
+            <div class="text-xs text-slate-300">
+              Thank You • <span class="font-arabic font-bold text-white">شكراً لحسن استماعكم</span>
+            </div>
+            <span class="px-4 py-1.5 rounded-full bg-white text-slateDark font-extrabold text-xs">Q&amp;A Session Open</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Team Strip -->
+      <div class="bento-card py-2.5 px-6 bg-white flex items-center justify-between text-xs font-semibold text-slate-600">
+        <span>Moustafa Maher</span><span>•</span>
+        <span>Adel Ahmed</span><span>•</span>
+        <span>Abdallah Sameh</span><span>•</span>
+        <span>Retaj Hakim</span><span>•</span>
+        <span>Renad Hakim</span><span>•</span>
+        <span>Roaa Ashraf</span>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SPEAKER NOTES DRAWER (TOGGLED VIA BUTTON OR 'S' KEY)
+    ====================================================================== -->
+    <div id="speaker-drawer">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded bg-skyTech text-white font-mono text-xs font-bold">SPEAKER SCRIPT (ARABIC)</span>
+          <span id="drawer-slide-label" class="text-xs font-mono text-slate-500">Slide 01 / 16</span>
+        </div>
+        <button onclick="toggleSpeakerNotes()" class="text-xs font-bold text-slate-500 hover:text-slateDark flex items-center gap-1">
+          Close <kbd class="px-1.5 py-0.5 bg-slate-100 border rounded text-[10px] font-mono">S</kbd>
+        </button>
+      </div>
+      <p id="speaker-script-content" class="font-arabic ar-text text-lg font-bold text-slateDark leading-relaxed"></p>
+    </div>
+
+    <!-- =====================================================================
+         BOTTOM PRESENTATION HUD / CONTROL BAR
+    ====================================================================== -->
+    <div id="bottom-hud" class="absolute bottom-0 left-0 right-0 h-12 bg-white/90 backdrop-blur-md border-t border-slate-200 px-10 flex items-center justify-between z-50">
+      <!-- Left: Brand & Section -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-7 w-auto object-contain drop-shadow-sm" />
+          <span class="font-extrabold text-xs tracking-tight text-slateDark">TALK<span class="text-skyTech">SHOP</span> <span class="text-slate-400 font-mono">2026</span></span>
+        </div>
+        <span class="text-slate-300">|</span>
+        <span id="hud-section" class="font-mono text-xs font-semibold text-slate-500">01 // Cover &amp; Team</span>
+      </div>
+
+      <!-- Center: Progress Dots -->
+      <div id="progress-dots" class="flex items-center gap-1.5"></div>
+
+      <!-- Right: Controls -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleSpeakerNotes()" id="btn-notes" class="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-sky-50 hover:border-sky-200 text-xs font-bold text-slate-700 flex items-center gap-1.5 transition">
+          <i data-lucide="mic" class="w-3.5 h-3.5 text-skyTech"></i>
+          <span>Script (S)</span>
+        </button>
+        <button onclick="toggleGridModal()" class="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1.5 transition">
+          <i data-lucide="grid" class="w-3.5 h-3.5 text-aiViolet"></i>
+          <span>Slides (G)</span>
+        </button>
+        <!-- Print Modal Button -->
+        <button onclick="openPrintModal()" class="px-2.5 py-1 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-xs font-bold text-finEmerald flex items-center gap-1.5 transition" title="Open Print & Export Options (P)">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span>Print / PDF (P)</span>
+        </button>
+        <!-- Quick Print with Script -->
+        <button onclick="printDeck('with-script')" class="px-2.5 py-1 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-xs font-bold text-skyTech flex items-center gap-1.5 transition" title="Print Slides + Speaker Script on each page">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span>Print + Script</span>
+        </button>
+        <button onclick="toggleFullscreen()" class="p-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition" title="Fullscreen (F)">
+          <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+        </button>
+        <div class="flex items-center gap-1 ml-2">
+          <button onclick="prevSlide()" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slateDark transition">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <span id="hud-counter" class="font-mono text-xs font-bold px-2 text-slateDark">01 / 16</span>
+          <button onclick="nextSlide()" class="p-1.5 rounded-lg bg-skyTech hover:bg-sky-700 text-white transition">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =====================================================================
+       SLIDE OVERVIEW GRID MODAL (PRESS 'G')
+  ====================================================================== -->
+  <div id="grid-modal">
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+      <div>
+        <span class="text-xs font-mono font-bold uppercase text-skyTech">Presentation Navigator</span>
+        <h3 class="text-2xl font-extrabold text-slateDark">All 16 Slides — Quick Jump</h3>
+      </div>
+      <button onclick="toggleGridModal()" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold">
+        Close Navigator (ESC)
+      </button>
+    </div>
+    <div id="grid-container" class="grid grid-cols-4 gap-4"></div>
+  </div>
+
+
+  <!-- =====================================================================
+       PRINT / EXPORT OPTIONS MODAL (PRESS 'P')
+  ====================================================================== -->
+  <div id="print-modal">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-finEmerald flex items-center justify-center">
+            <i data-lucide="printer" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-extrabold text-slateDark">Print / Export Presentation Deck</h3>
+            <p class="text-xs text-slateBody">Select print layout format for PDF export or physical paper</p>
+          </div>
+        </div>
+        <button onclick="closePrintModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3.5 mb-6">
+        <!-- Option 1: Clean Slides Deck -->
+        <div onclick="printDeck('slides')" class="group p-4 rounded-xl border-2 border-slate-200 hover:border-skyTech hover:bg-sky-50/40 cursor-pointer transition flex items-center justify-between">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-lg bg-sky-50 text-skyTech flex items-center justify-center group-hover:bg-skyTech group-hover:text-white transition">
+              <i data-lucide="presentation" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-sm text-slateDark flex items-center gap-2">
+                <span>Presentation Slides Deck (PDF)</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-100 text-skyTech font-bold">1 Slide / Page</span>
+              </div>
+              <div class="text-xs text-slateBody mt-0.5">Exact 16:9 widescreen format, aligned &amp; modern, perfect for jury review or projector export.</div>
+            </div>
+          </div>
+          <button class="px-3.5 py-1.5 rounded-lg bg-skyTech text-white text-xs font-bold shrink-0">Print Deck →</button>
+        </div>
+
+        <!-- Option 2: Slides + Verbatim Arabic Script -->
+        <div onclick="printDeck('with-script')" class="group p-4 rounded-xl border-2 border-slate-200 hover:border-aiViolet hover:bg-indigo-50/40 cursor-pointer transition flex items-center justify-between">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-lg bg-indigo-50 text-aiViolet flex items-center justify-center group-hover:bg-aiViolet group-hover:text-white transition">
+              <i data-lucide="file-text" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-sm text-slateDark flex items-center gap-2">
+                <span>Slides + Speaker Script on Each Page</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-100 text-aiViolet font-bold">Recommended for Defense</span>
+              </div>
+              <div class="text-xs text-slateBody mt-0.5">Each page prints the complete slide visual PLUS the official Arabic defense speech script &amp; timing at the bottom.</div>
+            </div>
+          </div>
+          <button class="px-3.5 py-1.5 rounded-lg bg-aiViolet text-white text-xs font-bold shrink-0">Print with Script →</button>
+        </div>
+
+        <!-- Option 3: Speaker Cue-Cards Dossier Booklet -->
+        <div onclick="printDeck('script-booklet')" class="group p-4 rounded-xl border-2 border-slate-200 hover:border-finEmerald hover:bg-emerald-50/40 cursor-pointer transition flex items-center justify-between">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-lg bg-emerald-50 text-finEmerald flex items-center justify-center group-hover:bg-finEmerald group-hover:text-white transition">
+              <i data-lucide="book-open" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-sm text-slateDark flex items-center gap-2">
+                <span>Speaker Defense Script Booklet</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-100 text-finEmerald font-bold">Arabic Script Only</span>
+              </div>
+              <div class="text-xs text-slateBody mt-0.5">Comprehensive handheld defense cue-card guide with all 16 speech scripts, timing allocations, and speaking tips.</div>
+            </div>
+          </div>
+          <button class="px-3.5 py-1.5 rounded-lg bg-finEmerald text-white text-xs font-bold shrink-0">Print Booklet →</button>
+        </div>
+      </div>
+
+      <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs text-slate-500 font-mono">
+        <div class="flex items-center gap-2">
+          <i data-lucide="info" class="w-4 h-4 text-skyTech"></i>
+          <span>Tip: In Chrome Print Dialog, enable "Background graphics" and set Margins to "None"</span>
+        </div>
+        <span>Shortcuts: P (Print), S (Script), G (Grid)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Print Booklet Container for Script-Only Print Mode -->
+  <div id="script-booklet-container"></div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const totalSlides = slides.length;
+    let currentIndex = 0;
+    let notesOpen = false;
+    let gridOpen = false;
+
+    const hudCounter = document.getElementById('hud-counter');
+    const hudSection = document.getElementById('hud-section');
+    const progressDots = document.getElementById('progress-dots');
+    const speakerDrawer = document.getElementById('speaker-drawer');
+    const speakerScriptContent = document.getElementById('speaker-script-content');
+    const drawerSlideLabel = document.getElementById('drawer-slide-label');
+    const gridModal = document.getElementById('grid-modal');
+    const gridContainer = document.getElementById('grid-container');
+
+    // Build Progress Dots & Overview Grid
+    slides.forEach((slide, idx) => {
+      // Progress dot
+      const dot = document.createElement('button');
+      dot.className = 'h-2 rounded-full transition-all duration-200 bg-slate-300 w-2';
+      dot.title = `Slide ${idx + 1}`;
+      dot.onclick = () => goToSlide(idx);
+      progressDots.appendChild(dot);
+
+      // Grid card
+      const titleEl = slide.querySelector('h1, h2');
+      const titleText = titleEl ? titleEl.innerText : `Slide ${idx + 1}`;
+      const sectionText = slide.getAttribute('data-section') || '';
+      const card = document.createElement('div');
+      card.className = 'bento-card p-4 cursor-pointer hover:border-skyTech transition flex flex-col justify-between';
+      card.onclick = () => {
+        goToSlide(idx);
+        toggleGridModal(false);
+      };
+      card.innerHTML = `
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="px-2 py-0.5 rounded bg-sky-50 text-skyTech font-mono text-xs font-bold">Slide ${String(idx + 1).padStart(2, '0')}</span>
+            <span class="text-[11px] font-mono text-slate-400">${sectionText}</span>
+          </div>
+          <div class="font-bold text-sm text-slateDark line-clamp-2">${titleText}</div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-skyTech font-semibold">Jump to slide →</div>
+      `;
+      gridContainer.appendChild(card);
+    });
+
+    function updateSlideUI() {
+      slides.forEach((slide, idx) => {
+        if (idx === currentIndex) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      const activeSlide = slides[currentIndex];
+      const slideNum = String(currentIndex + 1).padStart(2, '0');
+      hudCounter.textContent = `${slideNum} / ${totalSlides}`;
+      hudSection.textContent = activeSlide.getAttribute('data-section') || '';
+      drawerSlideLabel.textContent = `Slide ${slideNum} / ${totalSlides}`;
+      speakerScriptContent.textContent = activeSlide.getAttribute('data-script') || '';
+
+      // Update dots
+      Array.from(progressDots.children).forEach((dot, idx) => {
+        if (idx === currentIndex) {
+          dot.className = 'h-2 rounded-full transition-all duration-200 bg-skyTech w-7';
+        } else {
+          dot.className = 'h-2 rounded-full transition-all duration-200 bg-slate-300 hover:bg-slate-400 w-2';
+        }
+      });
+    }
+
+    function goToSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      currentIndex = index;
+      updateSlideUI();
+    }
+
+    function nextSlide() {
+      if (currentIndex < totalSlides - 1) {
+        currentIndex++;
+        updateSlideUI();
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateSlideUI();
+      }
+    }
+
+    function toggleSpeakerNotes() {
+      notesOpen = !notesOpen;
+      speakerDrawer.classList.toggle('open', notesOpen);
+    }
+
+    function toggleGridModal(forceState) {
+      gridOpen = typeof forceState === 'boolean' ? forceState : !gridOpen;
+      gridModal.classList.toggle('open', gridOpen);
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Print Modal & Deck Print Logic
+    const printModal = document.getElementById('print-modal');
+    let printModalOpen = false;
+
+    function openPrintModal() {
+      printModalOpen = true;
+      printModal.classList.add('open');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closePrintModal() {
+      printModalOpen = false;
+      printModal.classList.remove('open');
+    }
+
+    function printDeck(mode) {
+      closePrintModal();
+      document.body.classList.remove('print-mode-slides', 'print-mode-with-script', 'print-mode-script-booklet');
+      
+      if (mode === 'with-script') {
+        document.body.classList.add('print-mode-with-script');
+      } else if (mode === 'script-booklet') {
+        document.body.classList.add('print-mode-script-booklet');
+      } else {
+        document.body.classList.add('print-mode-slides');
+      }
+
+      // Small tick to ensure styles are applied before print dialog opens
+      setTimeout(() => {
+        window.print();
+      }, 80);
+    }
+
+    window.addEventListener('afterprint', () => {
+      document.body.classList.remove('print-mode-slides', 'print-mode-with-script', 'print-mode-script-booklet');
+    });
+
+    // Wrap slide content and attach per-slide print script card
+    slides.forEach((slide, idx) => {
+      if (!slide.querySelector('.slide-inner')) {
+        const wrap = document.createElement('div');
+        wrap.className = 'slide-inner flex-1 flex flex-col justify-between min-h-0 w-full';
+        while (slide.firstChild) {
+          wrap.appendChild(slide.firstChild);
+        }
+        slide.appendChild(wrap);
+
+        const scriptText = slide.getAttribute('data-script') || '';
+        const sectionText = slide.getAttribute('data-section') || '';
+        const titleEl = wrap.querySelector('h1, h2');
+        const titleText = titleEl ? titleEl.innerText : `Slide ${idx + 1}`;
+        const slideNum = String(idx + 1).padStart(2, '0');
+
+        const printCard = document.createElement('div');
+        printCard.className = 'print-script-card';
+        printCard.innerHTML = `
+          <div class="flex items-center justify-between pb-2 border-b border-sky-100">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-sky-50 text-skyTech font-mono text-[11px] font-bold border border-sky-200">
+                🎙️ كارت إلقاء المتحدث — سلايد ${slideNum} من ${totalSlides}
+              </span>
+              <span class="text-xs font-bold text-slateDark truncate max-w-md">${titleText}</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] font-mono text-slate-500">
+              <span class="px-2 py-0.5 rounded bg-slate-100 font-bold text-slate-700">⏱️ الوقت المقترح: 45–60 ثانية</span>
+              <span class="text-skyTech font-bold">TalkShop Defense 2026</span>
+            </div>
+          </div>
+          <p class="font-arabic ar-text text-[14px] font-bold text-slate-800 leading-relaxed py-2 px-1 my-auto">
+            ${scriptText}
+          </p>
+          <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1.5 border-t border-slate-100">
+            <span>HITU — Faculty of AI &amp; Data Science • Class of 2026</span>
+            <span class="font-arabic ar-text font-bold text-slate-500">نظام TalkShop للتجارة الإلكترونية والـ ERP بالذكاء الاصطناعي التوليدي</span>
+          </div>
+        `;
+        slide.appendChild(printCard);
+      }
+    });
+
+    // Build Script Booklet for booklet printing mode
+    const bookletContainer = document.getElementById('script-booklet-container');
+    if (bookletContainer) {
+      for (let i = 0; i < slides.length; i += 2) {
+        const s1 = slides[i];
+        const s2 = slides[i + 1];
+        
+        const page = document.createElement('div');
+        page.className = 'booklet-page';
+        
+        let card1Html = '';
+        let card2Html = '';
+
+        if (s1) {
+          const num1 = String(i + 1).padStart(2, '0');
+          const title1 = s1.querySelector('h1, h2')?.innerText || `Slide ${i + 1}`;
+          const sec1 = s1.getAttribute('data-section') || '';
+          const sc1 = s1.getAttribute('data-script') || '';
+          card1Html = `
+            <div class="flex-1 bento-card p-5 flex flex-col justify-between border-t-4 border-t-skyTech mb-4">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-lg bg-sky-50 text-skyTech font-mono font-bold text-xs flex items-center justify-center">${num1}</span>
+                  <div>
+                    <span class="text-[10px] font-mono font-bold text-skyTech uppercase">${sec1}</span>
+                    <h4 class="text-sm font-extrabold text-slateDark">${title1}</h4>
+                  </div>
+                </div>
+                <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 font-bold text-slate-600">⏱️ 45–60s</span>
+              </div>
+              <p class="font-arabic ar-text text-[15px] font-bold text-slate-800 leading-relaxed my-auto">${sc1}</p>
+            </div>
+          `;
+        }
+
+        if (s2) {
+          const num2 = String(i + 2).padStart(2, '0');
+          const title2 = s2.querySelector('h1, h2')?.innerText || `Slide ${i + 2}`;
+          const sec2 = s2.getAttribute('data-section') || '';
+          const sc2 = s2.getAttribute('data-script') || '';
+          card2Html = `
+            <div class="flex-1 bento-card p-5 flex flex-col justify-between border-t-4 border-t-aiViolet">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-lg bg-indigo-50 text-aiViolet font-mono font-bold text-xs flex items-center justify-center">${num2}</span>
+                  <div>
+                    <span class="text-[10px] font-mono font-bold text-aiViolet uppercase">${sec2}</span>
+                    <h4 class="text-sm font-extrabold text-slateDark">${title2}</h4>
+                  </div>
+                </div>
+                <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 font-bold text-slate-600">⏱️ 45–60s</span>
+              </div>
+              <p class="font-arabic ar-text text-[15px] font-bold text-slate-800 leading-relaxed my-auto">${sc2}</p>
+            </div>
+          `;
+        }
+
+        page.innerHTML = `
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
+            <div class="flex items-center gap-2.5">
+              <img src="TransparentLogoCropped.png" alt="TalkShop" class="h-8 w-auto object-contain" />
+              <div>
+                <h2 class="text-base font-extrabold text-slateDark">TalkShop Graduation Defense — Speaker Speech Dossier</h2>
+                <p class="text-xs text-slateBody">Faculty of AI &amp; Data Science • Class of 2026</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-slate-100 font-mono text-xs font-bold text-slate-700">Dossier Sheet ${Math.floor(i / 2) + 1} / 8</span>
+          </div>
+          <div class="flex-1 flex flex-col justify-between min-h-0">
+            ${card1Html}
+            ${card2Html}
+          </div>
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>TalkShop Next-Gen Agentic OS</span>
+            <span>Verbatim Defense Cue Cards</span>
+          </div>
+        `;
+        bookletContainer.appendChild(page);
+      }
+    }
+
+    // Responsive 16:9 Viewport Scaling
+    function scaleDeckViewport() {
+      const viewport = document.getElementById('deck-viewport');
+      const targetW = 1600;
+      const targetH = 900;
+      const pad = 28;
+      const availW = window.innerWidth - pad;
+      const availH = window.innerHeight - pad;
+      const scale = Math.min(availW / targetW, availH / targetH);
+      viewport.style.transform = `scale(${scale})`;
+    }
+
+    window.addEventListener('resize', scaleDeckViewport);
+    scaleDeckViewport();
+    updateSlideUI();
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        if (!gridOpen) { e.preventDefault(); nextSlide(); }
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        if (!gridOpen) { e.preventDefault(); prevSlide(); }
+      } else if (e.key === 's' || e.key === 'S') {
+        toggleSpeakerNotes();
+      } else if (e.key === 'g' || e.key === 'G') {
+        toggleGridModal();
+      } else if (e.key === 'p' || e.key === 'P') {
+        if (printModalOpen) closePrintModal();
+        else openPrintModal();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 'Escape') {
+        if (gridOpen) toggleGridModal(false);
+        if (notesOpen) toggleSpeakerNotes();
+        if (printModalOpen) closePrintModal();
+      }
+    });
+  </script>
+</body>
+</html>

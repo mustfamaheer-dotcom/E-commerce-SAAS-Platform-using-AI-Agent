@@ -5,6 +5,8 @@ Coordinates read analysis (get_customer_segments) and state-mutating promo creat
 """
 import re
 from typing import Any, Dict, Optional
+from typing_extensions import Annotated
+from langgraph.graph.message import AnyMessage, add_messages
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, MessagesState, StateGraph
